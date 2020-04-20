@@ -1,0 +1,60 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.28803.156
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{BF2482A1-13C0-4305-B732-AB62EBD9429B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{9AEE6ADE-DD45-4605-A933-E06CF0BA4203}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MessagingService", "MessagingService\MessagingService.csproj", "{3A9325F7-4A47-4B4E-8A99-58AEBD33FF3F}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MessagingService.DataTransferObjects", "MessagingService.DataTransferObjects\MessagingService.DataTransferObjects.csproj", "{2E8C8118-8456-4CBD-BD68-578B838200CC}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MessagingService.BusinessLogic", "MessagingService.BusinessLogic\MessagingService.BusinessLogic.csproj", "{A372C9E9-C412-4A36-961F-A358FF8F700E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MessagingService.EmailMessageAggregate", "MessagingService.EmailMessageAggregate\MessagingService.EmailMessageAggregate.csproj", "{0BD162FA-64F1-44D5-9C06-749400F84FA5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MessagingService.EmailMessage.DomainEvents", "NessagingService.EmailMessage.DomainEvents\MessagingService.EmailMessage.DomainEvents.csproj", "{689A531D-86EB-4656-81B3-4C6E569A7E4B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3A9325F7-4A47-4B4E-8A99-58AEBD33FF3F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3A9325F7-4A47-4B4E-8A99-58AEBD33FF3F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3A9325F7-4A47-4B4E-8A99-58AEBD33FF3F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3A9325F7-4A47-4B4E-8A99-58AEBD33FF3F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2E8C8118-8456-4CBD-BD68-578B838200CC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2E8C8118-8456-4CBD-BD68-578B838200CC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2E8C8118-8456-4CBD-BD68-578B838200CC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2E8C8118-8456-4CBD-BD68-578B838200CC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A372C9E9-C412-4A36-961F-A358FF8F700E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A372C9E9-C412-4A36-961F-A358FF8F700E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A372C9E9-C412-4A36-961F-A358FF8F700E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A372C9E9-C412-4A36-961F-A358FF8F700E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0BD162FA-64F1-44D5-9C06-749400F84FA5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0BD162FA-64F1-44D5-9C06-749400F84FA5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0BD162FA-64F1-44D5-9C06-749400F84FA5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0BD162FA-64F1-44D5-9C06-749400F84FA5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{689A531D-86EB-4656-81B3-4C6E569A7E4B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{689A531D-86EB-4656-81B3-4C6E569A7E4B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{689A531D-86EB-4656-81B3-4C6E569A7E4B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{689A531D-86EB-4656-81B3-4C6E569A7E4B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{3A9325F7-4A47-4B4E-8A99-58AEBD33FF3F} = {BF2482A1-13C0-4305-B732-AB62EBD9429B}
+		{2E8C8118-8456-4CBD-BD68-578B838200CC} = {BF2482A1-13C0-4305-B732-AB62EBD9429B}
+		{A372C9E9-C412-4A36-961F-A358FF8F700E} = {BF2482A1-13C0-4305-B732-AB62EBD9429B}
+		{0BD162FA-64F1-44D5-9C06-749400F84FA5} = {BF2482A1-13C0-4305-B732-AB62EBD9429B}
+		{689A531D-86EB-4656-81B3-4C6E569A7E4B} = {BF2482A1-13C0-4305-B732-AB62EBD9429B}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {1929C0FE-8CEB-4D0E-BD22-9E5E16E2B49F}
+	EndGlobalSection
+EndGlobal
