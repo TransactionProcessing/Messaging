@@ -9,7 +9,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\NessagingService.EmailMessage.DomainEvents\MessagingService.EmailMessage.DomainEvents.csproj" />
+    <ProjectReference Include="..\MessagingService.EmailMessage.DomainEvents\MessagingService.EmailMessage.DomainEvents.csproj" />
   </ItemGroup>
 
 </Project>
