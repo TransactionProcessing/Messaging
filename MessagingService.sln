@@ -15,7 +15,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MessagingService.BusinessLo
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MessagingService.EmailMessageAggregate", "MessagingService.EmailMessageAggregate\MessagingService.EmailMessageAggregate.csproj", "{0BD162FA-64F1-44D5-9C06-749400F84FA5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MessagingService.EmailMessage.DomainEvents", "NessagingService.EmailMessage.DomainEvents\MessagingService.EmailMessage.DomainEvents.csproj", "{689A531D-86EB-4656-81B3-4C6E569A7E4B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MessagingService.EmailMessage.DomainEvents", "MessagingService.EmailMessage.DomainEvents\MessagingService.EmailMessage.DomainEvents.csproj", "{689A531D-86EB-4656-81B3-4C6E569A7E4B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
