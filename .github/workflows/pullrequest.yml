@@ -1,0 +1,41 @@
+name: Build and Test Pull Requests
+
+on:
+  pull_request:
+    branches:
+    - master
+
+jobs:
+  build:
+    name: "Build and Test Pull Requests"
+    env:
+        ASPNETCORE_ENVIRONMENT: "Production"
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v1
+
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 3.1.102
+
+    - name: Restore Nuget Packages
+      run: dotnet restore MessagingService.sln --source https://api.nuget.org/v3/index.json --source https://www.myget.org/F/transactionprocessing/api/v3/index.json
+
+    - name: Build Code
+      run: dotnet build MessagingService.sln --configuration Release
+
+    #- name: Run Unit Tests
+    #  run: |
+    #    echo "ASPNETCORE_ENVIRONMENT are > ${ASPNETCORE_ENVIRONMENT}"
+    #    dotnet test "MessagingService.BusinessLogic.Tests\MessagingService.BusinessLogic.Tests.csproj"
+    #    dotnet test "MessagingService.EmailAggregate.Tests\MessagingService.EmailAggregate.Tests.csproj"
+    #    dotnet test "MessagingService.Tests\MessagingService.Tests.csproj"
+
+    #- name: Build Docker Image
+    #  run: docker build . --file MessagingService/Dockerfile --tag messagingservice:latest
+        
+    #- name: Run Integration Tests
+    #  run: dotnet test "MessagingService.IntegrationTests\MessagingService.IntegrationTests.csproj" --filter Category=PRTest
