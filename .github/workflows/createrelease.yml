@@ -65,8 +65,8 @@ jobs:
     - name: Pack Files for Octopus
       run: >-
         /opt/octo/Octo pack
-        --outFolder /home/runner/work/MessagingService/MessagingService
-        --basePath /home/runner/work/MessagingService/MessagingService/publishOutput
+        --outFolder /home/runner/work/Messaging/Messaging
+        --basePath /home/runner/work/Messaging/Messaging/publishOutput
         --id MessagingService
         --version ${{ steps.get_version.outputs.VERSION }}
         --format zip
@@ -78,14 +78,14 @@ jobs:
         /opt/octo/Octo push
         --server ${{ secrets.OCTOPUS_URL }}
         --apiKey ${{ secrets.OCTOPUS_APIKEY }}
-        --package /home/runner/work/MessagingService/MessagingService/MessagingService.${{ steps.get_version.outputs.VERSION }}.zip
+        --package /home/runner/work/Messaging/Messaging/MessagingService.${{ steps.get_version.outputs.VERSION }}.zip
         --overwrite-mode IgnoreIfExists
     
     - name: Get Release
       id: getrelease
       uses: octokit/request-action@v1.x
       with:
-          route: GET /repos/StuartFerguson/MessagingService/releases/tags/${{ steps.get_version.outputs.VERSION }}
+          route: GET /repos/StuartFerguson/Messaging/releases/tags/${{ steps.get_version.outputs.VERSION }}
       env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
