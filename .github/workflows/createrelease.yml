@@ -46,8 +46,8 @@ jobs:
     #    docker push stuartferguson/messagingservice:latest
     #    docker push stuartferguson/messagingservice:${{ steps.get_version.outputs.VERSION }}
 
-    #- name: Publish API
-    #  run: dotnet publish "MessagingService\MessagingService.csproj" --configuration Release --output publishOutput
+    - name: Publish API
+      run: dotnet publish "MessagingService\MessagingService.csproj" --configuration Release --output publishOutput
 
     - name: Setup .NET Core 2.0
       uses: actions/setup-dotnet@v1
