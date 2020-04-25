@@ -7,9 +7,11 @@ using System.Threading.Tasks;
 
 namespace MessagingService.Service.Services.Email.IntegrationTest
 {
+    using System.Diagnostics.CodeAnalysis;
     using BusinessLogic.Requests;
     using BusinessLogic.Services.EmailServices;
 
+    [ExcludeFromCodeCoverage]
     public class IntegrationTestEmailServiceProxy : IEmailServiceProxy
     {
         /// <summary>

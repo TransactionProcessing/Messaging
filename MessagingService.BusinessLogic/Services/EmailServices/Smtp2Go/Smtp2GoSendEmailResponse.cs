@@ -3,6 +3,9 @@ using Newtonsoft.Json;
 
 namespace MessagingService.Service.Services.Email.Smtp2Go
 {
+    using System.Diagnostics.CodeAnalysis;
+
+    [ExcludeFromCodeCoverage]
     public class Smtp2GoSendEmailResponse
     {
         /// <summary>

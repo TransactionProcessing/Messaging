@@ -1,11 +1,13 @@
 ﻿namespace MessagingService.BusinessLogic.Services.EmailServices
 {
     using System;
+    using System.Diagnostics.CodeAnalysis;
     using System.Net;
 
     /// <summary>
     /// 
     /// </summary>
+    [ExcludeFromCodeCoverage]
     public class EmailServiceProxyResponse
     {
         /// <summary>

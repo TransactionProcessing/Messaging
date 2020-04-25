@@ -27,12 +27,12 @@ jobs:
     - name: Build Code
       run: dotnet build MessagingService.sln --configuration Release
 
-    #- name: Run Unit Tests
-    #  run: |
-    #    echo "ASPNETCORE_ENVIRONMENT are > ${ASPNETCORE_ENVIRONMENT}"
-    #    dotnet test "MessagingService.BusinessLogic.Tests\MessagingService.BusinessLogic.Tests.csproj"
-    #    dotnet test "MessagingService.EmailAggregate.Tests\MessagingService.EmailAggregate.Tests.csproj"
-    #    dotnet test "MessagingService.Tests\MessagingService.Tests.csproj"
+    - name: Run Unit Tests
+      run: |
+        echo "ASPNETCORE_ENVIRONMENT are > ${ASPNETCORE_ENVIRONMENT}"
+        dotnet test "MessagingService.BusinessLogic.Tests\MessagingService.BusinessLogic.Tests.csproj"
+        dotnet test "MessagingService.EmailAggregate.Tests\MessagingService.EmailAggregate.Tests.csproj"
+        dotnet test "MessagingService.Tests\MessagingService.Tests.csproj"
 
     #- name: Build Docker Image
     #  run: docker build . --file MessagingService/Dockerfile --tag messagingservice:latest
