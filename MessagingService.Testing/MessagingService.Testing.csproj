@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <DebugType>None</DebugType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MessagingService.BusinessLogic\MessagingService.BusinessLogic.csproj" />
+  </ItemGroup>
+
+</Project>

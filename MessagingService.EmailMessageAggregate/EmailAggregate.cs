@@ -4,7 +4,6 @@
     using System.Collections.Generic;
     using System.Diagnostics.CodeAnalysis;
     using EmailMessage.DomainEvents;
-    using Microsoft.EntityFrameworkCore.Migrations.Operations;
     using Shared.DomainDrivenDesign.EventSourcing;
     using Shared.DomainDrivenDesign.EventStore;
     using Shared.General;
@@ -15,6 +14,15 @@
     /// <seealso cref="Shared.DomainDrivenDesign.EventStore.Aggregate" />
     public class EmailAggregate : Aggregate
     {
+        #region Fields
+
+        /// <summary>
+        /// The recipients
+        /// </summary>
+        private readonly List<MessageRecipient> Recipients;
+
+        #endregion
+
         #region Constructors
 
         /// <summary>
@@ -35,36 +43,94 @@
             Guard.ThrowIfInvalidGuid(aggregateId, "Aggregate Id cannot be an Empty Guid");
 
             this.AggregateId = aggregateId;
+            this.MessageId = aggregateId;
             this.Recipients = new List<MessageRecipient>();
         }
+
+        #endregion
+
+        #region Properties
+
+        /// <summary>
+        /// Gets the body.
+        /// </summary>
+        /// <value>
+        /// The body.
+        /// </value>
+        public String Body { get; private set; }
+
+        /// <summary>
+        /// Gets from address.
+        /// </summary>
+        /// <value>
+        /// From address.
+        /// </value>
+        public String FromAddress { get; private set; }
+
+        /// <summary>
+        /// Gets a value indicating whether this instance is HTML.
+        /// </summary>
+        /// <value>
+        ///   <c>true</c> if this instance is HTML; otherwise, <c>false</c>.
+        /// </value>
+        public Boolean IsHtml { get; private set; }
+
+        /// <summary>
+        /// Gets the message identifier.
+        /// </summary>
+        /// <value>
+        /// The message identifier.
+        /// </value>
+        public Guid MessageId { get; }
+
+        /// <summary>
+        /// Gets the provider email reference.
+        /// </summary>
+        /// <value>
+        /// The provider email reference.
+        /// </value>
+        public String ProviderEmailReference { get; private set; }
+
+        /// <summary>
+        /// Gets the provider request reference.
+        /// </summary>
+        /// <value>
+        /// The provider request reference.
+        /// </value>
+        public String ProviderRequestReference { get; private set; }
+
+        /// <summary>
+        /// Gets the subject.
+        /// </summary>
+        /// <value>
+        /// The subject.
+        /// </value>
+        public String Subject { get; private set; }
 
         #endregion
 
         #region Methods
 
         /// <summary>
+        /// Creates the specified aggregate identifier.
+        /// </summary>
+        /// <param name="aggregateId">The aggregate identifier.</param>
+        /// <returns></returns>
+        public static EmailAggregate Create(Guid aggregateId)
+        {
+            return new EmailAggregate(aggregateId);
+        }
+
+        /// <summary>
         /// Messages the send to recipient failure.
-        /// </summary>
-        public void MessageSendToRecipientFailure()
-        {
-        }
-
-        /// <summary>
-        /// Messages the send to recipient successful.
-        /// </summary>
-        public void MessageSendToRecipientSuccessful()
-        {
-        }
-
-        /// <summary>
-        /// Receives the response from provider.
         /// </summary>
         /// <param name="providerRequestReference">The provider request reference.</param>
         /// <param name="providerEmailReference">The provider email reference.</param>
         public void ReceiveResponseFromProvider(String providerRequestReference,
                                                 String providerEmailReference)
         {
-            ResponseReceivedFromProviderEvent responseReceivedFromProviderEvent = ResponseReceivedFromProviderEvent.Create(this.AggregateId, providerRequestReference, providerEmailReference);
+            ResponseReceivedFromProviderEvent responseReceivedFromProviderEvent =
+                ResponseReceivedFromProviderEvent.Create(this.AggregateId, providerRequestReference, providerEmailReference);
 
             this.ApplyAndPend(responseReceivedFromProviderEvent);
         }
@@ -88,16 +154,6 @@
             this.ApplyAndPend(requestSentToProviderEvent);
         }
 
-        public String ProviderRequestReference { get; private set; }
-        public String ProviderEmailReference { get; private set; }
-        public String FromAddress { get; private set; }
-        public String Subject { get; private set; }
-        public String Body { get; private set; }
-        public Boolean IsHtml { get; private set; }
-
-        private List<MessageRecipient> Recipients;
-
-
         /// <summary>
         /// Gets the metadata.
         /// </summary>
@@ -117,6 +173,10 @@
             this.PlayEvent((dynamic)domainEvent);
         }
 
+        /// <summary>
+        /// Plays the event.
+        /// </summary>
+        /// <param name="domainEvent">The domain event.</param>
         private void PlayEvent(RequestSentToProviderEvent domainEvent)
         {
             this.Body = domainEvent.Body;
@@ -132,6 +192,10 @@
             }
         }
 
+        /// <summary>
+        /// Plays the event.
+        /// </summary>
+        /// <param name="domainEvent">The domain event.</param>
         private void PlayEvent(ResponseReceivedFromProviderEvent domainEvent)
         {
             this.ProviderEmailReference = domainEvent.ProviderEmailReference;
@@ -141,18 +205,38 @@
         #endregion
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
     internal class MessageRecipient
     {
+        #region Constructors
+
+        #endregion
+
+        #region Properties
+
+        /// <summary>
+        /// Converts to address.
+        /// </summary>
+        /// <value>
+        /// To address.
+        /// </value>
         internal String ToAddress { get; private set; }
 
-        internal MessageRecipient()
-        {
-            
-        }
+        #endregion
 
+        #region Methods
+
+        /// <summary>
+        /// Creates the specified to address.
+        /// </summary>
+        /// <param name="toAddress">To address.</param>
         internal void Create(String toAddress)
         {
             this.ToAddress = toAddress;
         }
+
+        #endregion
     }
 }

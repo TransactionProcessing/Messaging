@@ -12,6 +12,7 @@ using Microsoft.Extensions.Logging;
 
 namespace MessagingService
 {
+    using System.Diagnostics.CodeAnalysis;
     using System.IO;
     using System.Net.Http;
     using System.Reflection;
@@ -43,6 +44,7 @@ namespace MessagingService
     using Swashbuckle.AspNetCore.SwaggerGen;
     using ILogger = EventStore.ClientAPI.ILogger;
 
+    [ExcludeFromCodeCoverage]
     public class Startup
     {
         public Startup(IWebHostEnvironment webHostEnvironment)
