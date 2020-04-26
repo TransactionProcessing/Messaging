@@ -41,6 +41,7 @@
                                            String body,
                                            Boolean isHtml) : base(aggregateId, eventId)
         {
+            this.MessageId = aggregateId;
             this.FromAddress = fromAddress;
             this.ToAddresses = toAddresses;
             this.Subject = subject;
@@ -78,6 +79,15 @@
         /// </value>
         [JsonProperty]
         public Boolean IsHtml { get; private set; }
+
+        /// <summary>
+        /// Gets the message identifier.
+        /// </summary>
+        /// <value>
+        /// The message identifier.
+        /// </value>
+        [JsonProperty]
+        public Guid MessageId { get; private set; }
 
         /// <summary>
         /// Gets the subject.
