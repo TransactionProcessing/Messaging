@@ -34,6 +34,7 @@
                                                   String providerRequestReference,
                                                   String providerEmailReference) : base(aggregateId, eventId)
         {
+            this.MessageId = aggregateId;
             this.ProviderRequestReference = providerRequestReference;
             this.ProviderEmailReference = providerEmailReference;
         }
@@ -41,6 +42,15 @@
         #endregion
 
         #region Properties
+
+        /// <summary>
+        /// Gets the message identifier.
+        /// </summary>
+        /// <value>
+        /// The message identifier.
+        /// </value>
+        [JsonProperty]
+        public Guid MessageId { get; private set; }
 
         /// <summary>
         /// Gets the provider email reference.
