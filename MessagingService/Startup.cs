@@ -33,6 +33,7 @@ namespace MessagingService
     using Newtonsoft.Json;
     using Newtonsoft.Json.Serialization;
     using NLog.Extensions.Logging;
+    using Service.Services.Email.IntegrationTest;
     using Shared.DomainDrivenDesign.EventStore;
     using Shared.EntityFramework.ConnectionStringConfiguration;
     using Shared.EventStore.EventStore;
@@ -129,7 +130,9 @@ namespace MessagingService
             services.AddSingleton<IAggregateRepositoryManager, AggregateRepositoryManager>();
             services.AddSingleton<IAggregateRepository<EmailAggregate>, AggregateRepository<EmailAggregate>>();
             services.AddSingleton<IEmailDomainService, EmailDomainService>();
-            services.AddSingleton<IEmailServiceProxy, Smtp2GoProxy>();
+            
+            this.RegisterEmailProxy(services);
+
             //services.AddSingleton<IModelFactory, ModelFactory>();
             //services.AddSingleton<Factories.IModelFactory, Factories.ModelFactory>();
             //services.AddSingleton<ISecurityServiceClient, SecurityServiceClient>();
@@ -147,6 +150,25 @@ namespace MessagingService
                                                                          return ConfigurationReader.GetBaseServerUri(serviceName).OriginalString;
                                                                      });
             services.AddSingleton<HttpClient>();
+        }
+
+        /// <summary>
+        /// Registers the email proxy.
+        /// </summary>
+        /// <param name="services">The services.</param>
+        private void RegisterEmailProxy(IServiceCollection services)
+        {
+            // read the config setting 
+            String emailProxy = ConfigurationReader.GetValue("AppSettings", "EmailProxy");
+
+            if (emailProxy == "Smtp2Go")
+            {
+                services.AddSingleton<IEmailServiceProxy, Smtp2GoProxy>();
+            }
+            else
+            {
+                services.AddSingleton<IEmailServiceProxy, IntegrationTestEmailServiceProxy>();
+            }
         }
 
         private void ConfigureMiddlewareServices(IServiceCollection services)

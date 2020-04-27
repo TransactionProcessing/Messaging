@@ -37,14 +37,14 @@ jobs:
         dotnet test "MessagingService.EmailAggregate.Tests\MessagingService.EmailAggregate.Tests.csproj"
         dotnet test "MessagingService.Tests\MessagingService.Tests.csproj"
 
-    #- name: Build Docker Image
-    #  run: docker build . --file MessagingService/Dockerfile --tag stuartferguson/messagingservice:latest --tag stuartferguson/messagingservice:${{ steps.get_version.outputs.VERSION }}
+    - name: Build Docker Image
+      run: docker build . --file MessagingService/Dockerfile --tag stuartferguson/messagingservice:latest --tag stuartferguson/messagingservice:${{ steps.get_version.outputs.VERSION }}
 
-    #- name: Publish Images to Docker Hub
-    #  run: |
-    #    docker login --username=${{ secrets.DOCKER_USERNAME }} --password=${{ secrets.DOCKER_PASSWORD }}
-    #    docker push stuartferguson/messagingservice:latest
-    #    docker push stuartferguson/messagingservice:${{ steps.get_version.outputs.VERSION }}
+    - name: Publish Images to Docker Hub
+      run: |
+        docker login --username=${{ secrets.DOCKER_USERNAME }} --password=${{ secrets.DOCKER_PASSWORD }}
+        docker push stuartferguson/messagingservice:latest
+        docker push stuartferguson/messagingservice:${{ steps.get_version.outputs.VERSION }}
 
     - name: Publish API
       run: dotnet publish "MessagingService\MessagingService.csproj" --configuration Release --output publishOutput
