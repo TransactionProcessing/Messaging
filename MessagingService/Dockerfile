@@ -2,11 +2,15 @@
 
 FROM mcr.microsoft.com/dotnet/core/aspnet:3.1-buster-slim AS base
 WORKDIR /app
-EXPOSE 80
 
 FROM mcr.microsoft.com/dotnet/core/sdk:3.1-buster AS build
 WORKDIR /src
+COPY ["MessagingService/NuGet.Config", "."]
 COPY ["MessagingService/MessagingService.csproj", "MessagingService/"]
+COPY ["MessagingService.BusinessLogic/MessagingService.BusinessLogic.csproj", "MessagingService.BusinessLogic/"]
+COPY ["MessagingService.EmailMessageAggregate/MessagingService.EmailMessageAggregate.csproj", "MessagingService.EmailMessageAggregate/"]
+COPY ["MessagingService.EmailMessage.DomainEvents/MessagingService.EmailMessage.DomainEvents.csproj", "MessagingService.EmailMessage.DomainEvents/"]
+COPY ["MessagingService.DataTransferObjects/MessagingService.DataTransferObjects.csproj", "MessagingService.DataTransferObjects/"]
 RUN dotnet restore "MessagingService/MessagingService.csproj"
 COPY . .
 WORKDIR "/src/MessagingService"

@@ -52,6 +52,7 @@ namespace MessagingService.Tests.General
             configuration.Add("AppSettings:ClientSecret", "clientSecret");
             configuration.Add("AppSettings:EstateManagementApi", "http://localhost");
             configuration.Add("AppSettings:SecurityService", "http://localhost");
+            configuration.Add("AppSettings:EmailProxy", "UnitTest");
 
             builder.AddInMemoryCollection(configuration);
 
