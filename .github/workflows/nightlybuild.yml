@@ -2,7 +2,7 @@ name: Nightly Build
 
 on:
   schedule:
-  - cron: "45 10 * * *"
+  - cron: "00 10 * * *"
 
 jobs:
   build:
