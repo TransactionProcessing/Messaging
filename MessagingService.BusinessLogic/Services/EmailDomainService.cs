@@ -42,7 +42,7 @@
         {
             this.EmailAggregateRepository = emailAggregateRepository;
             this.EmailServiceProxy = emailServiceProxy;
-            this.EmailAggregateRepository.TraceGenerated += this.EmailAggregateRepository_TraceGenerated;
+            this.EmailAggregateRepository.TraceGenerated += EmailDomainService.EmailAggregateRepository_TraceGenerated;
         }
 
         #endregion
@@ -91,7 +91,7 @@
         /// </summary>
         /// <param name="trace">The trace.</param>
         /// <param name="logLevel">The log level.</param>
-        private void EmailAggregateRepository_TraceGenerated(String trace,
+        private static void EmailAggregateRepository_TraceGenerated(String trace,
                                                              LogLevel logLevel)
         {
             switch(logLevel)
@@ -113,6 +113,9 @@
                     break;
                 case LogLevel.Warning:
                     Logger.LogWarning(trace);
+                    break;
+                default:
+                    Logger.LogInformation(trace);
                     break;
             }
         }
