@@ -6,8 +6,9 @@
     using System.Threading.Tasks;
     using EmailMessageAggregate;
     using EmailServices;
-    using Shared.DomainDrivenDesign.EventStore;
+    using Microsoft.Extensions.Logging;
     using Shared.EventStore.EventStore;
+    using Shared.Logger;
 
     /// <summary>
     /// 
@@ -18,9 +19,9 @@
         #region Fields
 
         /// <summary>
-        /// The aggregate repository manager
+        /// The email aggregate repository
         /// </summary>
-        private readonly IAggregateRepositoryManager AggregateRepositoryManager;
+        private readonly IAggregateRepository<EmailAggregate> EmailAggregateRepository;
 
         /// <summary>
         /// The email service proxy
@@ -32,15 +33,16 @@
         #region Constructors
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="EmailDomainService"/> class.
+        /// Initializes a new instance of the <see cref="EmailDomainService" /> class.
         /// </summary>
-        /// <param name="aggregateRepositoryManager">The aggregate repository manager.</param>
+        /// <param name="emailAggregateRepository">The email aggregate repository.</param>
         /// <param name="emailServiceProxy">The email service proxy.</param>
-        public EmailDomainService(IAggregateRepositoryManager aggregateRepositoryManager,
+        public EmailDomainService(IAggregateRepository<EmailAggregate> emailAggregateRepository,
                                   IEmailServiceProxy emailServiceProxy)
         {
-            this.AggregateRepositoryManager = aggregateRepositoryManager;
+            this.EmailAggregateRepository = emailAggregateRepository;
             this.EmailServiceProxy = emailServiceProxy;
+            this.EmailAggregateRepository.TraceGenerated += this.EmailAggregateRepository_TraceGenerated;
         }
 
         #endregion
@@ -67,10 +69,8 @@
                                            Boolean isHtml,
                                            CancellationToken cancellationToken)
         {
-            IAggregateRepository<EmailAggregate> emailAggregateRepository = this.AggregateRepositoryManager.GetAggregateRepository<EmailAggregate>(connectionIdentifier);
-
             // Rehydrate Email Message aggregate
-            EmailAggregate emailAggregate = await emailAggregateRepository.GetLatestVersion(messageId, cancellationToken);
+            EmailAggregate emailAggregate = await this.EmailAggregateRepository.GetLatestVersion(messageId, cancellationToken);
 
             // send message to provider (record event)
             emailAggregate.SendRequestToProvider(fromAddress, toAddresses, subject, body, isHtml);
@@ -83,7 +83,38 @@
             emailAggregate.ReceiveResponseFromProvider(emailResponse.RequestIdentifier, emailResponse.EmailIdentifier);
 
             // Save Changes to persistance
-            await emailAggregateRepository.SaveChanges(emailAggregate, cancellationToken);
+            await this.EmailAggregateRepository.SaveChanges(emailAggregate, cancellationToken);
+        }
+
+        /// <summary>
+        /// Emails the aggregate repository trace generated.
+        /// </summary>
+        /// <param name="trace">The trace.</param>
+        /// <param name="logLevel">The log level.</param>
+        private void EmailAggregateRepository_TraceGenerated(String trace,
+                                                             LogLevel logLevel)
+        {
+            switch(logLevel)
+            {
+                case LogLevel.Critical:
+                    Logger.LogCritical(new Exception(trace));
+                    break;
+                case LogLevel.Debug:
+                    Logger.LogDebug(trace);
+                    break;
+                case LogLevel.Error:
+                    Logger.LogError(new Exception(trace));
+                    break;
+                case LogLevel.Information:
+                    Logger.LogInformation(trace);
+                    break;
+                case LogLevel.Trace:
+                    Logger.LogTrace(trace);
+                    break;
+                case LogLevel.Warning:
+                    Logger.LogWarning(trace);
+                    break;
+            }
         }
 
         #endregion

@@ -130,7 +130,7 @@
             INetworkService testNetwork = DockerHelper.SetupTestNetwork();
             this.TestNetworks.Add(testNetwork);
             IContainerService eventStoreContainer =
-                DockerHelper.SetupEventStoreContainer(this.EventStoreContainerName, this.Logger, "eventstore/eventstore:release-5.0.2", testNetwork, traceFolder);
+                DockerHelper.SetupEventStoreContainer(this.EventStoreContainerName, this.Logger, "eventstore/eventstore:20.6.0-buster-slim", testNetwork, traceFolder, usesEventStore2006OrLater:true);
 
             IContainerService securityServiceContainer = DockerHelper.SetupSecurityServiceContainer(this.SecurityServiceContainerName,
                                                                                                     this.Logger,
@@ -215,8 +215,7 @@
             logger.LogInformation("About to Start Messaging Service Container");
 
             List<String> environmentVariables = new List<String>();
-            environmentVariables
-                .Add($"EventStoreSettings:ConnectionString=ConnectTo=tcp://admin:changeit@{eventStoreContainerName}:{DockerHelper.EventStoreTcpDockerPort};VerboseLogging=true;");
+            environmentVariables.Add($"EventStoreSettings:ConnectionString=https://{eventStoreContainerName}:{DockerHelper.EventStoreHttpDockerPort}");
             environmentVariables.Add($"AppSettings:SecurityService=http://{securityServiceContainerName}:{securityServicePort}");
             environmentVariables.Add($"SecurityConfiguration:Authority=http://{securityServiceContainerName}:{securityServicePort}");
             environmentVariables.Add($"urls=http://*:{DockerHelper.MessagingServiceDockerPort}");
