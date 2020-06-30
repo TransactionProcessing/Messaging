@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
@@ -10,7 +10,7 @@
 
   <ItemGroup>
     <PackageReference Include="MediatR" Version="8.0.1" />
-    <PackageReference Include="Shared.EventStore" Version="0.0.12" />
+    <PackageReference Include="Shared.EventStore" Version="0.0.15.3" />
   </ItemGroup>
 
   <ItemGroup>

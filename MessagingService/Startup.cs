@@ -24,7 +24,7 @@ namespace MessagingService
     using BusinessLogic.Services.EmailServices.Smtp2Go;
     using Common;
     using EmailMessageAggregate;
-    using EventStore.ClientAPI;
+    using EventStore.Client;
     using MediatR;
     using Microsoft.AspNetCore.Authentication.JwtBearer;
     using Microsoft.AspNetCore.Mvc.ApiExplorer;
@@ -34,7 +34,6 @@ namespace MessagingService
     using Newtonsoft.Json.Serialization;
     using NLog.Extensions.Logging;
     using Service.Services.Email.IntegrationTest;
-    using Shared.DomainDrivenDesign.EventStore;
     using Shared.EntityFramework.ConnectionStringConfiguration;
     using Shared.EventStore.EventStore;
     using Shared.Extensions;
@@ -43,7 +42,6 @@ namespace MessagingService
     using Shared.Repositories;
     using Swashbuckle.AspNetCore.Filters;
     using Swashbuckle.AspNetCore.SwaggerGen;
-    using ILogger = EventStore.ClientAPI.ILogger;
 
     [ExcludeFromCodeCoverage]
     public class Startup
@@ -70,33 +68,8 @@ namespace MessagingService
             services.AddTransient<IMediator, Mediator>();
 
             ConfigurationReader.Initialise(Startup.Configuration);
-            String connString = Startup.Configuration.GetValue<String>("EventStoreSettings:ConnectionString");
-            String connectionName = Startup.Configuration.GetValue<String>("EventStoreSettings:ConnectionName");
-            Int32 httpPort = Startup.Configuration.GetValue<Int32>("EventStoreSettings:HttpPort");
 
             Boolean useConnectionStringConfig = Boolean.Parse(ConfigurationReader.GetValue("AppSettings", "UseConnectionStringConfig"));
-            EventStoreConnectionSettings settings = EventStoreConnectionSettings.Create(connString, connectionName, httpPort);
-            services.AddSingleton(settings);
-
-            services.AddSingleton<Func<EventStoreConnectionSettings, IEventStoreConnection>>(cont => (connectionSettings) =>
-            {
-                return EventStoreConnection.Create(connectionSettings
-                                                       .ConnectionString);
-            });
-
-            services.AddSingleton<Func<String, IEventStoreContext>>(cont => (connectionString) =>
-            {
-                EventStoreConnectionSettings connectionSettings =
-                    EventStoreConnectionSettings.Create(connectionString, connectionName, httpPort);
-
-                Func<EventStoreConnectionSettings, IEventStoreConnection> eventStoreConnectionFunc = cont.GetService<Func<EventStoreConnectionSettings, IEventStoreConnection>>();
-
-                IEventStoreContext context =
-                    new EventStoreContext(connectionSettings, eventStoreConnectionFunc);
-
-                return context;
-            });
-
 
             if (useConnectionStringConfig)
             {
@@ -106,38 +79,67 @@ namespace MessagingService
                 {
                     return new ConnectionStringConfigurationContext(connectionStringConfigurationConnString);
                 });
-
-                services.AddSingleton<IEventStoreContextManager, EventStoreContextManager>(c =>
-                {
-                    Func<String, IEventStoreContext> contextFunc = c.GetService<Func<String, IEventStoreContext>>();
-                    IConnectionStringConfigurationRepository connectionStringConfigurationRepository =
-                        c.GetService<IConnectionStringConfigurationRepository>();
-                    return new EventStoreContextManager(contextFunc,
-                                                        connectionStringConfigurationRepository);
-                });
+                
+                // TODO: Read this from a the database and set
             }
             else
             {
-                services.AddSingleton<IEventStoreContextManager, EventStoreContextManager>(c =>
-                {
-                    IEventStoreContext context = c.GetService<IEventStoreContext>();
-                    return new EventStoreContextManager(context);
-                });
+                services.AddEventStoreClient((settings) =>
+                                             {
+                                                 settings.CreateHttpMessageHandler = () => new SocketsHttpHandler
+                                                                                           {
+                                                                                               SslOptions =
+                                                                                               {
+                                                                                                   RemoteCertificateValidationCallback = (sender,
+                                                                                                                                          certificate,
+                                                                                                                                          chain,
+                                                                                                                                          errors) => true,
+                                                                                               }
+                                                                                           };
+                                                 settings.ConnectionName = Startup.Configuration.GetValue<String>("EventStoreSettings:ConnectionName");
+                                                 settings.ConnectivitySettings = new EventStoreClientConnectivitySettings
+                                                                                 {
+                                                                                     Address =
+                                                                                         new Uri(Startup.Configuration.GetValue<String>("EventStoreSettings:ConnectionString")),
+                                                                                 };
+                                                 settings.DefaultCredentials = new UserCredentials(Startup.Configuration.GetValue<String>("EventStoreSettings:UserName"),
+                                                                                                    Startup.Configuration.GetValue<String>("EventStoreSettings:Password"));
+                                             });
+
+                
+
+                services.AddEventStoreProjectionManagerClient((settings) =>
+                                                              {
+                                                                  settings.CreateHttpMessageHandler = () => new SocketsHttpHandler
+                                                                                                            {
+                                                                                                                SslOptions =
+                                                                                                                {
+                                                                                                                    RemoteCertificateValidationCallback = (sender,
+                                                                                                                                                           certificate,
+                                                                                                                                                           chain,
+                                                                                                                                                           errors) => true,
+                                                                                                                }
+                                                                                                            };
+                                                                  settings.ConnectionName = Startup.Configuration.GetValue<String>("EventStoreSettings:ConnectionName");
+                                                                  settings.ConnectivitySettings = new EventStoreClientConnectivitySettings
+                                                                                                  {
+                                                                                                      Address =
+                                                                                                          new Uri(Startup.Configuration.GetValue<String>("EventStoreSettings:ConnectionString"))
+                                                                                                  };
+                                                                  settings.DefaultCredentials = new UserCredentials(Startup.Configuration.GetValue<String>("EventStoreSettings:UserName"),
+                                                                                                                    Startup.Configuration.GetValue<String>("EventStoreSettings:Password"));
+                                                              });
                 services.AddSingleton<IConnectionStringConfigurationRepository, ConfigurationReaderConnectionStringRepository>();
             }
 
+
             services.AddTransient<IEventStoreContext, EventStoreContext>();
-            services.AddSingleton<IAggregateRepositoryManager, AggregateRepositoryManager>();
-            services.AddSingleton<IAggregateRepository<EmailAggregate>, AggregateRepository<EmailAggregate>>();
             services.AddSingleton<IEmailDomainService, EmailDomainService>();
+            services.AddSingleton<IAggregateRepository<EmailAggregate>, AggregateRepository<EmailAggregate>>();
             
             this.RegisterEmailProxy(services);
 
-            //services.AddSingleton<IModelFactory, ModelFactory>();
-            //services.AddSingleton<Factories.IModelFactory, Factories.ModelFactory>();
-            //services.AddSingleton<ISecurityServiceClient, SecurityServiceClient>();
-
-            //// request & notification handlers
+            // request & notification handlers
             services.AddTransient<ServiceFactory>(context =>
                                                   {
                                                       return t => context.GetService(t);
@@ -151,7 +153,7 @@ namespace MessagingService
                                                                      });
             services.AddSingleton<HttpClient>();
         }
-
+        
         /// <summary>
         /// Registers the email proxy.
         /// </summary>

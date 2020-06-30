@@ -44,9 +44,10 @@ namespace MessagingService.Tests.General
 
             IConfigurationBuilder builder = new ConfigurationBuilder();
 
-            configuration.Add("EventStoreSettings:ConnectionString", "ConnectTo=tcp://admin:changeit@127.0.0.1:1112;VerboseLogging=true;");
+            configuration.Add("EventStoreSettings:ConnectionString", "https://127.0.0.1:2113");
             configuration.Add("EventStoreSettings:ConnectionName", "UnitTestConnection");
-            configuration.Add("EventStoreSettings:HttpPort", "2113");
+            configuration.Add("EventStoreSettings:UserName", "admin");
+            configuration.Add("EventStoreSettings:Password", "changeit");
             configuration.Add("AppSettings:UseConnectionStringConfig", "false");
             configuration.Add("AppSettings:ClientId", "clientId");
             configuration.Add("AppSettings:ClientSecret", "clientSecret");
