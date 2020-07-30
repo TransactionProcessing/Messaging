@@ -9,6 +9,7 @@
     using Newtonsoft.Json;
     using Service.Services.Email.Smtp2Go;
     using Shared.General;
+    using Shared.Logger;
 
     /// <summary>
     /// 
@@ -74,6 +75,9 @@
                                                  };
 
             String requestSerialised = JsonConvert.SerializeObject(apiRequest);
+
+            Logger.LogDebug($"Request Message Sent to Email Provider [SMTP2Go] {requestSerialised}");
+
             StringContent content = new StringContent(requestSerialised, Encoding.UTF8, "application/json");
 
             using(HttpClient client = new HttpClient())
@@ -83,6 +87,8 @@
                 HttpResponseMessage httpResponse = await client.PostAsync("email/send", content, cancellationToken);
 
                 Smtp2GoSendEmailResponse apiResponse = JsonConvert.DeserializeObject<Smtp2GoSendEmailResponse>(await httpResponse.Content.ReadAsStringAsync());
+
+                Logger.LogDebug($"Response Message Received from Email Provider [SMTP2Go] {JsonConvert.SerializeObject(apiResponse)}");
 
                 // Translate the Response
                 response = new EmailServiceProxyResponse
