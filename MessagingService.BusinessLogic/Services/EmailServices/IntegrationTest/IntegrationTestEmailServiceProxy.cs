@@ -17,7 +17,12 @@ namespace MessagingService.Service.Services.Email.IntegrationTest
         /// <summary>
         /// Sends the email.
         /// </summary>
-        /// <param name="request">The request.</param>
+        /// <param name="messageId">The message identifier.</param>
+        /// <param name="fromAddress">From address.</param>
+        /// <param name="toAddresses">To addresses.</param>
+        /// <param name="subject">The subject.</param>
+        /// <param name="body">The body.</param>
+        /// <param name="isHtml">if set to <c>true</c> [is HTML].</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns></returns>
         public async Task<EmailServiceProxyResponse> SendEmail(Guid messageId,
