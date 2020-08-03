@@ -42,7 +42,6 @@
         {
             this.EmailAggregateRepository = emailAggregateRepository;
             this.EmailServiceProxy = emailServiceProxy;
-            this.EmailAggregateRepository.TraceGenerated += EmailDomainService.EmailAggregateRepository_TraceGenerated;
         }
 
         #endregion
@@ -85,41 +84,7 @@
             // Save Changes to persistance
             await this.EmailAggregateRepository.SaveChanges(emailAggregate, cancellationToken);
         }
-
-        /// <summary>
-        /// Emails the aggregate repository trace generated.
-        /// </summary>
-        /// <param name="trace">The trace.</param>
-        /// <param name="logLevel">The log level.</param>
-        private static void EmailAggregateRepository_TraceGenerated(String trace,
-                                                             LogLevel logLevel)
-        {
-            switch(logLevel)
-            {
-                case LogLevel.Critical:
-                    Logger.LogCritical(new Exception(trace));
-                    break;
-                case LogLevel.Debug:
-                    Logger.LogDebug(trace);
-                    break;
-                case LogLevel.Error:
-                    Logger.LogError(new Exception(trace));
-                    break;
-                case LogLevel.Information:
-                    Logger.LogInformation(trace);
-                    break;
-                case LogLevel.Trace:
-                    Logger.LogTrace(trace);
-                    break;
-                case LogLevel.Warning:
-                    Logger.LogWarning(trace);
-                    break;
-                default:
-                    Logger.LogInformation(trace);
-                    break;
-            }
-        }
-
+        
         #endregion
     }
 }

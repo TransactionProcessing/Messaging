@@ -1,19 +1,42 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Threading;
-using System.Threading.Tasks;
-
-namespace MessagingService.Service.Services.Email.IntegrationTest
+﻿namespace MessagingService.Service.Services.Email.IntegrationTest
 {
+    using System;
+    using System.Collections.Generic;
     using System.Diagnostics.CodeAnalysis;
-    using BusinessLogic.Requests;
+    using System.Net;
+    using System.Threading;
+    using System.Threading.Tasks;
     using BusinessLogic.Services.EmailServices;
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <seealso cref="MessagingService.BusinessLogic.Services.EmailServices.IEmailServiceProxy" />
     [ExcludeFromCodeCoverage]
     public class IntegrationTestEmailServiceProxy : IEmailServiceProxy
     {
+        #region Methods
+
+        /// <summary>
+        /// Gets the message status.
+        /// </summary>
+        /// <param name="providerReference">The provider reference.</param>
+        /// <param name="startDate">The start date.</param>
+        /// <param name="endDate">The end date.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns></returns>
+        public async Task<MessageStatusResponse> GetMessageStatus(String providerReference,
+                                                                  DateTime startDate,
+                                                                  DateTime endDate,
+                                                                  CancellationToken cancellationToken)
+        {
+            return new MessageStatusResponse
+                   {
+                       MessageStatus = MessageStatus.Delivered,
+                       ProviderStatusDescription = "delivered"
+                   };
+        }
+
         /// <summary>
         /// Sends the email.
         /// </summary>
@@ -30,16 +53,19 @@ namespace MessagingService.Service.Services.Email.IntegrationTest
                                                                List<String> toAddresses,
                                                                String subject,
                                                                String body,
-                                                               Boolean isHtml, CancellationToken cancellationToken)
+                                                               Boolean isHtml,
+                                                               CancellationToken cancellationToken)
         {
             return new EmailServiceProxyResponse
-            {
-                RequestIdentifier = "requestid",
-                EmailIdentifier = "emailid",
-                ApiStatusCode = HttpStatusCode.OK,
-                Error = String.Empty,
-                ErrorCode = String.Empty
-            };
+                   {
+                       RequestIdentifier = "requestid",
+                       EmailIdentifier = "emailid",
+                       ApiStatusCode = HttpStatusCode.OK,
+                       Error = string.Empty,
+                       ErrorCode = string.Empty
+                   };
         }
+
+        #endregion
     }
 }

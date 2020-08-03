@@ -17,7 +17,7 @@ namespace MessagingService.BusinessLogic.Tests.Services
     public class EmailDomainServiceTests
     {
         [Fact]
-        public async Task TransactionDomainService_ProcessLogonTransaction_TransactionIsProcessed()
+        public async Task EmailDomainService_SendEmailMessage_MessageSent()
         {
             Mock<IAggregateRepository<EmailAggregate>> aggregateRepository = new Mock<IAggregateRepository<EmailAggregate>>();
             aggregateRepository.Setup(a => a.GetLatestVersion(It.IsAny<Guid>(), It.IsAny<CancellationToken>())).ReturnsAsync(TestData.GetEmptyEmailAggregate());
@@ -30,11 +30,7 @@ namespace MessagingService.BusinessLogic.Tests.Services
                                         It.IsAny<String>(),
                                         It.IsAny<Boolean>(),
                                         It.IsAny<CancellationToken>())).ReturnsAsync(TestData.SuccessfulEmailServiceProxyResponse);
-            //IConfigurationRoot configurationRoot = new ConfigurationBuilder().AddInMemoryCollection(TestData.DefaultAppSettings).Build();
-            //ConfigurationReader.Initialise(configurationRoot);
-
-            //Logger.Initialise(NullLogger.Instance);
-
+            
             EmailDomainService emailDomainService =
                 new EmailDomainService(aggregateRepository.Object, emailServiceProxy.Object);
 
