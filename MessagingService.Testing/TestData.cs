@@ -5,8 +5,10 @@
     using System.Collections.Generic;
     using System.Net;
     using BusinessLogic.Services.EmailServices;
+    using EmailMessage.DomainEvents;
     using EmailMessageAggregate;
     using Microsoft.EntityFrameworkCore.SqlServer.Query.Internal;
+    using MessageStatus = BusinessLogic.Services.EmailServices.MessageStatus;
 
     public class TestData
     {
@@ -38,6 +40,80 @@
 
         public static String ProviderEmailReference = "ProviderEmailReference";
 
+        public static MessageStatus MessageStatusDelivered = MessageStatus.Delivered;
+
+        public static MessageStatus MessageStatusRejected = MessageStatus.Rejected;
+        
+        public static MessageStatus MessageStatusFailed = MessageStatus.Failed;
+        
+        public static MessageStatus MessageStatusBounced = MessageStatus.Bounced;
+        
+        public static MessageStatus MessageStatusSpam = MessageStatus.Spam;
+        
+        public static MessageStatus MessageStatusUnknown = MessageStatus.Unknown;
+
+        public static HttpStatusCode ProviderApiStatusCode = HttpStatusCode.OK;
+
+        public static String ProviderStatusDescription = "delivered";
+
+        public static DateTime DeliveredDateTime = DateTime.Now;
+
+        public static DateTime RejectedDateTime = DateTime.Now;
+
+        public static DateTime BouncedDateTime = DateTime.Now;
+
+        public static DateTime FailedDateTime = DateTime.Now;
+
+        public static DateTime SpamDateTime = DateTime.Now;
+
+        public static MessageStatusResponse MessageStatusResponseDelivered =>
+            new MessageStatusResponse
+            {
+                ProviderStatusDescription = TestData.ProviderStatusDescription,
+                ApiStatusCode = TestData.ProviderApiStatusCode,
+                MessageStatus = TestData.MessageStatusDelivered
+            };
+
+        public static MessageStatusResponse MessageStatusResponseBounced =>
+            new MessageStatusResponse
+            {
+                ProviderStatusDescription = TestData.ProviderStatusDescription,
+                ApiStatusCode = TestData.ProviderApiStatusCode,
+                MessageStatus = TestData.MessageStatusBounced
+            };
+
+        public static MessageStatusResponse MessageStatusResponseFailed =>
+            new MessageStatusResponse
+            {
+                ProviderStatusDescription = TestData.ProviderStatusDescription,
+                ApiStatusCode = TestData.ProviderApiStatusCode,
+                MessageStatus = TestData.MessageStatusFailed
+            };
+
+        public static MessageStatusResponse MessageStatusResponseRejected =>
+            new MessageStatusResponse
+            {
+                ProviderStatusDescription = TestData.ProviderStatusDescription,
+                ApiStatusCode = TestData.ProviderApiStatusCode,
+                MessageStatus = TestData.MessageStatusRejected
+            };
+
+        public static MessageStatusResponse MessageStatusResponseSpam =>
+            new MessageStatusResponse
+            {
+                ProviderStatusDescription = TestData.ProviderStatusDescription,
+                ApiStatusCode = TestData.ProviderApiStatusCode,
+                MessageStatus = TestData.MessageStatusSpam
+            };
+
+        public static MessageStatusResponse MessageStatusResponseUnknown =>
+            new MessageStatusResponse
+            {
+                ProviderStatusDescription = TestData.ProviderStatusDescription,
+                ApiStatusCode = TestData.ProviderApiStatusCode,
+                MessageStatus = TestData.MessageStatusUnknown
+            };
+
         public static EmailServiceProxyResponse SuccessfulEmailServiceProxyResponse =>
             new EmailServiceProxyResponse
             {
@@ -60,5 +136,17 @@
 
             return emailAggregate;
         }
+
+        public static EmailAggregate GetSentEmailAggregate()
+        {
+            EmailAggregate emailAggregate = new EmailAggregate();
+            emailAggregate.SendRequestToProvider(TestData.FromAddress, TestData.ToAddresses, TestData.Subject,
+                                                 TestData.Body, TestData.IsHtmlTrue);
+            emailAggregate.ReceiveResponseFromProvider(TestData.ProviderRequestReference, TestData.ProviderEmailReference);
+            return emailAggregate;
+        }
+
+        public static ResponseReceivedFromProviderEvent ResponseReceivedFromProviderEvent =>
+            ResponseReceivedFromProviderEvent.Create(TestData.MessageId, TestData.ProviderRequestReference, TestData.ProviderEmailReference);
     }
 }

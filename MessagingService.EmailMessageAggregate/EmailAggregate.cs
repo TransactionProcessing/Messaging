@@ -11,6 +11,7 @@
     /// <summary>
     /// 
     /// </summary>
+    /// <seealso cref="Shared.EventStore.EventStore.Aggregate" />
     /// <seealso cref="Aggregate" />
     public class EmailAggregate : Aggregate
     {
@@ -84,6 +85,14 @@
         public Guid MessageId { get; }
 
         /// <summary>
+        /// Gets the message status.
+        /// </summary>
+        /// <value>
+        /// The message status.
+        /// </value>
+        public MessageStatus MessageStatus { get; private set; }
+
+        /// <summary>
         /// Gets the provider email reference.
         /// </summary>
         /// <value>
@@ -119,6 +128,81 @@
         public static EmailAggregate Create(Guid aggregateId)
         {
             return new EmailAggregate(aggregateId);
+        }
+
+        /// <summary>
+        /// Marks the message as bounced.
+        /// </summary>
+        /// <param name="providerStatus">The provider status.</param>
+        /// <param name="bouncedDateTime">The bounced date time.</param>
+        public void MarkMessageAsBounced(String providerStatus,
+                                         DateTime bouncedDateTime)
+        {
+            this.CheckMessageCanBeSetToBounced();
+
+            MessageBouncedEvent messageBouncedEvent = MessageBouncedEvent.Create(this.AggregateId, providerStatus, bouncedDateTime);
+
+            this.ApplyAndPend(messageBouncedEvent);
+        }
+
+        /// <summary>
+        /// Marks the message as delivered.
+        /// </summary>
+        /// <param name="providerStatus">The provider status.</param>
+        /// <param name="deliveredDateTime">The delivered date time.</param>
+        public void MarkMessageAsDelivered(String providerStatus,
+                                           DateTime deliveredDateTime)
+        {
+            this.CheckMessageCanBeSetToDelivered();
+
+            MessageDeliveredEvent messageDeliveredEvent = MessageDeliveredEvent.Create(this.AggregateId, providerStatus, deliveredDateTime);
+
+            this.ApplyAndPend(messageDeliveredEvent);
+        }
+
+        /// <summary>
+        /// Marks the message as failed.
+        /// </summary>
+        /// <param name="providerStatus">The provider status.</param>
+        /// <param name="failedDateTime">The failed date time.</param>
+        public void MarkMessageAsFailed(String providerStatus,
+                                        DateTime failedDateTime)
+        {
+            this.CheckMessageCanBeSetToFailed();
+
+            MessageFailedEvent messageFailedEvent = MessageFailedEvent.Create(this.AggregateId, providerStatus, failedDateTime);
+
+            this.ApplyAndPend(messageFailedEvent);
+        }
+
+        /// <summary>
+        /// Marks the message as rejected.
+        /// </summary>
+        /// <param name="providerStatus">The provider status.</param>
+        /// <param name="rejectedDateTime">The rejected date time.</param>
+        public void MarkMessageAsRejected(String providerStatus,
+                                          DateTime rejectedDateTime)
+        {
+            this.CheckMessageCanBeSetToRejected();
+
+            MessageRejectedEvent messageRejectedEvent = MessageRejectedEvent.Create(this.AggregateId, providerStatus, rejectedDateTime);
+
+            this.ApplyAndPend(messageRejectedEvent);
+        }
+
+        /// <summary>
+        /// Marks the message as spam.
+        /// </summary>
+        /// <param name="providerStatus">The provider status.</param>
+        /// <param name="spamDateTime">The spam date time.</param>
+        public void MarkMessageAsSpam(String providerStatus,
+                                      DateTime spamDateTime)
+        {
+            this.CheckMessageCanBeSetToSpam();
+
+            MessageMarkedAsSpamEvent messageMarkedAsSpamEvent = MessageMarkedAsSpamEvent.Create(this.AggregateId, providerStatus, spamDateTime);
+
+            this.ApplyAndPend(messageMarkedAsSpamEvent);
         }
 
         /// <summary>
@@ -174,6 +258,66 @@
         }
 
         /// <summary>
+        /// Checks the message can be set to bounced.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">Message at status {this.MessageStatus} cannot be set to bounced</exception>
+        private void CheckMessageCanBeSetToBounced()
+        {
+            if (this.MessageStatus != MessageStatus.Sent)
+            {
+                throw new InvalidOperationException($"Message at status {this.MessageStatus} cannot be set to bounced");
+            }
+        }
+
+        /// <summary>
+        /// Checks the message can be set to delivered.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">Message at status {this.MessageStatus} cannot be set to delivered</exception>
+        private void CheckMessageCanBeSetToDelivered()
+        {
+            if (this.MessageStatus != MessageStatus.Sent)
+            {
+                throw new InvalidOperationException($"Message at status {this.MessageStatus} cannot be set to delivered");
+            }
+        }
+
+        /// <summary>
+        /// Checks the message can be set to failed.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">Message at status {this.MessageStatus} cannot be set to failed</exception>
+        private void CheckMessageCanBeSetToFailed()
+        {
+            if (this.MessageStatus != MessageStatus.Sent)
+            {
+                throw new InvalidOperationException($"Message at status {this.MessageStatus} cannot be set to failed");
+            }
+        }
+
+        /// <summary>
+        /// Checks the message can be set to rejected.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">Message at status {this.MessageStatus} cannot be set to rejected</exception>
+        private void CheckMessageCanBeSetToRejected()
+        {
+            if (this.MessageStatus != MessageStatus.Sent)
+            {
+                throw new InvalidOperationException($"Message at status {this.MessageStatus} cannot be set to rejected");
+            }
+        }
+
+        /// <summary>
+        /// Checks the message can be set to spam.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">Message at status {this.MessageStatus} cannot be set to spam</exception>
+        private void CheckMessageCanBeSetToSpam()
+        {
+            if (this.MessageStatus != MessageStatus.Sent)
+            {
+                throw new InvalidOperationException($"Message at status {this.MessageStatus} cannot be set to spam");
+            }
+        }
+
+        /// <summary>
         /// Plays the event.
         /// </summary>
         /// <param name="domainEvent">The domain event.</param>
@@ -183,6 +327,7 @@
             this.Subject = domainEvent.Subject;
             this.IsHtml = domainEvent.IsHtml;
             this.FromAddress = domainEvent.FromAddress;
+            this.MessageStatus = MessageStatus.NotSet;
 
             foreach (String domainEventToAddress in domainEvent.ToAddresses)
             {
@@ -200,41 +345,52 @@
         {
             this.ProviderEmailReference = domainEvent.ProviderEmailReference;
             this.ProviderRequestReference = domainEvent.ProviderRequestReference;
+            this.MessageStatus = MessageStatus.Sent;
         }
 
-        #endregion
-    }
-
-    /// <summary>
-    /// 
-    /// </summary>
-    internal class MessageRecipient
-    {
-        #region Constructors
-
-        #endregion
-
-        #region Properties
-
         /// <summary>
-        /// Converts to address.
+        /// Plays the event.
         /// </summary>
-        /// <value>
-        /// To address.
-        /// </value>
-        internal String ToAddress { get; private set; }
-
-        #endregion
-
-        #region Methods
-
-        /// <summary>
-        /// Creates the specified to address.
-        /// </summary>
-        /// <param name="toAddress">To address.</param>
-        internal void Create(String toAddress)
+        /// <param name="domainEvent">The domain event.</param>
+        private void PlayEvent(MessageDeliveredEvent domainEvent)
         {
-            this.ToAddress = toAddress;
+            this.MessageStatus = MessageStatus.Delivered;
+        }
+
+        /// <summary>
+        /// Plays the event.
+        /// </summary>
+        /// <param name="domainEvent">The domain event.</param>
+        private void PlayEvent(MessageFailedEvent domainEvent)
+        {
+            this.MessageStatus = MessageStatus.Failed;
+        }
+
+        /// <summary>
+        /// Plays the event.
+        /// </summary>
+        /// <param name="domainEvent">The domain event.</param>
+        private void PlayEvent(MessageRejectedEvent domainEvent)
+        {
+            this.MessageStatus = MessageStatus.Rejected;
+        }
+
+        /// <summary>
+        /// Plays the event.
+        /// </summary>
+        /// <param name="domainEvent">The domain event.</param>
+        private void PlayEvent(MessageBouncedEvent domainEvent)
+        {
+            this.MessageStatus = MessageStatus.Bounced;
+        }
+
+        /// <summary>
+        /// Plays the event.
+        /// </summary>
+        /// <param name="domainEvent">The domain event.</param>
+        private void PlayEvent(MessageMarkedAsSpamEvent domainEvent)
+        {
+            this.MessageStatus = MessageStatus.Spam;
         }
 
         #endregion

@@ -2,6 +2,8 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
+    using System.Linq;
     using System.Net.Http;
     using System.Text;
     using System.Threading;
@@ -15,6 +17,7 @@
     /// 
     /// </summary>
     /// <seealso cref="MessagingService.BusinessLogic.Services.EmailServices.IEmailServiceProxy" />
+    [ExcludeFromCodeCoverage]
     public class Smtp2GoProxy : IEmailServiceProxy
     {
         #region Fields
@@ -102,6 +105,93 @@
             }
 
             return response;
+        }
+
+        /// <summary>
+        /// Gets the message status.
+        /// </summary>
+        /// <param name="providerReference">The provider reference.</param>
+        /// <param name="startDate">The start date.</param>
+        /// <param name="endDate">The end date.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns></returns>
+        public async Task<MessageStatusResponse> GetMessageStatus(String providerReference,
+                                                                  DateTime startDate,
+                                                                  DateTime endDate,
+                                                                  CancellationToken cancellationToken)
+        {
+            MessageStatusResponse response = null;
+
+            Smtp2GoEmailSearchRequest apiRequest = new Smtp2GoEmailSearchRequest
+                                                   {
+                                                       ApiKey = ConfigurationReader.GetValue("SMTP2GoAPIKey"),
+                                                       EmailId = new List<String>{providerReference},
+                                                       StartDate = startDate.ToString("yyyy-MM-dd"),
+                                                       EndDate = endDate.ToString("yyyy-MM-dd"),
+            };
+
+            String requestSerialised = JsonConvert.SerializeObject(apiRequest);
+
+            Logger.LogDebug($"Request Message Sent to Email Provider [SMTP2Go] {requestSerialised}");
+
+            StringContent content = new StringContent(requestSerialised, Encoding.UTF8, "application/json");
+
+            using (HttpClient client = new HttpClient())
+            {
+                client.BaseAddress = new Uri(ConfigurationReader.GetValue("SMTP2GoBaseAddress"));
+
+                HttpResponseMessage httpResponse = await client.PostAsync("email/search", content, cancellationToken);
+
+                Smtp2GoEmailSearchResponse apiResponse = JsonConvert.DeserializeObject<Smtp2GoEmailSearchResponse>(await httpResponse.Content.ReadAsStringAsync());
+
+                Logger.LogDebug($"Response Message Received from Email Provider [SMTP2Go] {JsonConvert.SerializeObject(apiResponse)}");
+
+                // Translate the Response
+                response = new MessageStatusResponse
+                           {
+                               ApiStatusCode = httpResponse.StatusCode,
+                               MessageStatus = this.TranslateMessageStatus(apiResponse.Data.EmailDetails.Single().Status),
+                               ProviderStatusDescription = apiResponse.Data.EmailDetails.Single().Status,
+                               Timestamp = apiResponse.Data.EmailDetails.Single().EmailStatusDate
+                           };
+            }
+
+            return response;
+        }
+
+        private MessageStatus TranslateMessageStatus(String status)
+        {
+            MessageStatus result;
+            switch (status)
+            {
+                case "failed":
+                case "deferred":
+                    result = MessageStatus.Failed;
+                    break;
+                case "hardbounce":
+                case "refused":
+                case "softbounce":
+                case "returned":
+                    result = MessageStatus.Bounced;
+                    break;
+                case "delivered":
+                case "ok":
+                case "sent":
+                    result = MessageStatus.Delivered;
+                    break;
+                case "rejected":
+                    result = MessageStatus.Rejected;
+                    break;
+                case "complained":
+                case "spam":
+                    result = MessageStatus.Spam;
+                    break;
+                default:
+                    result = MessageStatus.Unknown;
+                    break;
+            }
+
+            return result;
         }
 
         #endregion

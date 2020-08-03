@@ -17,6 +17,7 @@ namespace MessagingService
     using System.Net.Http;
     using System.Reflection;
     using BusinessLogic.Common;
+    using BusinessLogic.EventHandling;
     using BusinessLogic.RequestHandlers;
     using BusinessLogic.Requests;
     using BusinessLogic.Services;
@@ -152,6 +153,28 @@ namespace MessagingService
                                                                          return ConfigurationReader.GetBaseServerUri(serviceName).OriginalString;
                                                                      });
             services.AddSingleton<HttpClient>();
+
+            Dictionary<String, String[]> eventHandlersConfiguration = new Dictionary<String, String[]>();
+
+            if (Startup.Configuration != null)
+            {
+                IConfigurationSection section = Startup.Configuration.GetSection("AppSettings:EventHandlerConfiguration");
+
+                if (section != null)
+                {
+                    Startup.Configuration.GetSection("AppSettings:EventHandlerConfiguration").Bind(eventHandlersConfiguration);
+                }
+            }
+            services.AddSingleton<Dictionary<String, String[]>>(eventHandlersConfiguration);
+
+            services.AddSingleton<Func<Type, IDomainEventHandler>>(container => (type) =>
+                                                                                {
+                                                                                    IDomainEventHandler handler = container.GetService(type) as IDomainEventHandler;
+                                                                                    return handler;
+                                                                                });
+
+            services.AddSingleton<EmailDomainEventHandler>();
+            services.AddSingleton<IDomainEventHandlerResolver, DomainEventHandlerResolver>();
         }
         
         /// <summary>
