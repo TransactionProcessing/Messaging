@@ -26,10 +26,13 @@ namespace MessagingService
     using Common;
     using EmailMessageAggregate;
     using EventStore.Client;
+    using HealthChecks.UI.Client;
     using MediatR;
     using Microsoft.AspNetCore.Authentication.JwtBearer;
+    using Microsoft.AspNetCore.Diagnostics.HealthChecks;
     using Microsoft.AspNetCore.Mvc.ApiExplorer;
     using Microsoft.AspNetCore.Mvc.Versioning;
+    using Microsoft.Extensions.Diagnostics.HealthChecks;
     using Microsoft.Extensions.Options;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Serialization;
@@ -61,15 +64,47 @@ namespace MessagingService
 
         public static IWebHostEnvironment WebHostEnvironment { get; set; }
 
+        private static EventStoreClientSettings EventStoreClientSettings;
+
+        private static void ConfigureEventStoreSettings(EventStoreClientSettings settings = null)
+        {
+            if (settings == null)
+            {
+                settings = new EventStoreClientSettings();
+            }
+
+            settings.CreateHttpMessageHandler = () => new SocketsHttpHandler
+                                                      {
+                                                          SslOptions =
+                                                          {
+                                                              RemoteCertificateValidationCallback = (sender,
+                                                                                                     certificate,
+                                                                                                     chain,
+                                                                                                     errors) => true,
+                                                          }
+                                                      };
+            settings.ConnectionName = Startup.Configuration.GetValue<String>("EventStoreSettings:ConnectionName");
+            settings.ConnectivitySettings = new EventStoreClientConnectivitySettings
+                                            {
+                                                Address = new Uri(Startup.Configuration.GetValue<String>("EventStoreSettings:ConnectionString")),
+                                            };
+
+            settings.DefaultCredentials = new UserCredentials(Startup.Configuration.GetValue<String>("EventStoreSettings:UserName"),
+                                                              Startup.Configuration.GetValue<String>("EventStoreSettings:Password"));
+            Startup.EventStoreClientSettings = settings;
+        }
+
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            ConfigurationReader.Initialise(Startup.Configuration);
+
+            Startup.ConfigureEventStoreSettings();
+
             this.ConfigureMiddlewareServices(services);
 
             services.AddTransient<IMediator, Mediator>();
-
-            ConfigurationReader.Initialise(Startup.Configuration);
-
+            
             Boolean useConnectionStringConfig = Boolean.Parse(ConfigurationReader.GetValue("AppSettings", "UseConnectionStringConfig"));
 
             if (useConnectionStringConfig)
@@ -85,51 +120,9 @@ namespace MessagingService
             }
             else
             {
-                services.AddEventStoreClient((settings) =>
-                                             {
-                                                 settings.CreateHttpMessageHandler = () => new SocketsHttpHandler
-                                                                                           {
-                                                                                               SslOptions =
-                                                                                               {
-                                                                                                   RemoteCertificateValidationCallback = (sender,
-                                                                                                                                          certificate,
-                                                                                                                                          chain,
-                                                                                                                                          errors) => true,
-                                                                                               }
-                                                                                           };
-                                                 settings.ConnectionName = Startup.Configuration.GetValue<String>("EventStoreSettings:ConnectionName");
-                                                 settings.ConnectivitySettings = new EventStoreClientConnectivitySettings
-                                                                                 {
-                                                                                     Address =
-                                                                                         new Uri(Startup.Configuration.GetValue<String>("EventStoreSettings:ConnectionString")),
-                                                                                 };
-                                                 settings.DefaultCredentials = new UserCredentials(Startup.Configuration.GetValue<String>("EventStoreSettings:UserName"),
-                                                                                                    Startup.Configuration.GetValue<String>("EventStoreSettings:Password"));
-                                             });
+                services.AddEventStoreClient(Startup.ConfigureEventStoreSettings);
+                services.AddEventStoreProjectionManagerClient(Startup.ConfigureEventStoreSettings);
 
-                
-
-                services.AddEventStoreProjectionManagerClient((settings) =>
-                                                              {
-                                                                  settings.CreateHttpMessageHandler = () => new SocketsHttpHandler
-                                                                                                            {
-                                                                                                                SslOptions =
-                                                                                                                {
-                                                                                                                    RemoteCertificateValidationCallback = (sender,
-                                                                                                                                                           certificate,
-                                                                                                                                                           chain,
-                                                                                                                                                           errors) => true,
-                                                                                                                }
-                                                                                                            };
-                                                                  settings.ConnectionName = Startup.Configuration.GetValue<String>("EventStoreSettings:ConnectionName");
-                                                                  settings.ConnectivitySettings = new EventStoreClientConnectivitySettings
-                                                                                                  {
-                                                                                                      Address =
-                                                                                                          new Uri(Startup.Configuration.GetValue<String>("EventStoreSettings:ConnectionString"))
-                                                                                                  };
-                                                                  settings.DefaultCredentials = new UserCredentials(Startup.Configuration.GetValue<String>("EventStoreSettings:UserName"),
-                                                                                                                    Startup.Configuration.GetValue<String>("EventStoreSettings:Password"));
-                                                              });
                 services.AddSingleton<IConnectionStringConfigurationRepository, ConfigurationReaderConnectionStringRepository>();
             }
 
@@ -198,6 +191,18 @@ namespace MessagingService
 
         private void ConfigureMiddlewareServices(IServiceCollection services)
         {
+            services.AddHealthChecks()
+                    .AddEventStore(Startup.EventStoreClientSettings,
+                                   userCredentials: Startup.EventStoreClientSettings.DefaultCredentials,
+                                   name: "Eventstore",
+                                   failureStatus: HealthStatus.Unhealthy,
+                                   tags: new string[] { "db", "eventstore" })
+                    .AddUrlGroup(new Uri($"{ConfigurationReader.GetValue("SecurityConfiguration", "Authority")}/health"),
+                                 name: "Security Service",
+                                 httpMethod: HttpMethod.Get,
+                                 failureStatus: HealthStatus.Unhealthy,
+                                 tags: new string[] { "security", "authorisation" });
+
             services.AddApiVersioning(
                                       options =>
                                       {
@@ -299,6 +304,11 @@ namespace MessagingService
             app.UseEndpoints(endpoints =>
                              {
                                  endpoints.MapControllers();
+                                 endpoints.MapHealthChecks("health", new HealthCheckOptions()
+                                                                     {
+                                                                         Predicate = _ => true,
+                                                                         ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+                                                                     });
                              });
             app.UseSwagger();
 
