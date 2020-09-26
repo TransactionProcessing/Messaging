@@ -92,7 +92,7 @@ jobs:
     
     - name: Create & Deploy Release in Octopus
       run: >-
-        cto create-release
+        octo create-release
         --server ${{ secrets.OCTOPUS_URL }}
         --apiKey ${{ secrets.OCTOPUS_APIKEY }}
         --project "Messaging Service"
