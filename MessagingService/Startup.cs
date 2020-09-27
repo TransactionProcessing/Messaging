@@ -196,12 +196,7 @@ namespace MessagingService
                                    userCredentials: Startup.EventStoreClientSettings.DefaultCredentials,
                                    name: "Eventstore",
                                    failureStatus: HealthStatus.Unhealthy,
-                                   tags: new string[] { "db", "eventstore" })
-                    .AddUrlGroup(new Uri($"{ConfigurationReader.GetValue("SecurityConfiguration", "Authority")}/health"),
-                                 name: "Security Service",
-                                 httpMethod: HttpMethod.Get,
-                                 failureStatus: HealthStatus.Unhealthy,
-                                 tags: new string[] { "security", "authorisation" });
+                                   tags: new string[] { "db", "eventstore" });
 
             services.AddApiVersioning(
                                       options =>
