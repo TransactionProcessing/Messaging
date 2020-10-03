@@ -56,18 +56,10 @@ namespace MessagingService.IntegrationTests.Email
                                            Subject = subject,
                                            ToAddresses = toAddresses.Split(",").ToList()
                                        };
-
-            StringContent requestContent = new StringContent(JsonConvert.SerializeObject(request), Encoding.UTF8, "application/json");
-            this.TestingContext.DockerHelper.MessagingServiceClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", this.TestingContext.AccessToken);
             
-            HttpResponseMessage httpResponse = await this.TestingContext.DockerHelper.MessagingServiceClient.PostAsync("api/Email", requestContent, CancellationToken.None).ConfigureAwait(false);
+            SendEmailResponse sendEmailResponse = await this.TestingContext.DockerHelper.MessagingServiceClient.SendEmail(this.TestingContext.AccessToken, request, CancellationToken.None).ConfigureAwait(false);
 
-            httpResponse.StatusCode.ShouldBe(HttpStatusCode.Created);
-            String responseContent = await httpResponse.Content.ReadAsStringAsync().ConfigureAwait(false);
-
-            responseContent.ShouldNotBeNullOrEmpty();
-            SendEmailResponse response = JsonConvert.DeserializeObject<SendEmailResponse>(responseContent);
-            response.MessageId.ShouldNotBe(Guid.Empty);
+            sendEmailResponse.MessageId.ShouldNotBe(Guid.Empty);
         }
     }
 }
