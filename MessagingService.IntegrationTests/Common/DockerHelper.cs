@@ -5,6 +5,7 @@
     using System.Linq;
     using System.Net.Http;
     using System.Threading.Tasks;
+    using Client;
     using Ductus.FluentDocker.Builders;
     using Ductus.FluentDocker.Common;
     using Ductus.FluentDocker.Model.Builders;
@@ -26,7 +27,10 @@
         /// </summary>
         public ISecurityServiceClient SecurityServiceClient;
 
-        public HttpClient MessagingServiceClient;
+        /// <summary>
+        /// The messaging service client
+        /// </summary>
+        public IMessagingServiceClient MessagingServiceClient;
 
         /// <summary>
         /// The test identifier
@@ -166,12 +170,11 @@
 
             // Setup the base address resolvers
             String SecurityServiceBaseAddressResolver(String api) => $"http://127.0.0.1:{this.SecurityServicePort}";
+            String MessagingServiceBaseAddressResolver(String api) => $"http://127.0.0.1:{this.MessagingServicePort}";
 
             HttpClient httpClient = new HttpClient();
             this.SecurityServiceClient = new SecurityServiceClient(SecurityServiceBaseAddressResolver, httpClient);
-
-            this.MessagingServiceClient = new HttpClient();
-            this.MessagingServiceClient.BaseAddress = new Uri($"http://127.0.0.1:{this.MessagingServicePort}");
+            this.MessagingServiceClient = new MessagingServiceClient(MessagingServiceBaseAddressResolver, httpClient);
         }
 
         /// <summary>
