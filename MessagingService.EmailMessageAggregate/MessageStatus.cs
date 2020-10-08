@@ -10,6 +10,8 @@
         /// </summary>
         NotSet = 0,
 
+        InProgress,
+
         /// <summary>
         /// The sent
         /// </summary>

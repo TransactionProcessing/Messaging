@@ -233,6 +233,11 @@
                                           String body,
                                           Boolean isHtml)
         {
+            if (this.MessageStatus != MessageStatus.NotSet)
+            {
+                throw new InvalidOperationException("Cannot send a message to provider that has already been sent");
+            }
+
             RequestSentToProviderEvent requestSentToProviderEvent = RequestSentToProviderEvent.Create(this.AggregateId, fromAddress, toAddresses, subject, body, isHtml);
 
             this.ApplyAndPend(requestSentToProviderEvent);
@@ -327,7 +332,7 @@
             this.Subject = domainEvent.Subject;
             this.IsHtml = domainEvent.IsHtml;
             this.FromAddress = domainEvent.FromAddress;
-            this.MessageStatus = MessageStatus.NotSet;
+            this.MessageStatus = MessageStatus.InProgress;
 
             foreach (String domainEventToAddress in domainEvent.ToAddresses)
             {

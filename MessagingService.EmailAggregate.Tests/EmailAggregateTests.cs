@@ -28,7 +28,25 @@ namespace MessagingService.EmailAggregate.Tests
             emailAggregate.Subject.ShouldBe(TestData.Subject);
             emailAggregate.Body.ShouldBe(TestData.Body);
             emailAggregate.IsHtml.ShouldBe(TestData.IsHtmlTrue);
+            emailAggregate.MessageStatus.ShouldBe(MessageStatus.InProgress);
             // TODO: Get Recipients
+        }
+
+        [Fact]
+        public void EmailAggregate_SendRequestToProvider_RequestAlreadySent_ErrorThrown()
+        {
+            EmailAggregate emailAggregate = EmailAggregate.Create(TestData.MessageId);
+
+            emailAggregate.SendRequestToProvider(TestData.FromAddress, TestData.ToAddresses, TestData.Subject, TestData.Body, TestData.IsHtmlTrue);
+
+            Should.Throw<InvalidOperationException>(() =>
+                                                    {
+                                                        emailAggregate.SendRequestToProvider(TestData.FromAddress,
+                                                                                             TestData.ToAddresses,
+                                                                                             TestData.Subject,
+                                                                                             TestData.Body,
+                                                                                             TestData.IsHtmlTrue);
+                                                    });
         }
 
         [Fact]
@@ -41,6 +59,7 @@ namespace MessagingService.EmailAggregate.Tests
 
             emailAggregate.ProviderRequestReference.ShouldBe(TestData.ProviderRequestReference);
             emailAggregate.ProviderEmailReference.ShouldBe(TestData.ProviderEmailReference);
+            emailAggregate.MessageStatus.ShouldBe(MessageStatus.Sent);
         }
 
         [Fact]

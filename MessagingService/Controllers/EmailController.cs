@@ -65,7 +65,7 @@ namespace MessagingService.Controllers
                 return this.Forbid();
             }
 
-            Guid messageId = Guid.NewGuid();
+            Guid messageId =  sendEmailRequest.MessageId.HasValue ? sendEmailRequest.MessageId.Value : Guid.NewGuid();
 
             // Create the command
             SendEmailRequest request = SendEmailRequest.Create(sendEmailRequest.ConnectionIdentifier,
