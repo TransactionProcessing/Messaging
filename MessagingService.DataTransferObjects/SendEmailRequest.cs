@@ -8,6 +8,8 @@
     public class SendEmailRequest
     {
         #region Properties
+        
+        public Guid? MessageId { get; set; }
 
         /// <summary>
         /// Gets or sets the body.
