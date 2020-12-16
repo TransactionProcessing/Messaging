@@ -32,7 +32,7 @@
         #region Constructors
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Smtp2GoProxy"/> class.
+        /// Initializes a new instance of the <see cref="Smtp2GoProxy" /> class.
         /// </summary>
         /// <param name="httpClient">The HTTP client.</param>
         public Smtp2GoProxy(HttpClient httpClient)
@@ -83,27 +83,25 @@
 
             StringContent content = new StringContent(requestSerialised, Encoding.UTF8, "application/json");
 
-            using(HttpClient client = new HttpClient())
-            {
-                client.BaseAddress = new Uri(ConfigurationReader.GetValue("SMTP2GoBaseAddress"));
+            String requestUri = $"{ConfigurationReader.GetValue("SMTP2GoBaseAddress")}/email/send";
+            HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Post, requestUri);
+            requestMessage.Content = content;
 
-                HttpResponseMessage httpResponse = await client.PostAsync("email/send", content, cancellationToken);
+            HttpResponseMessage httpResponse = await this.HttpClient.SendAsync(requestMessage, cancellationToken);
 
-                Smtp2GoSendEmailResponse apiResponse = JsonConvert.DeserializeObject<Smtp2GoSendEmailResponse>(await httpResponse.Content.ReadAsStringAsync());
+            Smtp2GoSendEmailResponse apiResponse = JsonConvert.DeserializeObject<Smtp2GoSendEmailResponse>(await httpResponse.Content.ReadAsStringAsync());
 
-                Logger.LogDebug($"Response Message Received from Email Provider [SMTP2Go] {JsonConvert.SerializeObject(apiResponse)}");
+            Logger.LogDebug($"Response Message Received from Email Provider [SMTP2Go] {JsonConvert.SerializeObject(apiResponse)}");
 
-                // Translate the Response
-                response = new EmailServiceProxyResponse
-                           {
-                               ApiStatusCode = httpResponse.StatusCode,
-                               EmailIdentifier = apiResponse.Data.EmailId,
-                               Error = apiResponse.Data.Error,
-                               ErrorCode = apiResponse.Data.ErrorCode,
-                               RequestIdentifier = apiResponse.RequestId
-                           };
-            }
-
+            // Translate the Response
+            response = new EmailServiceProxyResponse
+                       {
+                           ApiStatusCode = httpResponse.StatusCode,
+                           EmailIdentifier = apiResponse.Data.EmailId,
+                           Error = apiResponse.Data.Error,
+                           ErrorCode = apiResponse.Data.ErrorCode,
+                           RequestIdentifier = apiResponse.RequestId
+                       };
             return response;
         }
 
@@ -125,10 +123,13 @@
             Smtp2GoEmailSearchRequest apiRequest = new Smtp2GoEmailSearchRequest
                                                    {
                                                        ApiKey = ConfigurationReader.GetValue("SMTP2GoAPIKey"),
-                                                       EmailId = new List<String>{providerReference},
+                                                       EmailId = new List<String>
+                                                                 {
+                                                                     providerReference
+                                                                 },
                                                        StartDate = startDate.ToString("yyyy-MM-dd"),
                                                        EndDate = endDate.ToString("yyyy-MM-dd"),
-            };
+                                                   };
 
             String requestSerialised = JsonConvert.SerializeObject(apiRequest);
 
@@ -136,29 +137,33 @@
 
             StringContent content = new StringContent(requestSerialised, Encoding.UTF8, "application/json");
 
-            using (HttpClient client = new HttpClient())
-            {
-                client.BaseAddress = new Uri(ConfigurationReader.GetValue("SMTP2GoBaseAddress"));
+            String requestUri = $"{ConfigurationReader.GetValue("SMTP2GoBaseAddress")}/email/search";
+            HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Post, requestUri);
+            requestMessage.Content = content;
 
-                HttpResponseMessage httpResponse = await client.PostAsync("email/search", content, cancellationToken);
+            HttpResponseMessage httpResponse = await this.HttpClient.SendAsync(requestMessage, cancellationToken);
 
-                Smtp2GoEmailSearchResponse apiResponse = JsonConvert.DeserializeObject<Smtp2GoEmailSearchResponse>(await httpResponse.Content.ReadAsStringAsync());
+            Smtp2GoEmailSearchResponse apiResponse = JsonConvert.DeserializeObject<Smtp2GoEmailSearchResponse>(await httpResponse.Content.ReadAsStringAsync());
 
-                Logger.LogDebug($"Response Message Received from Email Provider [SMTP2Go] {JsonConvert.SerializeObject(apiResponse)}");
+            Logger.LogDebug($"Response Message Received from Email Provider [SMTP2Go] {JsonConvert.SerializeObject(apiResponse)}");
 
-                // Translate the Response
-                response = new MessageStatusResponse
-                           {
-                               ApiStatusCode = httpResponse.StatusCode,
-                               MessageStatus = this.TranslateMessageStatus(apiResponse.Data.EmailDetails.Single().Status),
-                               ProviderStatusDescription = apiResponse.Data.EmailDetails.Single().Status,
-                               Timestamp = apiResponse.Data.EmailDetails.Single().EmailStatusDate
-                           };
-            }
+            // Translate the Response
+            response = new MessageStatusResponse
+                       {
+                           ApiStatusCode = httpResponse.StatusCode,
+                           MessageStatus = this.TranslateMessageStatus(apiResponse.Data.EmailDetails.Single().Status),
+                           ProviderStatusDescription = apiResponse.Data.EmailDetails.Single().Status,
+                           Timestamp = apiResponse.Data.EmailDetails.Single().EmailStatusDate
+                       };
 
             return response;
         }
 
+        /// <summary>
+        /// Translates the message status.
+        /// </summary>
+        /// <param name="status">The status.</param>
+        /// <returns></returns>
         private MessageStatus TranslateMessageStatus(String status)
         {
             MessageStatus result;
