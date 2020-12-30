@@ -223,6 +223,7 @@
             environmentVariables.Add($"SecurityConfiguration:Authority=http://{securityServiceContainerName}:{securityServicePort}");
             environmentVariables.Add($"urls=http://*:{DockerHelper.MessagingServiceDockerPort}");
             environmentVariables.Add("AppSettings:EmailProxy=Integration");
+            environmentVariables.Add("AppSettings:SMSProxy=Integration");
 
             ContainerBuilder messagingServiceContainer = new Builder().UseContainer().WithName(containerName).WithEnvironment(environmentVariables.ToArray())
                                                                       .UseImage(imageName, forceLatestImage).ExposePort(DockerHelper.MessagingServiceDockerPort)

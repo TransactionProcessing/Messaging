@@ -55,6 +55,7 @@ namespace MessagingService.Tests.General
             configuration.Add("AppSettings:SecurityService", "http://localhost");
             configuration.Add("SecurityConfiguration:Authority", "http://localhost");
             configuration.Add("AppSettings:EmailProxy", "UnitTest");
+            configuration.Add("AppSettings:SMSProxy", "UnitTest");
 
             builder.AddInMemoryCollection(configuration);
 

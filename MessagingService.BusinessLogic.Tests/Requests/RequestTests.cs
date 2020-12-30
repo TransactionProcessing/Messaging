@@ -31,5 +31,22 @@ namespace MessagingService.BusinessLogic.Tests.Requests
             request.Body.ShouldBe(TestData.Body);
             request.IsHtml.ShouldBe(TestData.IsHtmlTrue);
         }
+
+        [Fact]
+        public void SendSMSRequest_CanBeCreated_IsCreated()
+        {
+            SendSMSRequest request = SendSMSRequest.Create(TestData.ConnectionIdentifier,
+                                                           TestData.MessageId,
+                                                           TestData.Sender,
+                                                           TestData.Destination,
+                                                           TestData.Message);
+
+            request.ShouldNotBeNull();
+            request.ConnectionIdentifier.ShouldBe(TestData.ConnectionIdentifier);
+            request.MessageId.ShouldBe(TestData.MessageId);
+            request.Sender.ShouldBe(TestData.Sender);
+            request.Destination.ShouldBe(TestData.Destination);
+            request.Message.ShouldBe(TestData.Message);
+        }
     }
 }

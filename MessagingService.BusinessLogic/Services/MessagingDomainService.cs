@@ -9,12 +9,14 @@
     using Microsoft.Extensions.Logging;
     using Shared.EventStore.EventStore;
     using Shared.Logger;
+    using SMSMessageAggregate;
+    using SMSServices;
 
     /// <summary>
     /// 
     /// </summary>
-    /// <seealso cref="MessagingService.BusinessLogic.Services.IEmailDomainService" />
-    public class EmailDomainService : IEmailDomainService
+    /// <seealso cref="IMessagingDomainService" />
+    public class MessagingDomainService : IMessagingDomainService
     {
         #region Fields
 
@@ -23,25 +25,36 @@
         /// </summary>
         private readonly IAggregateRepository<EmailAggregate> EmailAggregateRepository;
 
+        private readonly IAggregateRepository<SMSAggregate> SmsAggregateRepository;
+
         /// <summary>
         /// The email service proxy
         /// </summary>
         private readonly IEmailServiceProxy EmailServiceProxy;
+
+        private readonly ISMSServiceProxy SmsServiceProxy;
 
         #endregion
 
         #region Constructors
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="EmailDomainService" /> class.
+        /// Initializes a new instance of the <see cref="MessagingDomainService" /> class.
         /// </summary>
         /// <param name="emailAggregateRepository">The email aggregate repository.</param>
+        /// <param name="smsAggregateRepository">The SMS aggregate repository.</param>
         /// <param name="emailServiceProxy">The email service proxy.</param>
-        public EmailDomainService(IAggregateRepository<EmailAggregate> emailAggregateRepository,
-                                  IEmailServiceProxy emailServiceProxy)
+        /// <param name="smsServiceProxy">The SMS service proxy.</param>
+        public MessagingDomainService(IAggregateRepository<EmailAggregate> emailAggregateRepository,
+                                      IAggregateRepository<SMSAggregate> smsAggregateRepository,
+                                      IEmailServiceProxy emailServiceProxy,
+                                      ISMSServiceProxy smsServiceProxy)
         {
             this.EmailAggregateRepository = emailAggregateRepository;
+            this.SmsAggregateRepository = smsAggregateRepository;
+
             this.EmailServiceProxy = emailServiceProxy;
+            this.SmsServiceProxy = smsServiceProxy;
         }
 
         #endregion
@@ -84,7 +97,40 @@
             // Save Changes to persistance
             await this.EmailAggregateRepository.SaveChanges(emailAggregate, cancellationToken);
         }
-        
-        #endregion
+
+        /// <summary>
+        /// Sends the SMS message.
+        /// </summary>
+        /// <param name="connectionIdentifier">The connection identifier.</param>
+        /// <param name="messageId">The message identifier.</param>
+        /// <param name="sender">The sender.</param>
+        /// <param name="destination">The destination.</param>
+        /// <param name="message">The message.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        public async Task SendSMSMessage(Guid connectionIdentifier,
+                                         Guid messageId,
+                                         String sender,
+                                         String destination,
+                                         String message,
+                                         CancellationToken cancellationToken)
+        {
+            // Rehydrate SMS Message aggregate
+            SMSAggregate smsAggregate = await this.SmsAggregateRepository.GetLatestVersion(messageId, cancellationToken);
+
+            // send message to provider (record event)
+            smsAggregate.SendRequestToProvider(sender, destination,message);
+
+            // Make call to SMS provider here
+            SMSServiceProxyResponse smsResponse =
+                await this.SmsServiceProxy.SendSMS(messageId, sender, destination, message, cancellationToken);
+
+            // response message from provider (record event)
+            smsAggregate.ReceiveResponseFromProvider(smsResponse.SMSIdentifier);
+
+            // Save Changes to persistance
+            await this.SmsAggregateRepository.SaveChanges(smsAggregate, cancellationToken);
+        }
     }
+
+        #endregion
 }

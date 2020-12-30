@@ -23,6 +23,8 @@ namespace MessagingService
     using BusinessLogic.Services;
     using BusinessLogic.Services.EmailServices;
     using BusinessLogic.Services.EmailServices.Smtp2Go;
+    using BusinessLogic.Services.SMSServices;
+    using BusinessLogic.Services.SMSServices.TheSMSWorks;
     using Common;
     using EmailMessageAggregate;
     using EventStore.Client;
@@ -38,12 +40,14 @@ namespace MessagingService
     using Newtonsoft.Json.Serialization;
     using NLog.Extensions.Logging;
     using Service.Services.Email.IntegrationTest;
+    using Service.Services.SMSServices.IntegrationTest;
     using Shared.EntityFramework.ConnectionStringConfiguration;
     using Shared.EventStore.EventStore;
     using Shared.Extensions;
     using Shared.General;
     using Shared.Logger;
     using Shared.Repositories;
+    using SMSMessageAggregate;
     using Swashbuckle.AspNetCore.Filters;
     using Swashbuckle.AspNetCore.SwaggerGen;
 
@@ -128,10 +132,12 @@ namespace MessagingService
 
 
             services.AddTransient<IEventStoreContext, EventStoreContext>();
-            services.AddSingleton<IEmailDomainService, EmailDomainService>();
+            services.AddSingleton<IMessagingDomainService, MessagingDomainService>();
             services.AddSingleton<IAggregateRepository<EmailAggregate>, AggregateRepository<EmailAggregate>>();
-            
+            services.AddSingleton<IAggregateRepository<SMSAggregate>, AggregateRepository<SMSAggregate>>();
+
             this.RegisterEmailProxy(services);
+            this.RegisterSMSProxy(services);
 
             // request & notification handlers
             services.AddTransient<ServiceFactory>(context =>
@@ -139,7 +145,8 @@ namespace MessagingService
                                                       return t => context.GetService(t);
                                                   });
 
-            services.AddSingleton<IRequestHandler<SendEmailRequest, String>, EmailRequestHandler>();
+            services.AddSingleton<IRequestHandler<SendEmailRequest, String>, MessagingRequestHandler>();
+            services.AddSingleton<IRequestHandler<SendSMSRequest, String>, MessagingRequestHandler>();
 
             services.AddSingleton<Func<String, String>>(container => (serviceName) =>
                                                                      {
@@ -186,6 +193,21 @@ namespace MessagingService
             else
             {
                 services.AddSingleton<IEmailServiceProxy, IntegrationTestEmailServiceProxy>();
+            }
+        }
+
+        private void RegisterSMSProxy(IServiceCollection services)
+        {
+            // read the config setting 
+            String emailProxy = ConfigurationReader.GetValue("AppSettings", "SMSProxy");
+
+            if (emailProxy == "TheSMSWorks")
+            {
+                services.AddSingleton<ISMSServiceProxy, TheSmsWorksProxy>();
+            }
+            else
+            {
+                services.AddSingleton<ISMSServiceProxy, IntegrationTestSMSServiceProxy>();
             }
         }
 

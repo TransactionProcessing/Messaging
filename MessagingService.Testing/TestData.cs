@@ -5,9 +5,11 @@
     using System.Collections.Generic;
     using System.Net;
     using BusinessLogic.Services.EmailServices;
+    using BusinessLogic.Services.SMSServices;
     using EmailMessage.DomainEvents;
     using EmailMessageAggregate;
     using Microsoft.EntityFrameworkCore.SqlServer.Query.Internal;
+    using SMSMessageAggregate;
     using MessageStatus = BusinessLogic.Services.EmailServices.MessageStatus;
 
     public class TestData
@@ -65,6 +67,25 @@
         public static DateTime FailedDateTime = DateTime.Now;
 
         public static DateTime SpamDateTime = DateTime.Now;
+
+        public static String Sender = "Sender";
+        public static String Destination = "07777777770";
+
+        public static String Message = "Test SMS Message";
+
+        public static String ProviderSMSReference = "SMSReference";
+
+        public static DateTime UndeliveredDateTime = DateTime.Now;
+
+        public static DateTime ExpiredDateTime = DateTime.Now;
+
+        public static SendSMSRequest SendSMSRequest = SendSMSRequest.Create(TestData.ConnectionIdentifier,
+                                                                            TestData.MessageId,
+                                                                            TestData.Sender,
+                                                                            TestData.Destination,
+                                                                            TestData.Message);
+
+        private static String SMSIdentifier = "2FACEDE5-0915-46A2-B1EE-CD904746DDD0";
 
         public static MessageStatusResponse MessageStatusResponseDelivered =>
             new MessageStatusResponse
@@ -148,5 +169,19 @@
 
         public static ResponseReceivedFromProviderEvent ResponseReceivedFromProviderEvent =>
             ResponseReceivedFromProviderEvent.Create(TestData.MessageId, TestData.ProviderRequestReference, TestData.ProviderEmailReference);
+
+        public static SMSServiceProxyResponse SuccessfulSMSServiceProxyResponse =>
+            new SMSServiceProxyResponse
+            {
+                SMSIdentifier = TestData.SMSIdentifier,
+                ApiStatusCode = TestData.ApiStatusCodeSuccess
+            };
+
+        public static SMSAggregate GetEmptySMSAggregate()
+        {
+            SMSAggregate smsAggregate = new SMSAggregate();
+
+            return smsAggregate;
+        }
     }
 }
