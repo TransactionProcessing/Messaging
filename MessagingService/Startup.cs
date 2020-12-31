@@ -174,6 +174,7 @@ namespace MessagingService
                                                                                 });
 
             services.AddSingleton<EmailDomainEventHandler>();
+            services.AddSingleton<SMSDomainEventHandler>();
             services.AddSingleton<IDomainEventHandlerResolver, DomainEventHandlerResolver>();
         }
         

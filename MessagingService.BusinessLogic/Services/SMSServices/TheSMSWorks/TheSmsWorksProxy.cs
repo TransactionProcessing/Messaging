@@ -11,6 +11,7 @@ namespace MessagingService.BusinessLogic.Services.SMSServices.TheSMSWorks
     using System.Threading.Tasks;
     using Newtonsoft.Json;
     using Requests;
+    using Shared.Exceptions;
     using Shared.Extensions;
     using Shared.General;
 
@@ -82,8 +83,8 @@ namespace MessagingService.BusinessLogic.Services.SMSServices.TheSMSWorks
                         response = new SMSServiceProxyResponse
                         {
                                        ApiStatusCode = apiSendSMSMessageHttpResponse.StatusCode,
-                                       SMSIdentifier = apiTheSmsWorksSendSmsResponse.MessageId
-                                   };
+                                       SMSIdentifier = apiTheSmsWorksSendSmsResponse.MessageId,
+                        };
                     }
                     else
                     {
@@ -99,7 +100,96 @@ namespace MessagingService.BusinessLogic.Services.SMSServices.TheSMSWorks
 
             return response;
         }
-        
+
+        public async Task<MessageStatusResponse> GetMessageStatus(String providerReference,
+                                                                  CancellationToken cancellationToken)
+        {
+            MessageStatusResponse response = new MessageStatusResponse();
+
+            using (HttpClient client = new HttpClient())
+            {
+                // Create the Auth Request                
+                TheSmsWorksTokenRequest apiTokenRequest = new TheSmsWorksTokenRequest
+                {
+                    CustomerId = ConfigurationReader.GetValue("TheSMSWorksCustomerId"),
+                    Key = ConfigurationReader.GetValue("TheSMSWorksKey"),
+                    Secret = ConfigurationReader.GetValue("TheSMSWorksSecret")
+                };
+
+                String apiTokenRequestSerialised = JsonConvert.SerializeObject(apiTokenRequest).ToLower();
+                StringContent content = new StringContent(apiTokenRequestSerialised, Encoding.UTF8, "application/json");
+
+                // First do the authentication
+                HttpResponseMessage apiTokenHttpResponse = await client.PostAsync($"{ConfigurationReader.GetValue("TheSMSWorksBaseAddress")}auth/token", content, cancellationToken);
+
+                if (apiTokenHttpResponse.IsSuccessStatusCode)
+                {
+                    TheSmsWorksTokenResponse apiTokenResponse =
+                        JsonConvert.DeserializeObject<TheSmsWorksTokenResponse>(await apiTokenHttpResponse.Content.ReadAsStringAsync());
+                    
+                    client.DefaultRequestHeaders.Add("Authorization", apiTokenResponse.Token);
+                    HttpResponseMessage apiGetSMSMessageHttpResponse =
+                        await client.GetAsync($"{ConfigurationReader.GetValue("TheSMSWorksBaseAddress")}messages/{providerReference}", cancellationToken);
+
+                    if (apiGetSMSMessageHttpResponse.IsSuccessStatusCode)
+                    {
+                        // Message has been sent
+                        TheSMSWorksGetMessageResponse apiSmsWorksGetMessageResponse =
+                            JsonConvert.DeserializeObject<TheSMSWorksGetMessageResponse>(await apiGetSMSMessageHttpResponse.Content.ReadAsStringAsync());
+
+                        response = new MessageStatusResponse
+                                   {
+                                       ApiStatusCode = apiGetSMSMessageHttpResponse.StatusCode,
+                                       MessageStatus = this.TranslateMessageStatus(apiSmsWorksGetMessageResponse.Status),
+                            ProviderStatusDescription = apiSmsWorksGetMessageResponse.Status,
+                                       Timestamp = DateTime.Parse(apiSmsWorksGetMessageResponse.Modified)
+                                   };
+                    }
+                    else
+                    {
+                        throw new NotFoundException($"Error getting message Id [{providerReference}]");
+                    }
+                }
+                else
+                {
+                    throw new Exception("Authentication Error");
+                }
+            }
+
+            return response;
+        }
+
+        /// <summary>
+        /// Translates the message status.
+        /// </summary>
+        /// <param name="status">The status.</param>
+        /// <returns></returns>
+        private MessageStatus TranslateMessageStatus(String status)
+        {
+            MessageStatus result = MessageStatus.NotSet;
+            switch (status)
+            {
+                case "UNDELIVERABLE":
+                    result = MessageStatus.Undeliverable;
+                    break;
+                case "DELIVERED":
+                case "SENT":
+                    result = MessageStatus.Delivered;
+                    break;
+                case "REJECTED":
+                    result = MessageStatus.Rejected;
+                    break;
+                case "EXPIRED":
+                    result = MessageStatus.Expired;
+                    break;
+                case "INCOMING":
+                    result = MessageStatus.Incoming;
+                    break;
+            }
+
+            return result;
+        }
+
         /// <summary>
         /// Handles the API error.
         /// </summary>

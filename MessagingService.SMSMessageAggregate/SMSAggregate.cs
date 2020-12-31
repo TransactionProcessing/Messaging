@@ -127,6 +127,114 @@ namespace MessagingService.SMSMessageAggregate
         }
 
         /// <summary>
+        /// Marks the message as failed.
+        /// </summary>
+        /// <param name="providerStatus">The provider status.</param>
+        /// <param name="failedDateTime">The failed date time.</param>
+        public void MarkMessageAsExpired(String providerStatus,
+                                        DateTime failedDateTime)
+        {
+            this.CheckMessageCanBeSetToExpired();
+
+            MessageExpiredEvent messageExpiredEvent = MessageExpiredEvent.Create(this.AggregateId, providerStatus, failedDateTime);
+
+            this.ApplyAndPend(messageExpiredEvent);
+        }
+
+        /// <summary>
+        /// Marks the message as failed.
+        /// </summary>
+        /// <param name="providerStatus">The provider status.</param>
+        /// <param name="failedDateTime">The failed date time.</param>
+        public void MarkMessageAsRejected(String providerStatus,
+                                          DateTime failedDateTime)
+        {
+            this.CheckMessageCanBeSetToRejected();
+
+            MessageRejectedEvent messageRejectedEvent = MessageRejectedEvent.Create(this.AggregateId, providerStatus, failedDateTime);
+
+            this.ApplyAndPend(messageRejectedEvent);
+        }
+
+        /// <summary>
+        /// Marks the message as delivered.
+        /// </summary>
+        /// <param name="providerStatus">The provider status.</param>
+        /// <param name="failedDateTime">The failed date time.</param>
+        public void MarkMessageAsDelivered(String providerStatus,
+                                           DateTime failedDateTime)
+        {
+            this.CheckMessageCanBeSetToDelivered();
+
+            MessageDeliveredEvent messageDeliveredEvent = MessageDeliveredEvent.Create(this.AggregateId, providerStatus, failedDateTime);
+
+            this.ApplyAndPend(messageDeliveredEvent);
+        }
+
+
+        /// <summary>
+        /// Marks the message as undeliverable.
+        /// </summary>
+        /// <param name="providerStatus">The provider status.</param>
+        /// <param name="failedDateTime">The failed date time.</param>
+        public void MarkMessageAsUndeliverable(String providerStatus,
+                                               DateTime failedDateTime)
+        {
+            this.CheckMessageCanBeSetToUndeliverable();
+
+            MessageUndeliveredEvent messageUndeliveredEvent = MessageUndeliveredEvent.Create(this.AggregateId, providerStatus, failedDateTime);
+
+            this.ApplyAndPend(messageUndeliveredEvent);
+        }
+
+        /// <summary>
+        /// Checks the message can be set to expired.
+        /// </summary>
+        /// <exception cref="System.InvalidOperationException">Message at status {this.MessageStatus} cannot be set to expired</exception>
+        private void CheckMessageCanBeSetToExpired()
+        {
+            if (this.MessageStatus != MessageStatus.Sent)
+            {
+                throw new InvalidOperationException($"Message at status {this.MessageStatus} cannot be set to expired");
+            }
+        }
+
+        /// <summary>
+        /// Checks the message can be set to rejected.
+        /// </summary>
+        /// <exception cref="System.InvalidOperationException">Message at status {this.MessageStatus} cannot be set to rejected</exception>
+        private void CheckMessageCanBeSetToRejected()
+        {
+            if (this.MessageStatus != MessageStatus.Sent)
+            {
+                throw new InvalidOperationException($"Message at status {this.MessageStatus} cannot be set to rejected");
+            }
+        }
+        /// <summary>
+        /// Checks the message can be set to delivered.
+        /// </summary>
+        /// <exception cref="System.InvalidOperationException">Message at status {this.MessageStatus} cannot be set to delivered</exception>
+        private void CheckMessageCanBeSetToDelivered()
+        {
+            if (this.MessageStatus != MessageStatus.Sent)
+            {
+                throw new InvalidOperationException($"Message at status {this.MessageStatus} cannot be set to delivered");
+            }
+        }
+
+        /// <summary>
+        /// Checks the message can be set to undeliverable.
+        /// </summary>
+        /// <exception cref="System.InvalidOperationException">Message at status {this.MessageStatus} cannot be set to undeliverable</exception>
+        private void CheckMessageCanBeSetToUndeliverable()
+        {
+            if (this.MessageStatus != MessageStatus.Sent)
+            {
+                throw new InvalidOperationException($"Message at status {this.MessageStatus} cannot be set to undeliverable");
+            }
+        }
+
+        /// <summary>
         /// Gets the metadata.
         /// </summary>
         /// <returns></returns>
@@ -165,6 +273,42 @@ namespace MessagingService.SMSMessageAggregate
         {
             this.ProviderReference = domainEvent.ProviderSMSReference;
             this.MessageStatus = MessageStatus.Sent;
+        }
+
+        /// <summary>
+        /// Plays the event.
+        /// </summary>
+        /// <param name="domainEvent">The domain event.</param>
+        private void PlayEvent(MessageExpiredEvent domainEvent)
+        {
+            this.MessageStatus = MessageStatus.Expired;
+        }
+
+        /// <summary>
+        /// Plays the event.
+        /// </summary>
+        /// <param name="domainEvent">The domain event.</param>
+        private void PlayEvent(MessageDeliveredEvent domainEvent)
+        {
+            this.MessageStatus = MessageStatus.Delivered;
+        }
+
+        /// <summary>
+        /// Plays the event.
+        /// </summary>
+        /// <param name="domainEvent">The domain event.</param>
+        private void PlayEvent(MessageRejectedEvent domainEvent)
+        {
+            this.MessageStatus = MessageStatus.Rejected;
+        }
+
+        /// <summary>
+        /// Plays the event.
+        /// </summary>
+        /// <param name="domainEvent">The domain event.</param>
+        private void PlayEvent(MessageUndeliveredEvent domainEvent)
+        {
+            this.MessageStatus = MessageStatus.Undeliverable;
         }
     }
 }

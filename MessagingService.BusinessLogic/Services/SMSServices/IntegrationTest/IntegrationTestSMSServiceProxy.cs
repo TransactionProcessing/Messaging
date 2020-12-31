@@ -1,44 +1,48 @@
 ﻿namespace MessagingService.Service.Services.SMSServices.IntegrationTest
 {
     using System;
-    using System.Collections.Generic;
     using System.Diagnostics.CodeAnalysis;
     using System.Net;
     using System.Threading;
     using System.Threading.Tasks;
     using BusinessLogic.Services.SMSServices;
+    using MessageStatus = BusinessLogic.Services.SMSServices.MessageStatus;
 
     /// <summary>
     /// 
     /// </summary>
+    /// <seealso cref="MessagingService.BusinessLogic.Services.SMSServices.ISMSServiceProxy" />
     /// <seealso cref="MessagingService.BusinessLogic.Services.EmailServices.IEmailServiceProxy" />
     [ExcludeFromCodeCoverage]
     public class IntegrationTestSMSServiceProxy : ISMSServiceProxy
     {
         #region Methods
 
-        ///// <summary>
-        ///// Gets the message status.
-        ///// </summary>
-        ///// <param name="providerReference">The provider reference.</param>
-        ///// <param name="startDate">The start date.</param>
-        ///// <param name="endDate">The end date.</param>
-        ///// <param name="cancellationToken">The cancellation token.</param>
-        ///// <returns></returns>
-        //public async Task<MessageStatusResponse> GetMessageStatus(String providerReference,
-        //                                                          DateTime startDate,
-        //                                                          DateTime endDate,
-        //                                                          CancellationToken cancellationToken)
-        //{
-        //    return new MessageStatusResponse
-        //           {
-        //               MessageStatus = MessageStatus.Delivered,
-        //               ProviderStatusDescription = "delivered"
-        //           };
-        //}
+        /// <summary>
+        /// Gets the message status.
+        /// </summary>
+        /// <param name="providerReference">The provider reference.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns></returns>
+        public async Task<MessageStatusResponse> GetMessageStatus(String providerReference,
+                                                                  CancellationToken cancellationToken)
+        {
+            return new MessageStatusResponse
+                   {
+                       MessageStatus = MessageStatus.Delivered,
+                       ProviderStatusDescription = "delivered"
+                   };
+        }
 
-        #endregion
-
+        /// <summary>
+        /// Sends the SMS.
+        /// </summary>
+        /// <param name="messageId">The message identifier.</param>
+        /// <param name="sender">The sender.</param>
+        /// <param name="destination">The destination.</param>
+        /// <param name="message">The message.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns></returns>
         public async Task<SMSServiceProxyResponse> SendSMS(Guid messageId,
                                                            String sender,
                                                            String destination,
@@ -53,5 +57,7 @@
                        SMSIdentifier = "smsid"
                    };
         }
+
+        #endregion
     }
 }

@@ -24,5 +24,14 @@ namespace MessagingService.BusinessLogic.Services.SMSServices
                                       String destination,
                                       String message,
                                       CancellationToken cancellationToken);
+
+        /// <summary>
+        /// Gets the message status.
+        /// </summary>
+        /// <param name="providerReference">The provider reference.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns></returns>
+        Task<MessageStatusResponse> GetMessageStatus(String providerReference,
+                                                     CancellationToken cancellationToken);
     }
 }
