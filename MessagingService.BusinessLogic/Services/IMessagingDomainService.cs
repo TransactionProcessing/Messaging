@@ -8,7 +8,7 @@
     /// <summary>
     /// 
     /// </summary>
-    public interface IEmailDomainService
+    public interface IMessagingDomainService
     {
         #region Methods
 
@@ -32,6 +32,23 @@
                               String body,
                               Boolean isHtml,
                               CancellationToken cancellationToken);
+
+        /// <summary>
+        /// Sends the SMS message.
+        /// </summary>
+        /// <param name="connectionIdentifier">The connection identifier.</param>
+        /// <param name="messageId">The message identifier.</param>
+        /// <param name="sender">The sender.</param>
+        /// <param name="destination">The destination.</param>
+        /// <param name="message">The message.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns></returns>
+        Task SendSMSMessage(Guid connectionIdentifier,
+                            Guid messageId,
+                            String sender,
+                            String destination,
+                            String message,
+                            CancellationToken cancellationToken);
 
         #endregion
     }

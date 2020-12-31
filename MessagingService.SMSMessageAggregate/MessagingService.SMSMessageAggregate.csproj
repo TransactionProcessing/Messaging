@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Shared.EventStore" Version="0.0.15.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MessagingService.SMSMessage.DomainEvents\MessagingService.SMSMessage.DomainEvents.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -27,7 +27,7 @@ namespace MessagingService.BusinessLogic.Tests.DomainEventHanders
             EmailDomainEventHandler emailDomainEventHandler = new EmailDomainEventHandler(aggregateRepository.Object,
                                                                                           emailServiceProxy.Object);
 
-            await emailDomainEventHandler.Handle(TestData.ResponseReceivedFromProviderEvent, CancellationToken.None);
+            await emailDomainEventHandler.Handle(TestData.EmailResponseReceivedFromProviderEvent, CancellationToken.None);
         }
 
         [Fact]
@@ -42,7 +42,7 @@ namespace MessagingService.BusinessLogic.Tests.DomainEventHanders
             EmailDomainEventHandler emailDomainEventHandler = new EmailDomainEventHandler(aggregateRepository.Object,
                                                                                           emailServiceProxy.Object);
 
-            await emailDomainEventHandler.Handle(TestData.ResponseReceivedFromProviderEvent, CancellationToken.None);
+            await emailDomainEventHandler.Handle(TestData.EmailResponseReceivedFromProviderEvent, CancellationToken.None);
         }
 
         [Fact]
@@ -57,7 +57,7 @@ namespace MessagingService.BusinessLogic.Tests.DomainEventHanders
             EmailDomainEventHandler emailDomainEventHandler = new EmailDomainEventHandler(aggregateRepository.Object,
                                                                                           emailServiceProxy.Object);
 
-            await emailDomainEventHandler.Handle(TestData.ResponseReceivedFromProviderEvent, CancellationToken.None);
+            await emailDomainEventHandler.Handle(TestData.EmailResponseReceivedFromProviderEvent, CancellationToken.None);
         }
 
         [Fact]
@@ -72,7 +72,7 @@ namespace MessagingService.BusinessLogic.Tests.DomainEventHanders
             EmailDomainEventHandler emailDomainEventHandler = new EmailDomainEventHandler(aggregateRepository.Object,
                                                                                           emailServiceProxy.Object);
 
-            await emailDomainEventHandler.Handle(TestData.ResponseReceivedFromProviderEvent, CancellationToken.None);
+            await emailDomainEventHandler.Handle(TestData.EmailResponseReceivedFromProviderEvent, CancellationToken.None);
         }
 
         [Fact]
@@ -87,7 +87,7 @@ namespace MessagingService.BusinessLogic.Tests.DomainEventHanders
             EmailDomainEventHandler emailDomainEventHandler = new EmailDomainEventHandler(aggregateRepository.Object,
                                                                                           emailServiceProxy.Object);
 
-            await emailDomainEventHandler.Handle(TestData.ResponseReceivedFromProviderEvent, CancellationToken.None);
+            await emailDomainEventHandler.Handle(TestData.EmailResponseReceivedFromProviderEvent, CancellationToken.None);
         }
 
         [Fact]
@@ -102,7 +102,7 @@ namespace MessagingService.BusinessLogic.Tests.DomainEventHanders
             EmailDomainEventHandler emailDomainEventHandler = new EmailDomainEventHandler(aggregateRepository.Object,
                                                                                           emailServiceProxy.Object);
 
-            await emailDomainEventHandler.Handle(TestData.ResponseReceivedFromProviderEvent, CancellationToken.None);
+            await emailDomainEventHandler.Handle(TestData.EmailResponseReceivedFromProviderEvent, CancellationToken.None);
         }
     }
 }
