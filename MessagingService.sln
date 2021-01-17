@@ -27,7 +27,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MessagingService.EmailAggre
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MessagingService.IntegrationTests", "MessagingService.IntegrationTests\MessagingService.IntegrationTests.csproj", "{FEBD44D2-5B93-40D8-B59C-E5221570055D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MessagingService.Client", "MessagingService.Client\MessagingService.Client.csproj", "{E1F3FEA4-3358-429F-B3CF-FD7E15EDB993}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MessagingService.Client", "MessagingService.Client\MessagingService.Client.csproj", "{E1F3FEA4-3358-429F-B3CF-FD7E15EDB993}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MessagingService.SMSMessageAggregate", "MessagingService.SMSMessageAggregate\MessagingService.SMSMessageAggregate.csproj", "{FDABAE5C-D47A-43A2-A76F-107F34480399}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MessagingService.SMSMessage.DomainEvents", "MessagingService.SMSMessage.DomainEvents\MessagingService.SMSMessage.DomainEvents.csproj", "{6699EB4E-7F56-468D-9F1A-D094B8A19BAA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MessagingService.SMSAggregate.Tests", "MessagingService.SMSAggregate.Tests\MessagingService.SMSAggregate.Tests.csproj", "{883DEFD0-7DDB-4F79-9996-2279E71CAF5B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -79,6 +85,18 @@ Global
 		{E1F3FEA4-3358-429F-B3CF-FD7E15EDB993}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E1F3FEA4-3358-429F-B3CF-FD7E15EDB993}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E1F3FEA4-3358-429F-B3CF-FD7E15EDB993}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FDABAE5C-D47A-43A2-A76F-107F34480399}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FDABAE5C-D47A-43A2-A76F-107F34480399}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FDABAE5C-D47A-43A2-A76F-107F34480399}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FDABAE5C-D47A-43A2-A76F-107F34480399}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6699EB4E-7F56-468D-9F1A-D094B8A19BAA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6699EB4E-7F56-468D-9F1A-D094B8A19BAA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6699EB4E-7F56-468D-9F1A-D094B8A19BAA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6699EB4E-7F56-468D-9F1A-D094B8A19BAA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{883DEFD0-7DDB-4F79-9996-2279E71CAF5B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{883DEFD0-7DDB-4F79-9996-2279E71CAF5B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{883DEFD0-7DDB-4F79-9996-2279E71CAF5B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{883DEFD0-7DDB-4F79-9996-2279E71CAF5B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -95,6 +113,9 @@ Global
 		{2FBED4B6-3096-4AD1-8436-247A59E0CDC2} = {9AEE6ADE-DD45-4605-A933-E06CF0BA4203}
 		{FEBD44D2-5B93-40D8-B59C-E5221570055D} = {9AEE6ADE-DD45-4605-A933-E06CF0BA4203}
 		{E1F3FEA4-3358-429F-B3CF-FD7E15EDB993} = {BF2482A1-13C0-4305-B732-AB62EBD9429B}
+		{FDABAE5C-D47A-43A2-A76F-107F34480399} = {BF2482A1-13C0-4305-B732-AB62EBD9429B}
+		{6699EB4E-7F56-468D-9F1A-D094B8A19BAA} = {BF2482A1-13C0-4305-B732-AB62EBD9429B}
+		{883DEFD0-7DDB-4F79-9996-2279E71CAF5B} = {9AEE6ADE-DD45-4605-A933-E06CF0BA4203}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {1929C0FE-8CEB-4D0E-BD22-9E5E16E2B49F}

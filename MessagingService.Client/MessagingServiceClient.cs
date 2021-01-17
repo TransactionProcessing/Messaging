@@ -96,6 +96,50 @@
         }
 
         /// <summary>
+        /// Sends the SMS.
+        /// </summary>
+        /// <param name="accessToken">The access token.</param>
+        /// <param name="sendSMSRequest">The send SMS request.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns></returns>
+        public async Task<SendSMSResponse> SendSMS(String accessToken,
+                                                   SendSMSRequest sendSMSRequest,
+                                                   CancellationToken cancellationToken)
+        {
+            SendSMSResponse response = null;
+
+            String requestUri = this.BuildRequestUrl("/api/sms/");
+
+            try
+            {
+                String requestSerialised = JsonConvert.SerializeObject(sendSMSRequest);
+
+                StringContent httpContent = new StringContent(requestSerialised, Encoding.UTF8, "application/json");
+
+                // Add the access token to the client headers
+                this.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+
+                // Make the Http Call here
+                HttpResponseMessage httpResponse = await this.HttpClient.PostAsync(requestUri, httpContent, cancellationToken);
+
+                // Process the response
+                String content = await this.HandleResponse(httpResponse, cancellationToken);
+
+                // call was successful so now deserialise the body to the response object
+                response = JsonConvert.DeserializeObject<SendSMSResponse>(content);
+            }
+            catch (Exception ex)
+            {
+                // An exception has occurred, add some additional information to the message
+                Exception exception = new Exception("Error sending sms message.", ex);
+
+                throw exception;
+            }
+
+            return response;
+        }
+
+        /// <summary>
         /// Builds the request URL.
         /// </summary>
         /// <param name="route">The route.</param>

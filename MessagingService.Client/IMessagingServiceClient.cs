@@ -23,6 +23,17 @@
                                           SendEmailRequest request,
                                           CancellationToken cancellationToken);
 
+        /// <summary>
+        /// Sends the SMS.
+        /// </summary>
+        /// <param name="accessToken">The access token.</param>
+        /// <param name="request">The request.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns></returns>
+        Task<SendSMSResponse> SendSMS(String accessToken,
+                                          SendSMSRequest request,
+                                          CancellationToken cancellationToken);
+
         #endregion
     }
 }

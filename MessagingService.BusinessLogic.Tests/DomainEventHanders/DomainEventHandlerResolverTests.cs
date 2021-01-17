@@ -45,7 +45,7 @@
             String handlerTypeName = "MessagingService.BusinessLogic.EventHandling.EmailDomainEventHandler";
             Dictionary<String, String[]> eventHandlerConfiguration = new Dictionary<String, String[]>();
 
-            ResponseReceivedFromProviderEvent responseReceivedFromProviderEvent = TestData.ResponseReceivedFromProviderEvent;
+            ResponseReceivedFromProviderEvent responseReceivedFromProviderEvent = TestData.EmailResponseReceivedFromProviderEvent;
 
             eventHandlerConfiguration.Add(responseReceivedFromProviderEvent.GetType().FullName, new String[] { handlerTypeName });
 
@@ -67,7 +67,7 @@
             String handlerTypeName = "MessagingService.BusinessLogic.EventHandling.EmailDomainEventHandler";
             Dictionary<String, String[]> eventHandlerConfiguration = new Dictionary<String, String[]>();
 
-            ResponseReceivedFromProviderEvent responseReceivedFromProviderEvent = TestData.ResponseReceivedFromProviderEvent;
+            ResponseReceivedFromProviderEvent responseReceivedFromProviderEvent = TestData.EmailResponseReceivedFromProviderEvent;
 
             eventHandlerConfiguration.Add("RandomEvent", new String[] { handlerTypeName });
             Mock<IDomainEventHandler> domainEventHandler = new Mock<IDomainEventHandler>();
@@ -85,7 +85,7 @@
         {
             Dictionary<String, String[]> eventHandlerConfiguration = new Dictionary<String, String[]>();
 
-            ResponseReceivedFromProviderEvent responseReceivedFromProviderEvent = TestData.ResponseReceivedFromProviderEvent;
+            ResponseReceivedFromProviderEvent responseReceivedFromProviderEvent = TestData.EmailResponseReceivedFromProviderEvent;
             Mock<IDomainEventHandler> domainEventHandler = new Mock<IDomainEventHandler>();
 
             Func<Type, IDomainEventHandler> createDomainEventHandlerFunc = (type) => { return domainEventHandler.Object; };

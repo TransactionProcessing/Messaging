@@ -5,10 +5,17 @@
     using System.Collections.Generic;
     using System.Net;
     using BusinessLogic.Services.EmailServices;
+    using BusinessLogic.Services.SMSServices;
     using EmailMessage.DomainEvents;
     using EmailMessageAggregate;
     using Microsoft.EntityFrameworkCore.SqlServer.Query.Internal;
-    using MessageStatus = BusinessLogic.Services.EmailServices.MessageStatus;
+    using SMSMessageAggregate;
+    using EmailMessageStatus = BusinessLogic.Services.EmailServices.MessageStatus;
+    using SMSMessageStatus = BusinessLogic.Services.SMSServices.MessageStatus;
+    using EmailMessageStatusResponse = BusinessLogic.Services.EmailServices.MessageStatusResponse;
+    using SMSMessageStatusResponse = BusinessLogic.Services.SMSServices.MessageStatusResponse;
+    using EmailResponseReceivedFromProviderEvent = EmailMessage.DomainEvents.ResponseReceivedFromProviderEvent;
+    using SMSResponseReceivedFromProviderEvent = SMSMessage.DomainEvents.ResponseReceivedFromProviderEvent;
 
     public class TestData
     {
@@ -40,17 +47,23 @@
 
         public static String ProviderEmailReference = "ProviderEmailReference";
 
-        public static MessageStatus MessageStatusDelivered = MessageStatus.Delivered;
+        public static EmailMessageStatus EmailMessageStatusDelivered = EmailMessageStatus.Delivered;
 
-        public static MessageStatus MessageStatusRejected = MessageStatus.Rejected;
+        public static EmailMessageStatus EmailMessageStatusRejected = EmailMessageStatus.Rejected;
         
-        public static MessageStatus MessageStatusFailed = MessageStatus.Failed;
+        public static EmailMessageStatus EmailMessageStatusFailed = EmailMessageStatus.Failed;
         
-        public static MessageStatus MessageStatusBounced = MessageStatus.Bounced;
+        public static EmailMessageStatus EmailMessageStatusBounced = EmailMessageStatus.Bounced;
         
-        public static MessageStatus MessageStatusSpam = MessageStatus.Spam;
+        public static EmailMessageStatus EmailMessageStatusSpam = EmailMessageStatus.Spam;
         
-        public static MessageStatus MessageStatusUnknown = MessageStatus.Unknown;
+        public static EmailMessageStatus EmailMessageStatusUnknown = EmailMessageStatus.Unknown;
+
+        public static SMSMessageStatus SMSMessageStatusExpired = SMSMessageStatus.Expired;
+        public static SMSMessageStatus SMSMessageStatusIncoming = SMSMessageStatus.Incoming;
+        public static SMSMessageStatus SMSMessageStatusUndeliverable = SMSMessageStatus.Undeliverable;
+        public static SMSMessageStatus SMSMessageStatusDelivered = SMSMessageStatus.Delivered;
+        public static SMSMessageStatus SMSMessageStatusRejected = SMSMessageStatus.Rejected;
 
         public static HttpStatusCode ProviderApiStatusCode = HttpStatusCode.OK;
 
@@ -66,52 +79,103 @@
 
         public static DateTime SpamDateTime = DateTime.Now;
 
-        public static MessageStatusResponse MessageStatusResponseDelivered =>
-            new MessageStatusResponse
+        public static String Sender = "Sender";
+        public static String Destination = "07777777770";
+
+        public static String Message = "Test SMS Message";
+
+        public static String ProviderSMSReference = "SMSReference";
+
+        public static DateTime UndeliveredDateTime = DateTime.Now;
+
+        public static DateTime ExpiredDateTime = DateTime.Now;
+
+        public static SendSMSRequest SendSMSRequest = SendSMSRequest.Create(TestData.ConnectionIdentifier,
+                                                                            TestData.MessageId,
+                                                                            TestData.Sender,
+                                                                            TestData.Destination,
+                                                                            TestData.Message);
+
+        private static String SMSIdentifier = "2FACEDE5-0915-46A2-B1EE-CD904746DDD0";
+
+        public static EmailMessageStatusResponse MessageStatusResponseDelivered =>
+            new EmailMessageStatusResponse
             {
                 ProviderStatusDescription = TestData.ProviderStatusDescription,
                 ApiStatusCode = TestData.ProviderApiStatusCode,
-                MessageStatus = TestData.MessageStatusDelivered
+                MessageStatus = TestData.EmailMessageStatusDelivered
             };
 
-        public static MessageStatusResponse MessageStatusResponseBounced =>
-            new MessageStatusResponse
+        public static SMSMessageStatusResponse SMSMessageStatusResponseDelivered =>
+            new SMSMessageStatusResponse
             {
                 ProviderStatusDescription = TestData.ProviderStatusDescription,
                 ApiStatusCode = TestData.ProviderApiStatusCode,
-                MessageStatus = TestData.MessageStatusBounced
+                MessageStatus = TestData.SMSMessageStatusDelivered
             };
 
-        public static MessageStatusResponse MessageStatusResponseFailed =>
-            new MessageStatusResponse
+        public static SMSMessageStatusResponse SMSMessageStatusResponseExpired =>
+            new SMSMessageStatusResponse
             {
                 ProviderStatusDescription = TestData.ProviderStatusDescription,
                 ApiStatusCode = TestData.ProviderApiStatusCode,
-                MessageStatus = TestData.MessageStatusFailed
+                MessageStatus = TestData.SMSMessageStatusExpired
             };
 
-        public static MessageStatusResponse MessageStatusResponseRejected =>
-            new MessageStatusResponse
+        public static SMSMessageStatusResponse SMSMessageStatusResponseRejected =>
+            new SMSMessageStatusResponse
             {
                 ProviderStatusDescription = TestData.ProviderStatusDescription,
                 ApiStatusCode = TestData.ProviderApiStatusCode,
-                MessageStatus = TestData.MessageStatusRejected
+                MessageStatus = TestData.SMSMessageStatusRejected
             };
 
-        public static MessageStatusResponse MessageStatusResponseSpam =>
-            new MessageStatusResponse
+        public static SMSMessageStatusResponse SMSMessageStatusResponseUndelivered =>
+            new SMSMessageStatusResponse
             {
                 ProviderStatusDescription = TestData.ProviderStatusDescription,
                 ApiStatusCode = TestData.ProviderApiStatusCode,
-                MessageStatus = TestData.MessageStatusSpam
+                MessageStatus = TestData.SMSMessageStatusUndeliverable
             };
 
-        public static MessageStatusResponse MessageStatusResponseUnknown =>
-            new MessageStatusResponse
+        public static EmailMessageStatusResponse MessageStatusResponseBounced =>
+            new EmailMessageStatusResponse
             {
                 ProviderStatusDescription = TestData.ProviderStatusDescription,
                 ApiStatusCode = TestData.ProviderApiStatusCode,
-                MessageStatus = TestData.MessageStatusUnknown
+                MessageStatus = TestData.EmailMessageStatusBounced
+            };
+
+        public static EmailMessageStatusResponse MessageStatusResponseFailed =>
+            new EmailMessageStatusResponse
+            {
+                ProviderStatusDescription = TestData.ProviderStatusDescription,
+                ApiStatusCode = TestData.ProviderApiStatusCode,
+                MessageStatus = TestData.EmailMessageStatusFailed
+            };
+
+        public static EmailMessageStatusResponse MessageStatusResponseRejected =>
+            new EmailMessageStatusResponse
+            {
+                ProviderStatusDescription = TestData.ProviderStatusDescription,
+                ApiStatusCode = TestData.ProviderApiStatusCode,
+                MessageStatus = TestData.EmailMessageStatusRejected
+            };
+
+        public static EmailMessageStatusResponse MessageStatusResponseSpam =>
+            new EmailMessageStatusResponse
+            {
+                ProviderStatusDescription = TestData.ProviderStatusDescription,
+                ApiStatusCode = TestData.ProviderApiStatusCode,
+                MessageStatus = TestData.EmailMessageStatusSpam
+            };
+
+        public static EmailMessageStatusResponse MessageStatusResponseUnknown =>
+            new EmailMessageStatusResponse
+            {
+                ProviderStatusDescription = TestData.ProviderStatusDescription,
+                ApiStatusCode = TestData.ProviderApiStatusCode,
+                MessageStatus = TestData.EmailMessageStatusUnknown
             };
 
         public static EmailServiceProxyResponse SuccessfulEmailServiceProxyResponse =>
@@ -146,7 +210,32 @@
             return emailAggregate;
         }
 
-        public static ResponseReceivedFromProviderEvent ResponseReceivedFromProviderEvent =>
-            ResponseReceivedFromProviderEvent.Create(TestData.MessageId, TestData.ProviderRequestReference, TestData.ProviderEmailReference);
+        public static EmailResponseReceivedFromProviderEvent EmailResponseReceivedFromProviderEvent =>
+            EmailResponseReceivedFromProviderEvent.Create(TestData.MessageId, TestData.ProviderRequestReference, TestData.ProviderEmailReference);
+
+        public static SMSResponseReceivedFromProviderEvent SMSResponseReceivedFromProviderEvent =>
+            SMSResponseReceivedFromProviderEvent.Create(TestData.MessageId, TestData.ProviderSMSReference);
+
+        public static SMSServiceProxyResponse SuccessfulSMSServiceProxyResponse =>
+            new SMSServiceProxyResponse
+            {
+                SMSIdentifier = TestData.SMSIdentifier,
+                ApiStatusCode = TestData.ApiStatusCodeSuccess
+            };
+
+        public static SMSAggregate GetEmptySMSAggregate()
+        {
+            SMSAggregate smsAggregate = new SMSAggregate();
+
+            return smsAggregate;
+        }
+
+        public static SMSAggregate GetSentSMSAggregate()
+        {
+            SMSAggregate smsAggregate = new SMSAggregate();
+            smsAggregate.SendRequestToProvider(TestData.Sender, TestData.Destination, TestData.Message);
+            smsAggregate.ReceiveResponseFromProvider(TestData.ProviderSMSReference);
+            return smsAggregate;
+        }
     }
 }

@@ -37,10 +37,17 @@
       <LastGenOutput>SendEmail.feature.cs</LastGenOutput>
       <Generator Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'"></Generator>
     </SpecFlowFeatureFiles>
+    <SpecFlowFeatureFiles Update="SMS\SendSMS.feature">
+      <Generator>SpecFlowSingleFileGenerator</Generator>
+      <LastGenOutput>SendSMS.feature.cs</LastGenOutput>
+    </SpecFlowFeatureFiles>
   </ItemGroup>
 
   <ItemGroup>
     <Compile Update="Email\SendEmail.feature.cs">
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Update="SMS\SendSMS.feature.cs">
       <DesignTime>True</DesignTime>
     </Compile>
   </ItemGroup>
