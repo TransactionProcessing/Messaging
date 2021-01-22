@@ -3,8 +3,8 @@ Feature: SendEmail
 
 Background: 
 	
-		Given I create the following api scopes
-	| Name             | DisplayName                  | Description                        |
+	Given I create the following api scopes
+	| Name             | DisplayName          | Description                |
 	| messagingService | Messaging REST Scope | A scope for Messaging REST |
 
 	Given the following api resources exist
