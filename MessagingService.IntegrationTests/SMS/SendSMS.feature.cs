@@ -88,42 +88,42 @@ namespace MessagingService.IntegrationTests.SMS
         {
 #line 4
 #line hidden
-            TechTalk.SpecFlow.Table table5 = new TechTalk.SpecFlow.Table(new string[] {
+            TechTalk.SpecFlow.Table table6 = new TechTalk.SpecFlow.Table(new string[] {
                         "ResourceName",
                         "DisplayName",
                         "Secret",
                         "Scopes",
                         "UserClaims"});
-            table5.AddRow(new string[] {
+            table6.AddRow(new string[] {
                         "messagingService",
                         "Messaging REST",
                         "Secret1",
                         "messagingService",
                         ""});
 #line 5
- testRunner.Given("the following api resources exist", ((string)(null)), table5, "Given ");
+ testRunner.Given("the following api resources exist", ((string)(null)), table6, "Given ");
 #line hidden
-            TechTalk.SpecFlow.Table table6 = new TechTalk.SpecFlow.Table(new string[] {
+            TechTalk.SpecFlow.Table table7 = new TechTalk.SpecFlow.Table(new string[] {
                         "ClientId",
                         "ClientName",
                         "Secret",
                         "AllowedScopes",
                         "AllowedGrantTypes"});
-            table6.AddRow(new string[] {
+            table7.AddRow(new string[] {
                         "serviceClient",
                         "Service Client",
                         "Secret1",
                         "messagingService",
                         "client_credentials"});
 #line 9
- testRunner.Given("the following clients exist", ((string)(null)), table6, "Given ");
+ testRunner.Given("the following clients exist", ((string)(null)), table7, "Given ");
 #line hidden
-            TechTalk.SpecFlow.Table table7 = new TechTalk.SpecFlow.Table(new string[] {
+            TechTalk.SpecFlow.Table table8 = new TechTalk.SpecFlow.Table(new string[] {
                         "ClientId"});
-            table7.AddRow(new string[] {
+            table8.AddRow(new string[] {
                         "serviceClient"});
 #line 13
- testRunner.Given("I have a token to access the messaging service resource", ((string)(null)), table7, "Given ");
+ testRunner.Given("I have a token to access the messaging service resource", ((string)(null)), table8, "Given ");
 #line hidden
         }
         
@@ -165,16 +165,16 @@ this.ScenarioInitialize(scenarioInfo);
 #line 4
 this.FeatureBackground();
 #line hidden
-                TechTalk.SpecFlow.Table table8 = new TechTalk.SpecFlow.Table(new string[] {
+                TechTalk.SpecFlow.Table table9 = new TechTalk.SpecFlow.Table(new string[] {
                             "Sender",
                             "Destination",
                             "Message"});
-                table8.AddRow(new string[] {
+                table9.AddRow(new string[] {
                             "TestSender",
                             "07777777771",
                             "TestSMSMessage"});
 #line 19
- testRunner.Given("I send the following SMS Messages", ((string)(null)), table8, "Given ");
+ testRunner.Given("I send the following SMS Messages", ((string)(null)), table9, "Given ");
 #line hidden
             }
             this.ScenarioCleanup();
