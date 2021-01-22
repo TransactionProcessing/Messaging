@@ -2,6 +2,11 @@
 Feature: SendSMS
 
 Background: 
+
+	Given I create the following api scopes
+	| Name             | DisplayName          | Description                |
+	| messagingService | Messaging REST Scope | A scope for Messaging REST |
+
 	Given the following api resources exist
 	| ResourceName     | DisplayName    | Secret  | Scopes           | UserClaims |
 	| messagingService | Messaging REST | Secret1 | messagingService |            |

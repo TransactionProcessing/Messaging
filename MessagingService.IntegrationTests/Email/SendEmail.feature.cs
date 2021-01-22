@@ -89,41 +89,52 @@ namespace MessagingService.IntegrationTests.Email
 #line 4
 #line hidden
             TechTalk.SpecFlow.Table table1 = new TechTalk.SpecFlow.Table(new string[] {
+                        "Name",
+                        "DisplayName",
+                        "Description"});
+            table1.AddRow(new string[] {
+                        "messagingService",
+                        "Messaging REST Scope",
+                        "A scope for Messaging REST"});
+#line 6
+  testRunner.Given("I create the following api scopes", ((string)(null)), table1, "Given ");
+#line hidden
+            TechTalk.SpecFlow.Table table2 = new TechTalk.SpecFlow.Table(new string[] {
                         "ResourceName",
                         "DisplayName",
                         "Secret",
                         "Scopes",
                         "UserClaims"});
-            table1.AddRow(new string[] {
+            table2.AddRow(new string[] {
                         "messagingService",
                         "Messaging REST",
                         "Secret1",
                         "messagingService",
                         ""});
-#line 5
- testRunner.Given("the following api resources exist", ((string)(null)), table1, "Given ");
+#line 10
+ testRunner.Given("the following api resources exist", ((string)(null)), table2, "Given ");
 #line hidden
-            TechTalk.SpecFlow.Table table2 = new TechTalk.SpecFlow.Table(new string[] {
+            TechTalk.SpecFlow.Table table3 = new TechTalk.SpecFlow.Table(new string[] {
                         "ClientId",
                         "ClientName",
                         "Secret",
                         "AllowedScopes",
                         "AllowedGrantTypes"});
-            table2.AddRow(new string[] {
+            table3.AddRow(new string[] {
                         "serviceClient",
                         "Service Client",
                         "Secret1",
                         "messagingService",
                         "client_credentials"});
-#line 9
- testRunner.Given("the following clients exist", ((string)(null)), table2, "Given ");
+#line 14
+ testRunner.Given("the following clients exist", ((string)(null)), table3, "Given ");
 #line hidden
-            TechTalk.SpecFlow.Table table3 = new TechTalk.SpecFlow.Table(new string[] {
+            TechTalk.SpecFlow.Table table4 = new TechTalk.SpecFlow.Table(new string[] {
                         "ClientId"});
-            table3.AddRow(new string[] {
+            table4.AddRow(new string[] {
                         "serviceClient"});
-#line 13
- testRunner.Given("I have a token to access the messaging service resource", ((string)(null)), table3, "Given ");
+#line 18
+ testRunner.Given("I have a token to access the messaging service resource", ((string)(null)), table4, "Given ");
 #line hidden
         }
         
@@ -142,7 +153,7 @@ namespace MessagingService.IntegrationTests.Email
                     "PRTest"};
             System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
             TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Send Email", null, tagsOfScenario, argumentsOfScenario);
-#line 18
+#line 23
 this.ScenarioInitialize(scenarioInfo);
 #line hidden
             bool isScenarioIgnored = default(bool);
@@ -165,26 +176,26 @@ this.ScenarioInitialize(scenarioInfo);
 #line 4
 this.FeatureBackground();
 #line hidden
-                TechTalk.SpecFlow.Table table4 = new TechTalk.SpecFlow.Table(new string[] {
+                TechTalk.SpecFlow.Table table5 = new TechTalk.SpecFlow.Table(new string[] {
                             "FromAddress",
                             "ToAddresses",
                             "Subject",
                             "Body",
                             "IsHtml"});
-                table4.AddRow(new string[] {
+                table5.AddRow(new string[] {
                             "fromaddress@testemail.com",
                             "toaddress1@testemail.com",
                             "Test Email 1",
                             "Test Body",
                             "true"});
-                table4.AddRow(new string[] {
+                table5.AddRow(new string[] {
                             "fromaddress@testemail.com",
                             "toaddress1@testemail.com,toaddress2@testemail.com",
                             "Test Email 1",
                             "Test Body",
                             "true"});
-#line 19
- testRunner.Given("I send the following Email Messages", ((string)(null)), table4, "Given ");
+#line 24
+ testRunner.Given("I send the following Email Messages", ((string)(null)), table5, "Given ");
 #line hidden
             }
             this.ScenarioCleanup();
