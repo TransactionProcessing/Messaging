@@ -18,7 +18,7 @@
         {
             Dictionary<String, String[]> eventHandlerConfiguration = new Dictionary<String, String[]>();
 
-            eventHandlerConfiguration.Add("TestEventType1", new String[] { "MessagingService.BusinessLogic.EventHandling.EmailDomainEventHandler" });
+            eventHandlerConfiguration.Add("TestEventType1", new String[] { "MessagingService.BusinessLogic.EventHandling.EmailDomainEventHandler, MessagingService.BusinessLogic" });
 
             Mock<IDomainEventHandler> domainEventHandler = new Mock<IDomainEventHandler>();
             Func<Type, IDomainEventHandler> createDomainEventHandlerFunc = (type) => { return domainEventHandler.Object; };
@@ -43,7 +43,7 @@
         [Fact]
         public void DomainEventHandlerResolver_GetDomainEventHandlers_ResponseReceivedFromProviderEvent_EventHandlersReturned()
         {
-            String handlerTypeName = "MessagingService.BusinessLogic.EventHandling.EmailDomainEventHandler";
+            String handlerTypeName = "MessagingService.BusinessLogic.EventHandling.EmailDomainEventHandler, MessagingService.BusinessLogic";
             Dictionary<String, String[]> eventHandlerConfiguration = new Dictionary<String, String[]>();
 
             ResponseReceivedFromEmailProviderEvent responseReceivedFromProviderEvent = TestData.ResponseReceivedFromEmailProviderEvent;
@@ -65,7 +65,7 @@
         [Fact]
         public void DomainEventHandlerResolver_GetDomainEventHandlers_ResponseReceivedFromProviderEvent_EventNotConfigured_EventHandlersReturned()
         {
-            String handlerTypeName = "MessagingService.BusinessLogic.EventHandling.EmailDomainEventHandler";
+            String handlerTypeName = "MessagingService.BusinessLogic.EventHandling.EmailDomainEventHandler, MessagingService.BusinessLogic";
             Dictionary<String, String[]> eventHandlerConfiguration = new Dictionary<String, String[]>();
 
             ResponseReceivedFromEmailProviderEvent responseReceivedFromProviderEvent = TestData.ResponseReceivedFromEmailProviderEvent;
