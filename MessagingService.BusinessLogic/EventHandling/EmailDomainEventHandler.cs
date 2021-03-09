@@ -33,12 +33,11 @@
         /// </summary>
         /// <param name="aggregateRepository">The aggregate repository.</param>
         /// <param name="emailServiceProxy">The email service proxy.</param>
-        public EmailDomainEventHandler()
-                            //IAggregateRepository<EmailAggregate, DomainEventRecord.DomainEvent> aggregateRepository,
-                            //           IEmailServiceProxy emailServiceProxy)
+        public EmailDomainEventHandler(IAggregateRepository<EmailAggregate, DomainEventRecord.DomainEvent> aggregateRepository,
+                                       IEmailServiceProxy emailServiceProxy)
         {
-            //this.AggregateRepository = aggregateRepository;
-            //this.EmailServiceProxy = emailServiceProxy;
+            this.AggregateRepository = aggregateRepository;
+            this.EmailServiceProxy = emailServiceProxy;
         }
 
         #endregion

@@ -6,6 +6,7 @@
     using EmailMessage.DomainEvents;
     using Shared.DomainDrivenDesign.EventSourcing;
     using Shared.EventStore.Aggregate;
+    using Shared.General;
     using Shared.Logger;
 
     public class EmailAggregate : Aggregate
@@ -36,7 +37,7 @@
         /// <param name="aggregateId">The aggregate identifier.</param>
         private EmailAggregate(Guid aggregateId)
         {
-            //Guard.ThrowIfInvalidGuid(aggregateId, "Aggregate Id cannot be an Empty Guid");
+            Guard.ThrowIfInvalidGuid(aggregateId, "Aggregate Id cannot be an Empty Guid");
 
             this.AggregateId = aggregateId;
             this.MessageId = aggregateId;

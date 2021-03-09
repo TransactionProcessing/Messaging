@@ -47,6 +47,7 @@ namespace MessagingService
     using Shared.EventStore.Aggregate;
     using Shared.EventStore.EventHandling;
     using Shared.EventStore.EventStore;
+    using Shared.EventStore.Extensions;
     using Shared.Extensions;
     using Shared.General;
     using Shared.Logger;
@@ -146,10 +147,10 @@ namespace MessagingService
 
             TypeProvider.LoadDomainEventsTypeDynamically();
 
-            //foreach (KeyValuePair<Type, String> type in TypeMap.Map)
-            //{
-            //    Logger.LogInformation($"Type name {type.Value} mapped to {type.Key.Name}");
-            //}
+            foreach (KeyValuePair<Type, String> type in TypeMap.Map)
+            {
+                Logger.LogInformation($"Type name {type.Value} mapped to {type.Key.Name}");
+            }
 
             this.RegisterEmailProxy(services);
             this.RegisterSMSProxy(services);
@@ -230,12 +231,12 @@ namespace MessagingService
 
         private void ConfigureMiddlewareServices(IServiceCollection services)
         {
-            services.AddHealthChecks();
-            //        .AddEventStore(Startup.EventStoreClientSettings,
-            //                       userCredentials: Startup.EventStoreClientSettings.DefaultCredentials,
-            //                       name: "Eventstore",
-            //                       failureStatus: HealthStatus.Unhealthy,
-            //                       tags: new string[] { "db", "eventstore" });
+            services.AddHealthChecks()
+                    .AddEventStore(Startup.EventStoreClientSettings,
+                                   userCredentials: Startup.EventStoreClientSettings.DefaultCredentials,
+                                   name: "Eventstore",
+                                   failureStatus: HealthStatus.Unhealthy,
+                                   tags: new string[] { "db", "eventstore" });
 
             services.AddApiVersioning(
                                       options =>
