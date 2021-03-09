@@ -146,12 +146,7 @@ namespace MessagingService
                                                                                     "","",true);
 
             TypeProvider.LoadDomainEventsTypeDynamically();
-
-            foreach (KeyValuePair<Type, String> type in TypeMap.Map)
-            {
-                Logger.LogInformation($"Type name {type.Value} mapped to {type.Key.Name}");
-            }
-
+            
             this.RegisterEmailProxy(services);
             this.RegisterSMSProxy(services);
 
@@ -324,6 +319,11 @@ namespace MessagingService
             Microsoft.Extensions.Logging.ILogger logger = loggerFactory.CreateLogger("MessagingService");
 
             Logger.Initialise(logger);
+
+            foreach (KeyValuePair<Type, String> type in TypeMap.Map)
+            {
+                Logger.LogInformation($"Type name {type.Value} mapped to {type.Key.Name}");
+            }
 
             ConfigurationReader.Initialise(Startup.Configuration);
 
