@@ -6,13 +6,10 @@
     using EmailMessageAggregate;
     using Services.EmailServices;
     using Shared.DomainDrivenDesign.EventSourcing;
-    using Shared.EventStore.EventStore;
+    using Shared.EventStore.Aggregate;
+    using Shared.EventStore.EventHandling;
     using MessageStatus = Services.EmailServices.MessageStatus;
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <seealso cref="MessagingService.BusinessLogic.EventHandling.IDomainEventHandler" />
     public class EmailDomainEventHandler : IDomainEventHandler
     {
         #region Fields
@@ -20,7 +17,7 @@
         /// <summary>
         /// The aggregate repository
         /// </summary>
-        private readonly IAggregateRepository<EmailAggregate> AggregateRepository;
+        private readonly IAggregateRepository<EmailAggregate, DomainEventRecord.DomainEvent> AggregateRepository;
 
         /// <summary>
         /// The email service proxy
@@ -36,11 +33,12 @@
         /// </summary>
         /// <param name="aggregateRepository">The aggregate repository.</param>
         /// <param name="emailServiceProxy">The email service proxy.</param>
-        public EmailDomainEventHandler(IAggregateRepository<EmailAggregate> aggregateRepository,
-                                       IEmailServiceProxy emailServiceProxy)
+        public EmailDomainEventHandler()
+                            //IAggregateRepository<EmailAggregate, DomainEventRecord.DomainEvent> aggregateRepository,
+                            //           IEmailServiceProxy emailServiceProxy)
         {
-            this.AggregateRepository = aggregateRepository;
-            this.EmailServiceProxy = emailServiceProxy;
+            //this.AggregateRepository = aggregateRepository;
+            //this.EmailServiceProxy = emailServiceProxy;
         }
 
         #endregion
@@ -52,8 +50,7 @@
         /// </summary>
         /// <param name="domainEvent">The domain event.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
-        public async Task Handle(DomainEvent domainEvent,
-                                 CancellationToken cancellationToken)
+        public async Task Handle(IDomainEvent domainEvent, CancellationToken cancellationToken)
         {
             await this.HandleSpecificDomainEvent((dynamic)domainEvent, cancellationToken);
         }
@@ -63,7 +60,7 @@
         /// </summary>
         /// <param name="domainEvent">The domain event.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
-        private async Task HandleSpecificDomainEvent(ResponseReceivedFromProviderEvent domainEvent,
+        private async Task HandleSpecificDomainEvent(ResponseReceivedFromEmailProviderEvent domainEvent,
                                                      CancellationToken cancellationToken)
         {
             EmailAggregate emailAggregate = await this.AggregateRepository.GetLatestVersion(domainEvent.MessageId, cancellationToken);
@@ -72,8 +69,8 @@
 
             // Get the message status from the provider
             MessageStatusResponse messageStatus = await this.EmailServiceProxy.GetMessageStatus(domainEvent.ProviderEmailReference,
-                                                                                                domainEvent.EventCreatedDateTime,
-                                                                                                domainEvent.EventCreatedDateTime,
+                                                                                                domainEvent.EventTimestamp.DateTime,
+                                                                                                domainEvent.EventTimestamp.DateTime,
                                                                                                 cancellationToken);
 
             // Update the aggregate with the response
@@ -97,7 +94,7 @@
                 case MessageStatus.Unknown:
                     break;
             }
-            
+
             // Save the changes
             await this.AggregateRepository.SaveChanges(emailAggregate, cancellationToken);
         }

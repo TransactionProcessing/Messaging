@@ -6,6 +6,7 @@
     using EmailMessage.DomainEvents;
     using EventHandling;
     using Moq;
+    using Shared.EventStore.EventHandling;
     using Shouldly;
     using Testing;
     using Xunit;
@@ -45,9 +46,9 @@
             String handlerTypeName = "MessagingService.BusinessLogic.EventHandling.EmailDomainEventHandler";
             Dictionary<String, String[]> eventHandlerConfiguration = new Dictionary<String, String[]>();
 
-            ResponseReceivedFromProviderEvent responseReceivedFromProviderEvent = TestData.EmailResponseReceivedFromProviderEvent;
+            ResponseReceivedFromEmailProviderEvent responseReceivedFromProviderEvent = TestData.ResponseReceivedFromEmailProviderEvent;
 
-            eventHandlerConfiguration.Add(responseReceivedFromProviderEvent.GetType().FullName, new String[] { handlerTypeName });
+            eventHandlerConfiguration.Add(responseReceivedFromProviderEvent.GetType().Name, new String[] { handlerTypeName });
 
             Mock<IDomainEventHandler> domainEventHandler = new Mock<IDomainEventHandler>();
             Func<Type, IDomainEventHandler> createDomainEventHandlerFunc = (type) => { return domainEventHandler.Object; };
@@ -67,7 +68,7 @@
             String handlerTypeName = "MessagingService.BusinessLogic.EventHandling.EmailDomainEventHandler";
             Dictionary<String, String[]> eventHandlerConfiguration = new Dictionary<String, String[]>();
 
-            ResponseReceivedFromProviderEvent responseReceivedFromProviderEvent = TestData.EmailResponseReceivedFromProviderEvent;
+            ResponseReceivedFromEmailProviderEvent responseReceivedFromProviderEvent = TestData.ResponseReceivedFromEmailProviderEvent;
 
             eventHandlerConfiguration.Add("RandomEvent", new String[] { handlerTypeName });
             Mock<IDomainEventHandler> domainEventHandler = new Mock<IDomainEventHandler>();
@@ -85,7 +86,7 @@
         {
             Dictionary<String, String[]> eventHandlerConfiguration = new Dictionary<String, String[]>();
 
-            ResponseReceivedFromProviderEvent responseReceivedFromProviderEvent = TestData.EmailResponseReceivedFromProviderEvent;
+            ResponseReceivedFromEmailProviderEvent responseReceivedFromProviderEvent = TestData.ResponseReceivedFromEmailProviderEvent;
             Mock<IDomainEventHandler> domainEventHandler = new Mock<IDomainEventHandler>();
 
             Func<Type, IDomainEventHandler> createDomainEventHandlerFunc = (type) => { return domainEventHandler.Object; };

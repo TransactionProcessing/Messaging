@@ -4,7 +4,8 @@
     using System.Threading.Tasks;
     using Services.SMSServices;
     using Shared.DomainDrivenDesign.EventSourcing;
-    using Shared.EventStore.EventStore;
+    using Shared.EventStore.Aggregate;
+    using Shared.EventStore.EventHandling;
     using SMSMessage.DomainEvents;
     using SMSMessageAggregate;
     using MessageStatus = Services.SMSServices.MessageStatus;
@@ -16,7 +17,7 @@
         /// <summary>
         /// The aggregate repository
         /// </summary>
-        private readonly IAggregateRepository<SMSAggregate> AggregateRepository;
+        private readonly IAggregateRepository<SMSAggregate, DomainEventRecord.DomainEvent> AggregateRepository;
 
         /// <summary>
         /// The email service proxy
@@ -32,7 +33,7 @@
         /// </summary>
         /// <param name="aggregateRepository">The aggregate repository.</param>
         /// <param name="smsServiceProxy">The SMS service proxy.</param>
-        public SMSDomainEventHandler(IAggregateRepository<SMSAggregate> aggregateRepository,
+        public SMSDomainEventHandler(IAggregateRepository<SMSAggregate, DomainEventRecord.DomainEvent> aggregateRepository,
                                      ISMSServiceProxy smsServiceProxy)
         {
             this.AggregateRepository = aggregateRepository;
@@ -48,7 +49,7 @@
         /// </summary>
         /// <param name="domainEvent">The domain event.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
-        public async Task Handle(DomainEvent domainEvent,
+        public async Task Handle(IDomainEvent domainEvent,
                                  CancellationToken cancellationToken)
         {
             await this.HandleSpecificDomainEvent((dynamic)domainEvent, cancellationToken);
@@ -59,7 +60,7 @@
         /// </summary>
         /// <param name="domainEvent">The domain event.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
-        private async Task HandleSpecificDomainEvent(ResponseReceivedFromProviderEvent domainEvent,
+        private async Task HandleSpecificDomainEvent(ResponseReceivedFromSMSProviderEvent domainEvent,
                                                      CancellationToken cancellationToken)
         {
             SMSAggregate smsAggregate = await this.AggregateRepository.GetLatestVersion(domainEvent.MessageId, cancellationToken);

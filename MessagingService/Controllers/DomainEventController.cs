@@ -1,29 +1,52 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace MessagingService.Controllers
+﻿namespace MessagingService.Controllers
 {
+    using System;
+    using System.Collections.Generic;
     using System.Diagnostics.CodeAnalysis;
+    using System.Linq;
     using System.Threading;
-    using BusinessLogic.EventHandling;
+    using System.Threading.Tasks;
     using Microsoft.AspNetCore.Mvc;
     using Newtonsoft.Json;
     using Shared.DomainDrivenDesign.EventSourcing;
+    using Shared.EventStore.Aggregate;
+    using Shared.EventStore.EventHandling;
+    using Shared.General;
     using Shared.Logger;
+    using Shared.Serialisation;
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <seealso cref="Microsoft.AspNetCore.Mvc.ControllerBase" />
     [Route(DomainEventController.ControllerRoute)]
     [ApiController]
     [ExcludeFromCodeCoverage]
     public class DomainEventController : ControllerBase
     {
+        #region Fields
+
+        /// <summary>
+        /// The domain event handler resolver
+        /// </summary>
         private readonly IDomainEventHandlerResolver DomainEventHandlerResolver;
 
+        #endregion
+
+        #region Constructors
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DomainEventController"/> class.
+        /// </summary>
+        /// <param name="domainEventHandlerResolver">The domain event handler resolver.</param>
         public DomainEventController(IDomainEventHandlerResolver domainEventHandlerResolver)
         {
             this.DomainEventHandlerResolver = domainEventHandlerResolver;
         }
+
+        #endregion
+
+        #region Methods
 
         /// <summary>
         /// Posts the event asynchronous.
@@ -32,9 +55,11 @@ namespace MessagingService.Controllers
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns></returns>
         [HttpPost]
-        public async Task<IActionResult> PostEventAsync([FromBody] DomainEvent domainEvent,
+        public async Task<IActionResult> PostEventAsync([FromBody] Object request,
                                                         CancellationToken cancellationToken)
         {
+            var domainEvent = await this.GetDomainEvent(request);
+
             cancellationToken.Register(() => this.Callback(cancellationToken, domainEvent.EventId));
 
             try
@@ -62,7 +87,7 @@ namespace MessagingService.Controllers
 
                 return this.Ok();
             }
-            catch (Exception ex)
+            catch(Exception ex)
             {
                 String domainEventData = JsonConvert.SerializeObject(domainEvent);
                 Logger.LogError(new Exception($" Failed to Process Event, Event Data received [{domainEventData}]", ex));
@@ -86,6 +111,51 @@ namespace MessagingService.Controllers
             }
         }
 
+        /// <summary>
+        /// Gets the domain event.
+        /// </summary>
+        /// <param name="domainEvent">The domain event.</param>
+        /// <returns></returns>
+        private async Task<IDomainEvent> GetDomainEvent(Object domainEvent)
+        {
+            String eventType = this.Request.Query["eventType"].ToString();
+
+            var type = TypeMap.GetType(eventType);
+
+            if (type == null)
+                throw new Exception($"Failed to find a domain event with type {eventType}");
+
+            JsonIgnoreAttributeIgnorerContractResolver jsonIgnoreAttributeIgnorerContractResolver = new JsonIgnoreAttributeIgnorerContractResolver();
+            var jsonSerialiserSettings = new JsonSerializerSettings
+                                         {
+                                             ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+                                             TypeNameHandling = TypeNameHandling.All,
+                                             Formatting = Formatting.Indented,
+                                             DateTimeZoneHandling = DateTimeZoneHandling.Utc,
+                                             ContractResolver = jsonIgnoreAttributeIgnorerContractResolver
+                                         };
+
+            if (type.IsSubclassOf(typeof(DomainEventRecord.DomainEvent)))
+            {
+                var json = JsonConvert.SerializeObject(domainEvent, jsonSerialiserSettings);
+                DomainEventRecordFactory domainEventFactory = new();
+
+                return domainEventFactory.CreateDomainEvent(json, type);
+            }
+
+            if (type.IsSubclassOf(typeof(DomainEvent)))
+            {
+                var json = JsonConvert.SerializeObject(domainEvent, jsonSerialiserSettings);
+                DomainEventFactory domainEventFactory = new();
+
+                return domainEventFactory.CreateDomainEvent(json, type);
+            }
+
+            return null;
+        }
+
+        #endregion
+
         #region Others
 
         /// <summary>
@@ -99,6 +169,5 @@ namespace MessagingService.Controllers
         private const String ControllerRoute = "api/" + DomainEventController.ControllerName;
 
         #endregion
-
     }
 }

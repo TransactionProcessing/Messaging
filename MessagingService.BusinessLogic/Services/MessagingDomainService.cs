@@ -4,11 +4,12 @@
     using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
+    using EmailMessage.DomainEvents;
     using EmailMessageAggregate;
     using EmailServices;
     using Microsoft.Extensions.Logging;
-    using Shared.EventStore.EventStore;
-    using Shared.Logger;
+    using Shared.DomainDrivenDesign.EventSourcing;
+    using Shared.EventStore.Aggregate;
     using SMSMessageAggregate;
     using SMSServices;
 
@@ -23,15 +24,21 @@
         /// <summary>
         /// The email aggregate repository
         /// </summary>
-        private readonly IAggregateRepository<EmailAggregate> EmailAggregateRepository;
+        private readonly IAggregateRepository<EmailAggregate, DomainEventRecord.DomainEvent> EmailAggregateRepository;
 
-        private readonly IAggregateRepository<SMSAggregate> SmsAggregateRepository;
+        /// <summary>
+        /// The SMS aggregate repository
+        /// </summary>
+        private readonly IAggregateRepository<SMSAggregate, DomainEventRecord.DomainEvent> SmsAggregateRepository;
 
         /// <summary>
         /// The email service proxy
         /// </summary>
         private readonly IEmailServiceProxy EmailServiceProxy;
 
+        /// <summary>
+        /// The SMS service proxy
+        /// </summary>
         private readonly ISMSServiceProxy SmsServiceProxy;
 
         #endregion
@@ -45,8 +52,8 @@
         /// <param name="smsAggregateRepository">The SMS aggregate repository.</param>
         /// <param name="emailServiceProxy">The email service proxy.</param>
         /// <param name="smsServiceProxy">The SMS service proxy.</param>
-        public MessagingDomainService(IAggregateRepository<EmailAggregate> emailAggregateRepository,
-                                      IAggregateRepository<SMSAggregate> smsAggregateRepository,
+        public MessagingDomainService(IAggregateRepository<EmailAggregate, DomainEventRecord.DomainEvent> emailAggregateRepository,
+                                      IAggregateRepository<SMSAggregate, DomainEventRecord.DomainEvent> smsAggregateRepository,
                                       IEmailServiceProxy emailServiceProxy,
                                       ISMSServiceProxy smsServiceProxy)
         {

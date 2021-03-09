@@ -131,13 +131,16 @@
                                                        EndDate = endDate.ToString("yyyy-MM-dd"),
                                                    };
 
-            String requestSerialised = JsonConvert.SerializeObject(apiRequest);
+            String requestSerialised = JsonConvert.SerializeObject(apiRequest, new JsonSerializerSettings
+                                                                               {
+                                                                                   TypeNameHandling = TypeNameHandling.None
+                                                                               });
 
             Logger.LogDebug($"Request Message Sent to Email Provider [SMTP2Go] {requestSerialised}");
 
             StringContent content = new StringContent(requestSerialised, Encoding.UTF8, "application/json");
 
-            String requestUri = $"{ConfigurationReader.GetValue("SMTP2GoBaseAddress")}/email/search";
+            String requestUri = $"{ConfigurationReader.GetValue("SMTP2GoBaseAddress")}email/search";
             HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Post, requestUri);
             requestMessage.Content = content;
 

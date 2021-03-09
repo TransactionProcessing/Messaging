@@ -11,6 +11,12 @@ using Microsoft.Extensions.Logging;
 namespace MessagingService
 {
     using System.Diagnostics.CodeAnalysis;
+    using EmailMessage.DomainEvents;
+    using EventStore.Client;
+    using Microsoft.Extensions.DependencyInjection;
+    using Shared.EventStore.Aggregate;
+    using Shared.EventStore.Subscriptions;
+    using SMSMessage.DomainEvents;
 
     [ExcludeFromCodeCoverage]
     public class Program
@@ -35,13 +41,23 @@ namespace MessagingService
                                          {
                                              logging.AddConsole();
 
-                                         });
-            hostBuilder.ConfigureWebHostDefaults(webBuilder =>
-                                                 {
-                                                     webBuilder.UseStartup<Startup>();
-                                                     webBuilder.UseConfiguration(config);
-                                                     webBuilder.UseKestrel();
-                                                 });
+                                         }).ConfigureWebHostDefaults(webBuilder =>
+                                                                     {
+                                                                         webBuilder.UseStartup<Startup>();
+                                                                         webBuilder.UseConfiguration(config);
+                                                                         webBuilder.UseKestrel();
+                                                                     })
+                       .ConfigureServices(services =>
+                                                              {
+                                                                  RequestSentToEmailProviderEvent e = new RequestSentToEmailProviderEvent(Guid.Parse("2AA2D43B-5E24-4327-8029-1135B20F35CE"), "", new List<String>(),
+                                                                      "", "", true);
+
+                                                                  RequestSentToSMSProviderEvent s = new RequestSentToSMSProviderEvent(Guid.NewGuid(), "", "","");
+                                                                  
+                                                                  TypeProvider.LoadDomainEventsTypeDynamically();
+
+                                                                  services.AddHostedService<SubscriptionWorker>();
+                                                              });
             return hostBuilder;
         }
 

@@ -9,13 +9,12 @@
     using EmailMessage.DomainEvents;
     using EmailMessageAggregate;
     using Microsoft.EntityFrameworkCore.SqlServer.Query.Internal;
+    using SMSMessage.DomainEvents;
     using SMSMessageAggregate;
     using EmailMessageStatus = BusinessLogic.Services.EmailServices.MessageStatus;
     using SMSMessageStatus = BusinessLogic.Services.SMSServices.MessageStatus;
     using EmailMessageStatusResponse = BusinessLogic.Services.EmailServices.MessageStatusResponse;
     using SMSMessageStatusResponse = BusinessLogic.Services.SMSServices.MessageStatusResponse;
-    using EmailResponseReceivedFromProviderEvent = EmailMessage.DomainEvents.ResponseReceivedFromProviderEvent;
-    using SMSResponseReceivedFromProviderEvent = SMSMessage.DomainEvents.ResponseReceivedFromProviderEvent;
 
     public class TestData
     {
@@ -210,11 +209,11 @@
             return emailAggregate;
         }
 
-        public static EmailResponseReceivedFromProviderEvent EmailResponseReceivedFromProviderEvent =>
-            EmailResponseReceivedFromProviderEvent.Create(TestData.MessageId, TestData.ProviderRequestReference, TestData.ProviderEmailReference);
+        public static ResponseReceivedFromEmailProviderEvent ResponseReceivedFromEmailProviderEvent =>
+            new(TestData.MessageId, TestData.ProviderRequestReference, TestData.ProviderEmailReference);
 
-        public static SMSResponseReceivedFromProviderEvent SMSResponseReceivedFromProviderEvent =>
-            SMSResponseReceivedFromProviderEvent.Create(TestData.MessageId, TestData.ProviderSMSReference);
+        public static ResponseReceivedFromSMSProviderEvent ResponseReceivedFromSMSProviderEvent =>
+            new ResponseReceivedFromSMSProviderEvent(TestData.MessageId, TestData.ProviderSMSReference);
 
         public static SMSServiceProxyResponse SuccessfulSMSServiceProxyResponse =>
             new SMSServiceProxyResponse

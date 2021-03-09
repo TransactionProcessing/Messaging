@@ -10,13 +10,12 @@ namespace MessagingService.SMSAggregate.Tests
     public class SMSAggregateDomainEventTests
     {
         [Fact]
-        public void RequestSentToProviderEvent_CanBeCreated_IsCreated()
+        public void RequestSentToSMSProviderEvent_CanBeCreated_IsCreated()
         {
-            RequestSentToProviderEvent requestSentToProviderEvent = RequestSentToProviderEvent.Create(TestData.MessageId, TestData.Sender, TestData.Destination, TestData.Message);
+            RequestSentToSMSProviderEvent requestSentToProviderEvent = new RequestSentToSMSProviderEvent(TestData.MessageId, TestData.Sender, TestData.Destination, TestData.Message);
 
             requestSentToProviderEvent.ShouldNotBeNull();
             requestSentToProviderEvent.AggregateId.ShouldBe(TestData.MessageId);
-            requestSentToProviderEvent.EventCreatedDateTime.ShouldNotBe(DateTime.MinValue);
             requestSentToProviderEvent.EventId.ShouldNotBe(Guid.Empty);
             requestSentToProviderEvent.MessageId.ShouldBe(TestData.MessageId);
             requestSentToProviderEvent.Sender.ShouldBe(TestData.Sender);
@@ -25,27 +24,25 @@ namespace MessagingService.SMSAggregate.Tests
         }
 
         [Fact]
-        public void ResponseReceivedFromProviderEvent_CanBeCreated_IsCreated()
+        public void ResponseReceivedFromSMSProviderEvent_CanBeCreated_IsCreated()
         {
-            ResponseReceivedFromProviderEvent requestSentToProviderEvent = ResponseReceivedFromProviderEvent.Create(TestData.MessageId, TestData.ProviderSMSReference);
+            ResponseReceivedFromSMSProviderEvent requestSentToProviderEvent = new ResponseReceivedFromSMSProviderEvent(TestData.MessageId, TestData.ProviderSMSReference);
 
             requestSentToProviderEvent.ShouldNotBeNull();
             requestSentToProviderEvent.AggregateId.ShouldBe(TestData.MessageId);
-            requestSentToProviderEvent.EventCreatedDateTime.ShouldNotBe(DateTime.MinValue);
             requestSentToProviderEvent.EventId.ShouldNotBe(Guid.Empty);
             requestSentToProviderEvent.MessageId.ShouldBe(TestData.MessageId);
             requestSentToProviderEvent.ProviderSMSReference.ShouldBe(TestData.ProviderSMSReference);
         }
 
         [Fact]
-        public void MessageDeliveredEvent_CanBeCreated_IsCreated()
+        public void SMSMessageDeliveredEvent_CanBeCreated_IsCreated()
         {
-            MessageDeliveredEvent messageDeliveredEvent =
-                MessageDeliveredEvent.Create(TestData.MessageId, TestData.ProviderStatusDescription, TestData.DeliveredDateTime);
+            SMSMessageDeliveredEvent messageDeliveredEvent =
+                new SMSMessageDeliveredEvent(TestData.MessageId, TestData.ProviderStatusDescription, TestData.DeliveredDateTime);
 
             messageDeliveredEvent.ShouldNotBeNull();
             messageDeliveredEvent.AggregateId.ShouldBe(TestData.MessageId);
-            messageDeliveredEvent.EventCreatedDateTime.ShouldNotBe(DateTime.MinValue);
             messageDeliveredEvent.EventId.ShouldNotBe(Guid.Empty);
             messageDeliveredEvent.MessageId.ShouldBe(TestData.MessageId);
             messageDeliveredEvent.ProviderStatus.ShouldBe(TestData.ProviderStatusDescription);
@@ -53,14 +50,13 @@ namespace MessagingService.SMSAggregate.Tests
         }
 
         [Fact]
-        public void MessageUndeliveredEvent_CanBeCreated_IsCreated()
+        public void SMSMessageUndeliveredEvent_CanBeCreated_IsCreated()
         {
-            MessageUndeliveredEvent messageUndeliveredEvent=
-                MessageUndeliveredEvent.Create(TestData.MessageId, TestData.ProviderStatusDescription, TestData.UndeliveredDateTime);
+            SMSMessageUndeliveredEvent messageUndeliveredEvent =
+                new SMSMessageUndeliveredEvent(TestData.MessageId, TestData.ProviderStatusDescription, TestData.UndeliveredDateTime);
 
             messageUndeliveredEvent.ShouldNotBeNull();
             messageUndeliveredEvent.AggregateId.ShouldBe(TestData.MessageId);
-            messageUndeliveredEvent.EventCreatedDateTime.ShouldNotBe(DateTime.MinValue);
             messageUndeliveredEvent.EventId.ShouldNotBe(Guid.Empty);
             messageUndeliveredEvent.MessageId.ShouldBe(TestData.MessageId);
             messageUndeliveredEvent.ProviderStatus.ShouldBe(TestData.ProviderStatusDescription);
@@ -68,14 +64,13 @@ namespace MessagingService.SMSAggregate.Tests
         }
 
         [Fact]
-        public void MessageRejectedEvent_CanBeCreated_IsCreated()
+        public void SMSMessageRejectedEvent_CanBeCreated_IsCreated()
         {
-            MessageRejectedEvent messageRejectedEvent =
-                MessageRejectedEvent.Create(TestData.MessageId, TestData.ProviderStatusDescription, TestData.RejectedDateTime);
+            SMSMessageRejectedEvent messageRejectedEvent =
+                new SMSMessageRejectedEvent(TestData.MessageId, TestData.ProviderStatusDescription, TestData.RejectedDateTime);
 
             messageRejectedEvent.ShouldNotBeNull();
             messageRejectedEvent.AggregateId.ShouldBe(TestData.MessageId);
-            messageRejectedEvent.EventCreatedDateTime.ShouldNotBe(DateTime.MinValue);
             messageRejectedEvent.EventId.ShouldNotBe(Guid.Empty);
             messageRejectedEvent.MessageId.ShouldBe(TestData.MessageId);
             messageRejectedEvent.ProviderStatus.ShouldBe(TestData.ProviderStatusDescription);
@@ -83,14 +78,13 @@ namespace MessagingService.SMSAggregate.Tests
         }
 
         [Fact]
-        public void MessageBouncedEvent_CanBeCreated_IsCreated()
+        public void SMSMessageBouncedEvent_CanBeCreated_IsCreated()
         {
-            MessageExpiredEvent messageExpiredEvent=
-                MessageExpiredEvent.Create(TestData.MessageId, TestData.ProviderStatusDescription, TestData.ExpiredDateTime);
+            SMSMessageExpiredEvent messageExpiredEvent =
+                new SMSMessageExpiredEvent(TestData.MessageId, TestData.ProviderStatusDescription, TestData.ExpiredDateTime);
 
             messageExpiredEvent.ShouldNotBeNull();
             messageExpiredEvent.AggregateId.ShouldBe(TestData.MessageId);
-            messageExpiredEvent.EventCreatedDateTime.ShouldNotBe(DateTime.MinValue);
             messageExpiredEvent.EventId.ShouldNotBe(Guid.Empty);
             messageExpiredEvent.MessageId.ShouldBe(TestData.MessageId);
             messageExpiredEvent.ProviderStatus.ShouldBe(TestData.ProviderStatusDescription);
