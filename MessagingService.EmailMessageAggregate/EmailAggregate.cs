@@ -5,14 +5,10 @@
     using System.Diagnostics.CodeAnalysis;
     using EmailMessage.DomainEvents;
     using Shared.DomainDrivenDesign.EventSourcing;
-    using Shared.EventStore.EventStore;
+    using Shared.EventStore.Aggregate;
     using Shared.General;
+    using Shared.Logger;
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <seealso cref="Shared.EventStore.EventStore.Aggregate" />
-    /// <seealso cref="Aggregate" />
     public class EmailAggregate : Aggregate
     {
         #region Fields
@@ -140,9 +136,9 @@
         {
             this.CheckMessageCanBeSetToBounced();
 
-            MessageBouncedEvent messageBouncedEvent = MessageBouncedEvent.Create(this.AggregateId, providerStatus, bouncedDateTime);
+            EmailMessageBouncedEvent messageBouncedEvent = new EmailMessageBouncedEvent(this.AggregateId, providerStatus, bouncedDateTime);
 
-            this.ApplyAndPend(messageBouncedEvent);
+            this.ApplyAndAppend(messageBouncedEvent);
         }
 
         /// <summary>
@@ -155,9 +151,9 @@
         {
             this.CheckMessageCanBeSetToDelivered();
 
-            MessageDeliveredEvent messageDeliveredEvent = MessageDeliveredEvent.Create(this.AggregateId, providerStatus, deliveredDateTime);
+            EmailMessageDeliveredEvent messageDeliveredEvent = new EmailMessageDeliveredEvent(this.AggregateId, providerStatus, deliveredDateTime);
 
-            this.ApplyAndPend(messageDeliveredEvent);
+            this.ApplyAndAppend(messageDeliveredEvent);
         }
 
         /// <summary>
@@ -170,9 +166,9 @@
         {
             this.CheckMessageCanBeSetToFailed();
 
-            MessageFailedEvent messageFailedEvent = MessageFailedEvent.Create(this.AggregateId, providerStatus, failedDateTime);
+            EmailMessageFailedEvent messageFailedEvent = new EmailMessageFailedEvent(this.AggregateId, providerStatus, failedDateTime);
 
-            this.ApplyAndPend(messageFailedEvent);
+            this.ApplyAndAppend(messageFailedEvent);
         }
 
         /// <summary>
@@ -185,9 +181,9 @@
         {
             this.CheckMessageCanBeSetToRejected();
 
-            MessageRejectedEvent messageRejectedEvent = MessageRejectedEvent.Create(this.AggregateId, providerStatus, rejectedDateTime);
+            EmailMessageRejectedEvent messageRejectedEvent = new EmailMessageRejectedEvent(this.AggregateId, providerStatus, rejectedDateTime);
 
-            this.ApplyAndPend(messageRejectedEvent);
+            this.ApplyAndAppend(messageRejectedEvent);
         }
 
         /// <summary>
@@ -200,9 +196,9 @@
         {
             this.CheckMessageCanBeSetToSpam();
 
-            MessageMarkedAsSpamEvent messageMarkedAsSpamEvent = MessageMarkedAsSpamEvent.Create(this.AggregateId, providerStatus, spamDateTime);
+            EmailMessageMarkedAsSpamEvent messageMarkedAsSpamEvent = new EmailMessageMarkedAsSpamEvent(this.AggregateId, providerStatus, spamDateTime);
 
-            this.ApplyAndPend(messageMarkedAsSpamEvent);
+            this.ApplyAndAppend(messageMarkedAsSpamEvent);
         }
 
         /// <summary>
@@ -213,10 +209,10 @@
         public void ReceiveResponseFromProvider(String providerRequestReference,
                                                 String providerEmailReference)
         {
-            ResponseReceivedFromProviderEvent responseReceivedFromProviderEvent =
-                ResponseReceivedFromProviderEvent.Create(this.AggregateId, providerRequestReference, providerEmailReference);
+            ResponseReceivedFromEmailProviderEvent responseReceivedFromProviderEvent =
+                new ResponseReceivedFromEmailProviderEvent(this.AggregateId, providerRequestReference, providerEmailReference);
 
-            this.ApplyAndPend(responseReceivedFromProviderEvent);
+            this.ApplyAndAppend(responseReceivedFromProviderEvent);
         }
 
         /// <summary>
@@ -238,9 +234,9 @@
                 throw new InvalidOperationException("Cannot send a message to provider that has already been sent");
             }
 
-            RequestSentToProviderEvent requestSentToProviderEvent = RequestSentToProviderEvent.Create(this.AggregateId, fromAddress, toAddresses, subject, body, isHtml);
+            RequestSentToEmailProviderEvent requestSentToProviderEvent = new RequestSentToEmailProviderEvent(this.AggregateId, fromAddress, toAddresses, subject, body, isHtml);
 
-            this.ApplyAndPend(requestSentToProviderEvent);
+            this.ApplyAndAppend(requestSentToProviderEvent);
         }
 
         /// <summary>
@@ -257,9 +253,17 @@
         /// Plays the event.
         /// </summary>
         /// <param name="domainEvent">The domain event.</param>
-        protected override void PlayEvent(DomainEvent domainEvent)
+        public override void PlayEvent(IDomainEvent domainEvent)
         {
             this.PlayEvent((dynamic)domainEvent);
+        }
+
+        private void PlayEvent(Object @event)
+        {
+            Exception ex = new Exception($"Failed to apply event {@event.GetType()} to Aggregate {this.GetType().Name}");
+
+            Logger.LogCritical(ex);
+            throw ex;
         }
 
         /// <summary>
@@ -326,7 +330,7 @@
         /// Plays the event.
         /// </summary>
         /// <param name="domainEvent">The domain event.</param>
-        private void PlayEvent(RequestSentToProviderEvent domainEvent)
+        private void PlayEvent(RequestSentToEmailProviderEvent domainEvent)
         {
             this.Body = domainEvent.Body;
             this.Subject = domainEvent.Subject;
@@ -346,7 +350,7 @@
         /// Plays the event.
         /// </summary>
         /// <param name="domainEvent">The domain event.</param>
-        private void PlayEvent(ResponseReceivedFromProviderEvent domainEvent)
+        private void PlayEvent(ResponseReceivedFromEmailProviderEvent domainEvent)
         {
             this.ProviderEmailReference = domainEvent.ProviderEmailReference;
             this.ProviderRequestReference = domainEvent.ProviderRequestReference;
@@ -357,7 +361,7 @@
         /// Plays the event.
         /// </summary>
         /// <param name="domainEvent">The domain event.</param>
-        private void PlayEvent(MessageDeliveredEvent domainEvent)
+        private void PlayEvent(EmailMessageDeliveredEvent domainEvent)
         {
             this.MessageStatus = MessageStatus.Delivered;
         }
@@ -366,7 +370,7 @@
         /// Plays the event.
         /// </summary>
         /// <param name="domainEvent">The domain event.</param>
-        private void PlayEvent(MessageFailedEvent domainEvent)
+        private void PlayEvent(EmailMessageFailedEvent domainEvent)
         {
             this.MessageStatus = MessageStatus.Failed;
         }
@@ -375,7 +379,7 @@
         /// Plays the event.
         /// </summary>
         /// <param name="domainEvent">The domain event.</param>
-        private void PlayEvent(MessageRejectedEvent domainEvent)
+        private void PlayEvent(EmailMessageRejectedEvent domainEvent)
         {
             this.MessageStatus = MessageStatus.Rejected;
         }
@@ -384,7 +388,7 @@
         /// Plays the event.
         /// </summary>
         /// <param name="domainEvent">The domain event.</param>
-        private void PlayEvent(MessageBouncedEvent domainEvent)
+        private void PlayEvent(EmailMessageBouncedEvent domainEvent)
         {
             this.MessageStatus = MessageStatus.Bounced;
         }
@@ -393,7 +397,7 @@
         /// Plays the event.
         /// </summary>
         /// <param name="domainEvent">The domain event.</param>
-        private void PlayEvent(MessageMarkedAsSpamEvent domainEvent)
+        private void PlayEvent(EmailMessageMarkedAsSpamEvent domainEvent)
         {
             this.MessageStatus = MessageStatus.Spam;
         }

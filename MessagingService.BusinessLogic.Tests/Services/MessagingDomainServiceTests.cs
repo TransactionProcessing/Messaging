@@ -11,7 +11,8 @@ namespace MessagingService.BusinessLogic.Tests.Services
     using BusinessLogic.Services.SMSServices;
     using EmailMessageAggregate;
     using Moq;
-    using Shared.EventStore.EventStore;
+    using Shared.DomainDrivenDesign.EventSourcing;
+    using Shared.EventStore.Aggregate;
     using SMSMessageAggregate;
     using Testing;
     using Xunit;
@@ -21,9 +22,9 @@ namespace MessagingService.BusinessLogic.Tests.Services
         [Fact]
         public async Task MessagingDomainService_SendEmailMessage_MessageSent()
         {
-            Mock<IAggregateRepository<EmailAggregate>> emailAggregateRepository = new Mock<IAggregateRepository<EmailAggregate>>();
+            Mock<IAggregateRepository<EmailAggregate, DomainEventRecord.DomainEvent>> emailAggregateRepository = new Mock<IAggregateRepository<EmailAggregate, DomainEventRecord.DomainEvent>>();
             emailAggregateRepository.Setup(a => a.GetLatestVersion(It.IsAny<Guid>(), It.IsAny<CancellationToken>())).ReturnsAsync(TestData.GetEmptyEmailAggregate());
-            Mock<IAggregateRepository<SMSAggregate>> smsAggregateRepository = new Mock<IAggregateRepository<SMSAggregate>>();
+            Mock<IAggregateRepository<SMSAggregate, DomainEventRecord.DomainEvent>> smsAggregateRepository = new Mock<IAggregateRepository<SMSAggregate, DomainEventRecord.DomainEvent>>();
             Mock<IEmailServiceProxy> emailServiceProxy = new Mock<IEmailServiceProxy>();
             emailServiceProxy
                 .Setup(e => e.SendEmail(It.IsAny<Guid>(),
@@ -51,8 +52,8 @@ namespace MessagingService.BusinessLogic.Tests.Services
         [Fact]
         public async Task MessagingDomainService_SendSMSMessage_MessageSent()
         {
-            Mock<IAggregateRepository<EmailAggregate>> emailAggregateRepository = new Mock<IAggregateRepository<EmailAggregate>>();
-            Mock<IAggregateRepository<SMSAggregate>> smsAggregateRepository = new Mock<IAggregateRepository<SMSAggregate>>();
+            Mock<IAggregateRepository<EmailAggregate, DomainEventRecord.DomainEvent>> emailAggregateRepository = new Mock<IAggregateRepository<EmailAggregate, DomainEventRecord.DomainEvent>>();
+            Mock<IAggregateRepository<SMSAggregate, DomainEventRecord.DomainEvent>> smsAggregateRepository = new Mock<IAggregateRepository<SMSAggregate, DomainEventRecord.DomainEvent>>();
             smsAggregateRepository.Setup(a => a.GetLatestVersion(It.IsAny<Guid>(), It.IsAny<CancellationToken>())).ReturnsAsync(TestData.GetEmptySMSAggregate());
             Mock<IEmailServiceProxy> emailServiceProxy = new Mock<IEmailServiceProxy>();
             Mock<ISMSServiceProxy> smsServiceProxy = new Mock<ISMSServiceProxy>();

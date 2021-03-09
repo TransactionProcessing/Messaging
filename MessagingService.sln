@@ -29,11 +29,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MessagingService.Integratio
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MessagingService.Client", "MessagingService.Client\MessagingService.Client.csproj", "{E1F3FEA4-3358-429F-B3CF-FD7E15EDB993}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MessagingService.SMSMessageAggregate", "MessagingService.SMSMessageAggregate\MessagingService.SMSMessageAggregate.csproj", "{FDABAE5C-D47A-43A2-A76F-107F34480399}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MessagingService.SMSMessageAggregate", "MessagingService.SMSMessageAggregate\MessagingService.SMSMessageAggregate.csproj", "{FDABAE5C-D47A-43A2-A76F-107F34480399}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MessagingService.SMSMessage.DomainEvents", "MessagingService.SMSMessage.DomainEvents\MessagingService.SMSMessage.DomainEvents.csproj", "{6699EB4E-7F56-468D-9F1A-D094B8A19BAA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MessagingService.SMSAggregate.Tests", "MessagingService.SMSAggregate.Tests\MessagingService.SMSAggregate.Tests.csproj", "{883DEFD0-7DDB-4F79-9996-2279E71CAF5B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MessagingService.SMSAggregate.Tests", "MessagingService.SMSAggregate.Tests\MessagingService.SMSAggregate.Tests.csproj", "{883DEFD0-7DDB-4F79-9996-2279E71CAF5B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

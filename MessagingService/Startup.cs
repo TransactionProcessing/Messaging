@@ -26,6 +26,7 @@ namespace MessagingService
     using BusinessLogic.Services.SMSServices;
     using BusinessLogic.Services.SMSServices.TheSMSWorks;
     using Common;
+    using EmailMessage.DomainEvents;
     using EmailMessageAggregate;
     using EventStore.Client;
     using HealthChecks.UI.Client;
@@ -41,8 +42,12 @@ namespace MessagingService
     using NLog.Extensions.Logging;
     using Service.Services.Email.IntegrationTest;
     using Service.Services.SMSServices.IntegrationTest;
+    using Shared.DomainDrivenDesign.EventSourcing;
     using Shared.EntityFramework.ConnectionStringConfiguration;
+    using Shared.EventStore.Aggregate;
+    using Shared.EventStore.EventHandling;
     using Shared.EventStore.EventStore;
+    using Shared.EventStore.Extensions;
     using Shared.Extensions;
     using Shared.General;
     using Shared.Logger;
@@ -125,7 +130,8 @@ namespace MessagingService
             else
             {
                 services.AddEventStoreClient(Startup.ConfigureEventStoreSettings);
-                services.AddEventStoreProjectionManagerClient(Startup.ConfigureEventStoreSettings);
+                services.AddEventStoreProjectionManagementClient(Startup.ConfigureEventStoreSettings);
+                services.AddEventStorePersistentSubscriptionsClient(Startup.ConfigureEventStoreSettings);
 
                 services.AddSingleton<IConnectionStringConfigurationRepository, ConfigurationReaderConnectionStringRepository>();
             }
@@ -133,9 +139,14 @@ namespace MessagingService
 
             services.AddTransient<IEventStoreContext, EventStoreContext>();
             services.AddSingleton<IMessagingDomainService, MessagingDomainService>();
-            services.AddSingleton<IAggregateRepository<EmailAggregate>, AggregateRepository<EmailAggregate>>();
-            services.AddSingleton<IAggregateRepository<SMSAggregate>, AggregateRepository<SMSAggregate>>();
+            services.AddSingleton<IAggregateRepository<EmailAggregate, DomainEventRecord.DomainEvent>, AggregateRepository<EmailAggregate, DomainEventRecord.DomainEvent>>();
+            services.AddSingleton<IAggregateRepository<SMSAggregate, DomainEventRecord.DomainEvent>, AggregateRepository<SMSAggregate, DomainEventRecord.DomainEvent>>();
 
+            RequestSentToEmailProviderEvent r = new RequestSentToEmailProviderEvent(Guid.Parse("2AA2D43B-5E24-4327-8029-1135B20F35CE"), "", new List<String>(),
+                                                                                    "","",true);
+
+            TypeProvider.LoadDomainEventsTypeDynamically();
+            
             this.RegisterEmailProxy(services);
             this.RegisterSMSProxy(services);
 
@@ -165,6 +176,8 @@ namespace MessagingService
                     Startup.Configuration.GetSection("AppSettings:EventHandlerConfiguration").Bind(eventHandlersConfiguration);
                 }
             }
+            services.AddSingleton<EmailDomainEventHandler>();
+            services.AddSingleton<SMSDomainEventHandler>();
             services.AddSingleton<Dictionary<String, String[]>>(eventHandlersConfiguration);
 
             services.AddSingleton<Func<Type, IDomainEventHandler>>(container => (type) =>
@@ -173,8 +186,7 @@ namespace MessagingService
                                                                                     return handler;
                                                                                 });
 
-            services.AddSingleton<EmailDomainEventHandler>();
-            services.AddSingleton<SMSDomainEventHandler>();
+            
             services.AddSingleton<IDomainEventHandlerResolver, DomainEventHandlerResolver>();
         }
         
@@ -304,9 +316,14 @@ namespace MessagingService
             loggerFactory.ConfigureNLog(Path.Combine(env.ContentRootPath, nlogConfigFilename));
             loggerFactory.AddNLog();
 
-            Microsoft.Extensions.Logging.ILogger logger = loggerFactory.CreateLogger("EstateManagement");
+            Microsoft.Extensions.Logging.ILogger logger = loggerFactory.CreateLogger("MessagingService");
 
             Logger.Initialise(logger);
+
+            foreach (KeyValuePair<Type, String> type in TypeMap.Map)
+            {
+                Logger.LogInformation($"Type name {type.Value} mapped to {type.Key.Name}");
+            }
 
             ConfigurationReader.Initialise(Startup.Configuration);
 

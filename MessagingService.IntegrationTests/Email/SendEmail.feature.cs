@@ -97,7 +97,7 @@ namespace MessagingService.IntegrationTests.Email
                         "Messaging REST Scope",
                         "A scope for Messaging REST"});
 #line 6
-  testRunner.Given("I create the following api scopes", ((string)(null)), table1, "Given ");
+ testRunner.Given("I create the following api scopes", ((string)(null)), table1, "Given ");
 #line hidden
             TechTalk.SpecFlow.Table table2 = new TechTalk.SpecFlow.Table(new string[] {
                         "ResourceName",

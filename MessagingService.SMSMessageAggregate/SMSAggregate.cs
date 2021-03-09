@@ -5,14 +5,15 @@ namespace MessagingService.SMSMessageAggregate
     using System.Collections.Generic;
     using System.Diagnostics.CodeAnalysis;
     using Shared.DomainDrivenDesign.EventSourcing;
-    using Shared.EventStore.EventStore;
+    using Shared.EventStore.Aggregate;
     using Shared.General;
+    using Shared.Logger;
     using SMSMessage.DomainEvents;
 
     /// <summary>
     /// 
     /// </summary>
-    /// <seealso cref="Shared.EventStore.EventStore.Aggregate" />
+    /// <seealso cref="Aggregate" />
     public class SMSAggregate : Aggregate
     {
         #region Constructors
@@ -99,10 +100,10 @@ namespace MessagingService.SMSMessageAggregate
         /// <param name="providerSMSReference">The provider SMS reference.</param>
         public void ReceiveResponseFromProvider(String providerSMSReference)
         {
-            ResponseReceivedFromProviderEvent responseReceivedFromProviderEvent =
-                ResponseReceivedFromProviderEvent.Create(this.AggregateId, providerSMSReference);
+            ResponseReceivedFromSMSProviderEvent responseReceivedFromProviderEvent =
+                new ResponseReceivedFromSMSProviderEvent(this.AggregateId, providerSMSReference);
 
-            this.ApplyAndPend(responseReceivedFromProviderEvent);
+            this.ApplyAndAppend(responseReceivedFromProviderEvent);
         }
 
         /// <summary>
@@ -121,9 +122,9 @@ namespace MessagingService.SMSMessageAggregate
                 throw new InvalidOperationException("Cannot send a message to provider that has already been sent");
             }
 
-            RequestSentToProviderEvent requestSentToProviderEvent = RequestSentToProviderEvent.Create(this.AggregateId, sender,destination,message);
+            RequestSentToSMSProviderEvent requestSentToProviderEvent = new RequestSentToSMSProviderEvent(this.AggregateId, sender,destination,message);
 
-            this.ApplyAndPend(requestSentToProviderEvent);
+            this.ApplyAndAppend(requestSentToProviderEvent);
         }
 
         /// <summary>
@@ -136,9 +137,9 @@ namespace MessagingService.SMSMessageAggregate
         {
             this.CheckMessageCanBeSetToExpired();
 
-            MessageExpiredEvent messageExpiredEvent = MessageExpiredEvent.Create(this.AggregateId, providerStatus, failedDateTime);
+            SMSMessageExpiredEvent messageExpiredEvent = new SMSMessageExpiredEvent(this.AggregateId, providerStatus, failedDateTime);
 
-            this.ApplyAndPend(messageExpiredEvent);
+            this.ApplyAndAppend(messageExpiredEvent);
         }
 
         /// <summary>
@@ -151,9 +152,9 @@ namespace MessagingService.SMSMessageAggregate
         {
             this.CheckMessageCanBeSetToRejected();
 
-            MessageRejectedEvent messageRejectedEvent = MessageRejectedEvent.Create(this.AggregateId, providerStatus, failedDateTime);
+            SMSMessageRejectedEvent messageRejectedEvent = new SMSMessageRejectedEvent(this.AggregateId, providerStatus, failedDateTime);
 
-            this.ApplyAndPend(messageRejectedEvent);
+            this.ApplyAndAppend(messageRejectedEvent);
         }
 
         /// <summary>
@@ -166,9 +167,9 @@ namespace MessagingService.SMSMessageAggregate
         {
             this.CheckMessageCanBeSetToDelivered();
 
-            MessageDeliveredEvent messageDeliveredEvent = MessageDeliveredEvent.Create(this.AggregateId, providerStatus, failedDateTime);
+            SMSMessageDeliveredEvent messageDeliveredEvent = new SMSMessageDeliveredEvent(this.AggregateId, providerStatus, failedDateTime);
 
-            this.ApplyAndPend(messageDeliveredEvent);
+            this.ApplyAndAppend(messageDeliveredEvent);
         }
 
 
@@ -182,9 +183,9 @@ namespace MessagingService.SMSMessageAggregate
         {
             this.CheckMessageCanBeSetToUndeliverable();
 
-            MessageUndeliveredEvent messageUndeliveredEvent = MessageUndeliveredEvent.Create(this.AggregateId, providerStatus, failedDateTime);
+            SMSMessageUndeliveredEvent messageUndeliveredEvent = new SMSMessageUndeliveredEvent(this.AggregateId, providerStatus, failedDateTime);
 
-            this.ApplyAndPend(messageUndeliveredEvent);
+            this.ApplyAndAppend(messageUndeliveredEvent);
         }
 
         /// <summary>
@@ -248,16 +249,24 @@ namespace MessagingService.SMSMessageAggregate
         /// Plays the event.
         /// </summary>
         /// <param name="domainEvent">The domain event.</param>
-        protected override void PlayEvent(DomainEvent domainEvent)
+        public override void PlayEvent(IDomainEvent domainEvent)
         {
             this.PlayEvent((dynamic)domainEvent);
+        }
+
+        private void PlayEvent(Object @event)
+        {
+            Exception ex = new Exception($"Failed to apply event {@event.GetType()} to Aggregate {this.GetType().Name}");
+
+            Logger.LogCritical(ex);
+            throw ex;
         }
 
         /// <summary>
         /// Plays the event.
         /// </summary>
         /// <param name="domainEvent">The domain event.</param>
-        private void PlayEvent(RequestSentToProviderEvent domainEvent)
+        private void PlayEvent(RequestSentToSMSProviderEvent domainEvent)
         {
             this.MessageStatus = MessageStatus.InProgress;
             this.Sender = domainEvent.Sender;
@@ -269,7 +278,7 @@ namespace MessagingService.SMSMessageAggregate
         /// Plays the event.
         /// </summary>
         /// <param name="domainEvent">The domain event.</param>
-        private void PlayEvent(ResponseReceivedFromProviderEvent domainEvent)
+        private void PlayEvent(ResponseReceivedFromSMSProviderEvent domainEvent)
         {
             this.ProviderReference = domainEvent.ProviderSMSReference;
             this.MessageStatus = MessageStatus.Sent;
@@ -279,7 +288,7 @@ namespace MessagingService.SMSMessageAggregate
         /// Plays the event.
         /// </summary>
         /// <param name="domainEvent">The domain event.</param>
-        private void PlayEvent(MessageExpiredEvent domainEvent)
+        private void PlayEvent(SMSMessageExpiredEvent domainEvent)
         {
             this.MessageStatus = MessageStatus.Expired;
         }
@@ -288,7 +297,7 @@ namespace MessagingService.SMSMessageAggregate
         /// Plays the event.
         /// </summary>
         /// <param name="domainEvent">The domain event.</param>
-        private void PlayEvent(MessageDeliveredEvent domainEvent)
+        private void PlayEvent(SMSMessageDeliveredEvent domainEvent)
         {
             this.MessageStatus = MessageStatus.Delivered;
         }
@@ -297,7 +306,7 @@ namespace MessagingService.SMSMessageAggregate
         /// Plays the event.
         /// </summary>
         /// <param name="domainEvent">The domain event.</param>
-        private void PlayEvent(MessageRejectedEvent domainEvent)
+        private void PlayEvent(SMSMessageRejectedEvent domainEvent)
         {
             this.MessageStatus = MessageStatus.Rejected;
         }
@@ -306,7 +315,7 @@ namespace MessagingService.SMSMessageAggregate
         /// Plays the event.
         /// </summary>
         /// <param name="domainEvent">The domain event.</param>
-        private void PlayEvent(MessageUndeliveredEvent domainEvent)
+        private void PlayEvent(SMSMessageUndeliveredEvent domainEvent)
         {
             this.MessageStatus = MessageStatus.Undeliverable;
         }
