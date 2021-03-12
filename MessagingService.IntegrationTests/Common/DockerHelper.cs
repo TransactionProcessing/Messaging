@@ -129,6 +129,8 @@
             this.EventStoreContainerName = $"eventstore{testGuid:N}";
             this.MessagingServiceContainerName = $"messagingservice{testGuid:N}";
 
+            String eventStoreAddress = $"http://{this.EventStoreContainerName}";
+
             (String, String, String) dockerCredentials = ("https://www.docker.com", "stuartferguson", "Sc0tland");
 
             INetworkService testNetwork = DockerHelper.SetupTestNetwork();
@@ -153,7 +155,7 @@
                                                                                                       traceFolder,
                                                                                                       dockerCredentials,
                                                                                                       this.SecurityServiceContainerName,
-                                                                                                      this.EventStoreContainerName,
+                                                                                                      eventStoreAddress,
                                                                                                       ("serviceClient", "Secret1"));
 
             this.Containers.AddRange(new List<IContainerService>
