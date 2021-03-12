@@ -212,7 +212,7 @@
                                                                        String hostFolder,
                                                                        (String URL, String UserName, String Password)? dockerCredentials,
                                                                        String securityServiceContainerName,
-                                                                       String eventStoreContainerName,
+                                                                       String eventStoreAddress,
                                                                        (String clientId, String clientSecret) clientDetails,
                                                                        Boolean forceLatestImage = false,
                                                                        Int32 securityServicePort = DockerHelper.SecurityServiceDockerPort)
@@ -220,7 +220,7 @@
             logger.LogInformation("About to Start Messaging Service Container");
 
             List<String> environmentVariables = new List<String>();
-            environmentVariables.Add($"EventStoreSettings:ConnectionString=https://{eventStoreContainerName}:{DockerHelper.EventStoreHttpDockerPort}");
+            environmentVariables.Add($"EventStoreSettings:ConnectionString=http://{eventStoreAddress}:{DockerHelper.EventStoreHttpDockerPort}");
             environmentVariables.Add($"AppSettings:SecurityService=http://{securityServiceContainerName}:{securityServicePort}");
             environmentVariables.Add($"SecurityConfiguration:Authority=http://{securityServiceContainerName}:{securityServicePort}");
             environmentVariables.Add($"urls=http://*:{DockerHelper.MessagingServiceDockerPort}");
