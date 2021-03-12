@@ -129,12 +129,14 @@
             this.EventStoreContainerName = $"eventstore{testGuid:N}";
             this.MessagingServiceContainerName = $"messagingservice{testGuid:N}";
 
+            String eventStoreAddress = $"http://{this.EventStoreContainerName}";
+
             (String, String, String) dockerCredentials = ("https://www.docker.com", "stuartferguson", "Sc0tland");
 
             INetworkService testNetwork = DockerHelper.SetupTestNetwork();
             this.TestNetworks.Add(testNetwork);
             IContainerService eventStoreContainer =
-                DockerHelper.SetupEventStoreContainer(this.EventStoreContainerName, this.Logger, "eventstore/eventstore:20.6.0-buster-slim", testNetwork, traceFolder, usesEventStore2006OrLater:true);
+                DockerHelper.SetupEventStoreContainer(this.EventStoreContainerName, this.Logger, "eventstore/eventstore:20.10.0-buster-slim", testNetwork, traceFolder, true);
 
             IContainerService securityServiceContainer = DockerHelper.SetupSecurityServiceContainer(this.SecurityServiceContainerName,
                                                                                                     this.Logger,
@@ -153,7 +155,7 @@
                                                                                                       traceFolder,
                                                                                                       dockerCredentials,
                                                                                                       this.SecurityServiceContainerName,
-                                                                                                      this.EventStoreContainerName,
+                                                                                                      eventStoreAddress,
                                                                                                       ("serviceClient", "Secret1"));
 
             this.Containers.AddRange(new List<IContainerService>
@@ -200,46 +202,6 @@
                     networkService.Remove(true);
                 }
             }
-        }
-
-        public const int MessagingServiceDockerPort = 5006;
-        public static IContainerService SetupMessagingServiceContainer(String containerName,
-                                                                       ILogger logger,
-                                                                       String imageName,
-                                                                       List<INetworkService> networkServices,
-                                                                       String hostFolder,
-                                                                       (String URL, String UserName, String Password)? dockerCredentials,
-                                                                       String securityServiceContainerName,
-                                                                       String eventStoreContainerName,
-                                                                       (String clientId, String clientSecret) clientDetails,
-                                                                       Boolean forceLatestImage = false,
-                                                                       Int32 securityServicePort = DockerHelper.SecurityServiceDockerPort)
-        {
-            logger.LogInformation("About to Start Messaging Service Container");
-
-            List<String> environmentVariables = new List<String>();
-            environmentVariables.Add($"EventStoreSettings:ConnectionString=https://{eventStoreContainerName}:{DockerHelper.EventStoreHttpDockerPort}");
-            environmentVariables.Add($"AppSettings:SecurityService=http://{securityServiceContainerName}:{securityServicePort}");
-            environmentVariables.Add($"SecurityConfiguration:Authority=http://{securityServiceContainerName}:{securityServicePort}");
-            environmentVariables.Add($"urls=http://*:{DockerHelper.MessagingServiceDockerPort}");
-            environmentVariables.Add("AppSettings:EmailProxy=Integration");
-            environmentVariables.Add("AppSettings:SMSProxy=Integration");
-
-            ContainerBuilder messagingServiceContainer = new Builder().UseContainer().WithName(containerName).WithEnvironment(environmentVariables.ToArray())
-                                                                      .UseImage(imageName, forceLatestImage).ExposePort(DockerHelper.MessagingServiceDockerPort)
-                                                                      .UseNetwork(networkServices.ToArray()).Mount(hostFolder, "/home", MountType.ReadWrite);
-
-            if (dockerCredentials.HasValue)
-            {
-                messagingServiceContainer.WithCredential(dockerCredentials.Value.URL, dockerCredentials.Value.UserName, dockerCredentials.Value.Password);
-            }
-
-            // Now build and return the container                
-            IContainerService builtContainer = messagingServiceContainer.Build().Start().WaitForPort($"{DockerHelper.MessagingServiceDockerPort}/tcp", 30000);
-
-            logger.LogInformation("Messaging Service Container Started");
-
-            return builtContainer;
         }
 
         #endregion
