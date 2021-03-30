@@ -5,15 +5,17 @@
     using System.Threading;
     using System.Threading.Tasks;
     using Common;
+    using Common.RequestExamples;
     using DataTransferObjects;
     using MediatR;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
+    using Swashbuckle.AspNetCore.Annotations;
+    using Swashbuckle.AspNetCore.Filters;
 
     [ExcludeFromCodeCoverage]
     [Route(SMSController.ControllerRoute)]
     [ApiController]
-    [ApiVersion("1.0")]
     [Authorize]
     public class SMSController : ControllerBase
     {
@@ -49,6 +51,8 @@
         /// <returns></returns>
         [HttpPost]
         [Route("")]
+        [SwaggerResponse(201, "Created", typeof(SendSMSResponse))]
+        [SwaggerResponseExample(201, typeof(SendSMSResponseExample))]
         public async Task<IActionResult> PostSMS([FromBody] SendSMSRequest sendSMSRequest,
                                                    CancellationToken cancellationToken)
         {

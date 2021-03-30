@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Diagnostics.CodeAnalysis;
+    using System.Text.Json.Serialization;
 
     [ExcludeFromCodeCoverage]
     public class SendEmailRequest
@@ -15,6 +16,7 @@
         /// <value>
         /// The message identifier.
         /// </value>
+        [JsonPropertyName("message_id")]
         public Guid? MessageId { get; set; }
 
         /// <summary>
@@ -23,6 +25,7 @@
         /// <value>
         /// The body.
         /// </value>
+        [JsonPropertyName("body")]
         public String Body { get; set; }
 
         /// <summary>
@@ -31,6 +34,7 @@
         /// <value>
         /// The connection identifier.
         /// </value>
+        [JsonPropertyName("connection_identifier")]
         public Guid ConnectionIdentifier { get; set; }
 
         /// <summary>
@@ -39,6 +43,7 @@
         /// <value>
         /// From address.
         /// </value>
+        [JsonPropertyName("from_address")]
         public String FromAddress { get; set; }
 
         /// <summary>
@@ -47,6 +52,7 @@
         /// <value>
         ///   <c>true</c> if this instance is HTML; otherwise, <c>false</c>.
         /// </value>
+        [JsonPropertyName("is_html")]
         public Boolean IsHtml { get; set; }
 
         /// <summary>
@@ -55,6 +61,7 @@
         /// <value>
         /// The subject.
         /// </value>
+        [JsonPropertyName("subject")]
         public String Subject { get; set; }
 
         /// <summary>
@@ -63,6 +70,7 @@
         /// <value>
         /// To addresses.
         /// </value>
+        [JsonPropertyName("to_addresses")]
         public List<String> ToAddresses { get; set; }
 
         #endregion

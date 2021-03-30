@@ -2,6 +2,7 @@
 {
     using System;
     using System.Diagnostics.CodeAnalysis;
+    using System.Text.Json.Serialization;
 
     [ExcludeFromCodeCoverage]
     public class SendSMSRequest
@@ -14,6 +15,7 @@
         /// <value>
         /// The connection identifier.
         /// </value>
+        [JsonPropertyName("connection_identifier")]
         public Guid ConnectionIdentifier { get; set; }
 
         /// <summary>
@@ -22,6 +24,7 @@
         /// <value>
         /// The destination.
         /// </value>
+        [JsonPropertyName("destination")]
         public String Destination { get; set; }
 
         /// <summary>
@@ -30,6 +33,7 @@
         /// <value>
         /// The message.
         /// </value>
+        [JsonPropertyName("message")]
         public String Message { get; set; }
 
         /// <summary>
@@ -38,6 +42,7 @@
         /// <value>
         /// The message identifier.
         /// </value>
+        [JsonPropertyName("message_id")]
         public Guid? MessageId { get; set; }
 
         /// <summary>
@@ -46,6 +51,7 @@
         /// <value>
         /// The sender.
         /// </value>
+        [JsonPropertyName("sender")]
         public String Sender { get; set; }
 
         #endregion
