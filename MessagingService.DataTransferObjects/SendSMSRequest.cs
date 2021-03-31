@@ -1,8 +1,9 @@
 ﻿namespace MessagingService.DataTransferObjects
 {
+    using Newtonsoft.Json;
     using System;
     using System.Diagnostics.CodeAnalysis;
-
+    
     [ExcludeFromCodeCoverage]
     public class SendSMSRequest
     {
@@ -14,6 +15,7 @@
         /// <value>
         /// The connection identifier.
         /// </value>
+        [JsonProperty("connection_identifier")]
         public Guid ConnectionIdentifier { get; set; }
 
         /// <summary>
@@ -22,6 +24,7 @@
         /// <value>
         /// The destination.
         /// </value>
+        [JsonProperty("destination")]
         public String Destination { get; set; }
 
         /// <summary>
@@ -30,6 +33,7 @@
         /// <value>
         /// The message.
         /// </value>
+        [JsonProperty("message")]
         public String Message { get; set; }
 
         /// <summary>
@@ -38,6 +42,7 @@
         /// <value>
         /// The message identifier.
         /// </value>
+        [JsonProperty("message_id")]
         public Guid? MessageId { get; set; }
 
         /// <summary>
@@ -46,6 +51,7 @@
         /// <value>
         /// The sender.
         /// </value>
+        [JsonProperty("sender")]
         public String Sender { get; set; }
 
         #endregion

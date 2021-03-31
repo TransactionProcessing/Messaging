@@ -7,11 +7,14 @@ namespace MessagingService.Controllers
     using System.Diagnostics.CodeAnalysis;
     using System.Threading;
     using System.Threading.Tasks;
-    using BusinessLogic.Requests;
     using Common;
+    using Common.RequestExamples;
     using MediatR;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
+    using Swashbuckle.AspNetCore.Annotations;
+    using Swashbuckle.AspNetCore.Filters;
+    using SendEmailRequest = BusinessLogic.Requests.SendEmailRequest;
 
     /// <summary>
     /// 
@@ -20,7 +23,6 @@ namespace MessagingService.Controllers
     [ExcludeFromCodeCoverage]
     [Route(EmailController.ControllerRoute)]
     [ApiController]
-    [ApiVersion("1.0")]
     [Authorize]
     public class EmailController : ControllerBase
     {
@@ -56,6 +58,9 @@ namespace MessagingService.Controllers
         /// <returns></returns>
         [HttpPost]
         [Route("")]
+        [SwaggerResponse(201, "Created", typeof(SendEmailResponseDTO))]
+        [SwaggerResponseExample(201, typeof(SendEmailResponseExample))]
+
         public async Task<IActionResult> PostEmail([FromBody] SendEmailRequestDTO sendEmailRequest,
                                                    CancellationToken cancellationToken)
         {

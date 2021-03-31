@@ -2,6 +2,7 @@
 {
     using System;
     using System.Diagnostics.CodeAnalysis;
+    using Newtonsoft.Json;
 
     [ExcludeFromCodeCoverage]
     public class SendSMSResponse
@@ -14,6 +15,7 @@
         /// <value>
         /// The message identifier.
         /// </value>
+        [JsonProperty("message_id")]
         public Guid MessageId { get; set; }
 
         #endregion

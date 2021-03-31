@@ -40,6 +40,7 @@ namespace MessagingService
     using Newtonsoft.Json;
     using Newtonsoft.Json.Serialization;
     using NLog.Extensions.Logging;
+    using NuGet.Versioning;
     using Service.Services.Email.IntegrationTest;
     using Service.Services.SMSServices.IntegrationTest;
     using Shared.DomainDrivenDesign.EventSourcing;
@@ -233,12 +234,14 @@ namespace MessagingService
                                    failureStatus: HealthStatus.Unhealthy,
                                    tags: new string[] { "db", "eventstore" });
 
+            var version = ConfigurationReader.GetValue("AppSettings", "ApiVersion");
+            var v = NuGetVersion.Parse(version);
             services.AddApiVersioning(
                                       options =>
                                       {
                                           // reporting api versions will return the headers "api-supported-versions" and "api-deprecated-versions"
                                           options.ReportApiVersions = true;
-                                          options.DefaultApiVersion = new ApiVersion(1, 0);
+                                          options.DefaultApiVersion = new ApiVersion(v.Major, v.Minor, $"Patch{v.Patch}");
                                           options.AssumeDefaultVersionWhenUnspecified = true;
                                           options.ApiVersionReader = new HeaderApiVersionReader("api-version");
                                       });

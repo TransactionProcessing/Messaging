@@ -63,17 +63,13 @@ namespace MessagingService.Common
         {
             OpenApiInfo info = new OpenApiInfo
             {
-                Title = "Golf Handicapping API",
+                Title = "Messaging API",
                 Version = description.ApiVersion.ToString(),
-                Description = "A REST Api to manage the golf club handicapping system.",
+                Description = "A REST Api to manage sending of various messages over different formats, currently only Email and SMS are supported.",
                 Contact = new OpenApiContact
                 {
                     Name = "Stuart Ferguson",
                     Email = "golfhandicapping@btinternet.com"
-                },
-                License = new OpenApiLicense
-                {
-                    Name = "TODO"
                 }
             };
 

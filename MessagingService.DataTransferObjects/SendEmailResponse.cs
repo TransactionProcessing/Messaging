@@ -2,6 +2,7 @@
 {
     using System;
     using System.Diagnostics.CodeAnalysis;
+    using Newtonsoft.Json;
 
     /// <summary>
     /// 
@@ -17,6 +18,7 @@
         /// <value>
         /// The message identifier.
         /// </value>
+        [JsonProperty("message_id")]
         public Guid MessageId { get; set; }
 
         #endregion

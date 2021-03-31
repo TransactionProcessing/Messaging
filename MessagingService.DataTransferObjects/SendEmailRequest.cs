@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Diagnostics.CodeAnalysis;
+    using Newtonsoft.Json;
 
     [ExcludeFromCodeCoverage]
     public class SendEmailRequest
@@ -15,6 +16,7 @@
         /// <value>
         /// The message identifier.
         /// </value>
+        [JsonProperty("message_id")]
         public Guid? MessageId { get; set; }
 
         /// <summary>
@@ -23,6 +25,7 @@
         /// <value>
         /// The body.
         /// </value>
+        [JsonProperty("body")]
         public String Body { get; set; }
 
         /// <summary>
@@ -31,6 +34,7 @@
         /// <value>
         /// The connection identifier.
         /// </value>
+        [JsonProperty("connection_identifier")]
         public Guid ConnectionIdentifier { get; set; }
 
         /// <summary>
@@ -39,6 +43,7 @@
         /// <value>
         /// From address.
         /// </value>
+        [JsonProperty("from_address")]
         public String FromAddress { get; set; }
 
         /// <summary>
@@ -47,6 +52,7 @@
         /// <value>
         ///   <c>true</c> if this instance is HTML; otherwise, <c>false</c>.
         /// </value>
+        [JsonProperty("is_html")]
         public Boolean IsHtml { get; set; }
 
         /// <summary>
@@ -55,6 +61,7 @@
         /// <value>
         /// The subject.
         /// </value>
+        [JsonProperty("subject")]
         public String Subject { get; set; }
 
         /// <summary>
@@ -63,6 +70,7 @@
         /// <value>
         /// To addresses.
         /// </value>
+        [JsonProperty("to_addresses")]
         public List<String> ToAddresses { get; set; }
 
         #endregion
