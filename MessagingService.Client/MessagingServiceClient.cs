@@ -42,9 +42,6 @@
                                       HttpClient httpClient) : base(httpClient)
         {
             this.BaseAddressResolver = baseAddressResolver;
-
-            // Add the API version header
-            this.HttpClient.DefaultRequestHeaders.Add("api-version", "1.0");
         }
 
         #endregion

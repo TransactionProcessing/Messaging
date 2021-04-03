@@ -16,6 +16,7 @@ namespace MessagingService
     using System.IO;
     using System.Net.Http;
     using System.Reflection;
+    using System.Runtime.Intrinsics;
     using BusinessLogic.Common;
     using BusinessLogic.EventHandling;
     using BusinessLogic.RequestHandlers;
@@ -33,14 +34,12 @@ namespace MessagingService
     using MediatR;
     using Microsoft.AspNetCore.Authentication.JwtBearer;
     using Microsoft.AspNetCore.Diagnostics.HealthChecks;
-    using Microsoft.AspNetCore.Mvc.ApiExplorer;
-    using Microsoft.AspNetCore.Mvc.Versioning;
     using Microsoft.Extensions.Diagnostics.HealthChecks;
     using Microsoft.Extensions.Options;
+    using Microsoft.OpenApi.Models;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Serialization;
     using NLog.Extensions.Logging;
-    using NuGet.Versioning;
     using Service.Services.Email.IntegrationTest;
     using Service.Services.SMSServices.IntegrationTest;
     using Shared.DomainDrivenDesign.EventSourcing;
@@ -233,35 +232,20 @@ namespace MessagingService
                                    name: "Eventstore",
                                    failureStatus: HealthStatus.Unhealthy,
                                    tags: new string[] { "db", "eventstore" });
-
-            var version = ConfigurationReader.GetValue("AppSettings", "ApiVersion");
-            var v = NuGetVersion.Parse(version);
-            services.AddApiVersioning(
-                                      options =>
-                                      {
-                                          // reporting api versions will return the headers "api-supported-versions" and "api-deprecated-versions"
-                                          options.ReportApiVersions = true;
-                                          options.DefaultApiVersion = new ApiVersion(v.Major, v.Minor, $"Patch{v.Patch}");
-                                          options.AssumeDefaultVersionWhenUnspecified = true;
-                                          options.ApiVersionReader = new HeaderApiVersionReader("api-version");
-                                      });
-
-            services.AddVersionedApiExplorer(
-                                             options =>
-                                             {
-                                                 // add the versioned api explorer, which also adds IApiVersionDescriptionProvider service
-                                                 // note: the specified format code will format the version as "'v'major[.minor][-status]"
-                                                 options.GroupNameFormat = "'v'VVV";
-
-                                                 // note: this option is only necessary when versioning by url segment. the SubstitutionFormat
-                                                 // can also be used to control the format of the API version in route templates
-                                                 options.SubstituteApiVersionInUrl = true;
-                                             });
-
-            services.AddTransient<IConfigureOptions<SwaggerGenOptions>, ConfigureSwaggerOptions>();
-
+            
             services.AddSwaggerGen(c =>
             {
+                c.SwaggerDoc("v1", new OpenApiInfo
+                                                      {
+                                                          Title = "Messaging API",
+                                                          Version = "1.0",
+                                                          Description = "A REST Api to manage sending of various messages over different formats, currently only Email and SMS are supported.",
+                                                          Contact = new OpenApiContact
+                                                                    {
+                                                                        Name = "Stuart Ferguson",
+                                                                        Email = "golfhandicapping@btinternet.com"
+                                                                    }
+                                                      });
                 // add a custom operation filter which sets default values
                 c.OperationFilter<SwaggerDefaultValues>();
                 c.ExampleFilters();
@@ -305,8 +289,7 @@ namespace MessagingService
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory,
-                              IApiVersionDescriptionProvider provider)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory)
         {
             String nlogConfigFilename = "nlog.config";
 
@@ -350,15 +333,7 @@ namespace MessagingService
                              });
             app.UseSwagger();
 
-            app.UseSwaggerUI(
-                             options =>
-                             {
-                                 // build a swagger endpoint for each discovered API version
-                                 foreach (ApiVersionDescription description in provider.ApiVersionDescriptions)
-                                 {
-                                     options.SwaggerEndpoint($"/swagger/{description.GroupName}/swagger.json", description.GroupName.ToUpperInvariant());
-                                 }
-                             });
+            app.UseSwaggerUI();
         }
     }
 }
