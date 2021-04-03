@@ -16,6 +16,7 @@ namespace MessagingService
     using System.IO;
     using System.Net.Http;
     using System.Reflection;
+    using System.Runtime.Intrinsics;
     using BusinessLogic.Common;
     using BusinessLogic.EventHandling;
     using BusinessLogic.RequestHandlers;
@@ -35,6 +36,7 @@ namespace MessagingService
     using Microsoft.AspNetCore.Diagnostics.HealthChecks;
     using Microsoft.Extensions.Diagnostics.HealthChecks;
     using Microsoft.Extensions.Options;
+    using Microsoft.OpenApi.Models;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Serialization;
     using NLog.Extensions.Logging;
@@ -231,10 +233,21 @@ namespace MessagingService
                                    failureStatus: HealthStatus.Unhealthy,
                                    tags: new string[] { "db", "eventstore" });
 
-            services.AddTransient<IConfigureOptions<SwaggerGenOptions>, ConfigureSwaggerOptions>();
+            //services.AddTransient<IConfigureOptions<SwaggerGenOptions>, ConfigureSwaggerOptions>();
 
             services.AddSwaggerGen(c =>
             {
+                c.SwaggerDoc("v1", new OpenApiInfo
+                                                      {
+                                                          Title = "Messaging API",
+                                                          Version = "1.0",
+                                                          Description = "A REST Api to manage sending of various messages over different formats, currently only Email and SMS are supported.",
+                                                          Contact = new OpenApiContact
+                                                                    {
+                                                                        Name = "Stuart Ferguson",
+                                                                        Email = "golfhandicapping@btinternet.com"
+                                                                    }
+                                                      });
                 // add a custom operation filter which sets default values
                 c.OperationFilter<SwaggerDefaultValues>();
                 c.ExampleFilters();
