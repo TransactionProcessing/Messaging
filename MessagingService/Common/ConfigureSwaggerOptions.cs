@@ -1,15 +1,8 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace MessagingService.Common
+﻿namespace MessagingService.Common
 {
     using System.Diagnostics.CodeAnalysis;
-    using Microsoft.AspNetCore.Mvc;
-    using Microsoft.AspNetCore.Mvc.Abstractions;
+    using System.Linq;
     using Microsoft.AspNetCore.Mvc.ApiExplorer;
-    using Microsoft.AspNetCore.Mvc.Versioning;
-    using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Options;
     using Microsoft.OpenApi.Models;
     using Swashbuckle.AspNetCore.SwaggerGen;
@@ -22,36 +15,11 @@ namespace MessagingService.Common
     [ExcludeFromCodeCoverage]
     public class ConfigureSwaggerOptions : IConfigureOptions<SwaggerGenOptions>
     {
-        #region Fields
-
-        /// <summary>
-        /// The provider
-        /// </summary>
-        private readonly IApiVersionDescriptionProvider provider;
-
-        #endregion
-
-        #region Constructors
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ConfigureSwaggerOptions"/> class.
-        /// </summary>
-        /// <param name="provider">The <see cref="IApiVersionDescriptionProvider">provider</see> used to generate Swagger documents.</param>
-        public ConfigureSwaggerOptions(IApiVersionDescriptionProvider provider) => this.provider = provider;
-
-        #endregion
-
         #region Methods
 
         /// <inheritdoc />
         public void Configure(SwaggerGenOptions options)
         {
-            // add a swagger document for each discovered API version
-            // note: you might choose to skip or document deprecated API versions differently
-            foreach (ApiVersionDescription description in this.provider.ApiVersionDescriptions)
-            {
-                options.SwaggerDoc(description.GroupName, ConfigureSwaggerOptions.CreateInfoForApiVersion(description));
-            }
         }
 
         /// <summary>
@@ -59,24 +27,19 @@ namespace MessagingService.Common
         /// </summary>
         /// <param name="description">The description.</param>
         /// <returns></returns>
-        private static OpenApiInfo CreateInfoForApiVersion(ApiVersionDescription description)
+        private static OpenApiInfo CreateInfoForApiVersion()
         {
             OpenApiInfo info = new OpenApiInfo
-            {
-                Title = "Messaging API",
-                Version = description.ApiVersion.ToString(),
-                Description = "A REST Api to manage sending of various messages over different formats, currently only Email and SMS are supported.",
-                Contact = new OpenApiContact
-                {
-                    Name = "Stuart Ferguson",
-                    Email = "golfhandicapping@btinternet.com"
-                }
-            };
-
-            if (description.IsDeprecated)
-            {
-                info.Description += " This API version has been deprecated.";
-            }
+                               {
+                                   Title = "Messaging API",
+                                   Version = "1.0",
+                                   Description = "A REST Api to manage sending of various messages over different formats, currently only Email and SMS are supported.",
+                                   Contact = new OpenApiContact
+                                             {
+                                                 Name = "Stuart Ferguson",
+                                                 Email = "golfhandicapping@btinternet.com"
+                                             }
+                               };
 
             return info;
         }
@@ -92,6 +55,8 @@ namespace MessagingService.Common
     [ExcludeFromCodeCoverage]
     public class SwaggerDefaultValues : IOperationFilter
     {
+        #region Methods
+
         /// <summary>
         /// Applies the filter to the specified operation using the given context.
         /// </summary>
@@ -101,10 +66,6 @@ namespace MessagingService.Common
                           OperationFilterContext context)
         {
             ApiDescription apiDescription = context.ApiDescription;
-            ApiVersion apiVersion = apiDescription.GetApiVersion();
-            ApiVersionModel model = apiDescription.ActionDescriptor.GetApiVersionModel(ApiVersionMapping.Explicit | ApiVersionMapping.Implicit);
-
-            operation.Deprecated = model.DeprecatedApiVersions.Contains(apiVersion);
 
             if (operation.Parameters == null)
             {
@@ -123,5 +84,7 @@ namespace MessagingService.Common
                 parameter.Required |= description.IsRequired;
             }
         }
+
+        #endregion
     }
 }
