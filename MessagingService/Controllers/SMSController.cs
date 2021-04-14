@@ -51,7 +51,8 @@
         /// <returns></returns>
         [HttpPost]
         [Route("")]
-        [ProducesResponseType(typeof(SendSMSResponse), 201)]
+        [SwaggerResponse(201, "Created", typeof(SendSMSResponse))]
+        [SwaggerResponseExample(201, typeof(SendSMSResponseExample))]
         public async Task<IActionResult> SendSMS([FromBody] SendSMSRequest sendSMSRequest,
                                                    CancellationToken cancellationToken)
         {
