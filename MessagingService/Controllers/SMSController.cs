@@ -42,18 +42,17 @@
         #endregion
 
         #region Methods
-
+        
         /// <summary>
-        /// Posts the sms.
+        /// Sends the SMS.
         /// </summary>
         /// <param name="sendSMSRequest">The send SMS request.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns></returns>
         [HttpPost]
         [Route("")]
-        [SwaggerResponse(201, "Created", typeof(SendSMSResponse))]
-        [SwaggerResponseExample(201, typeof(SendSMSResponseExample))]
-        public async Task<IActionResult> PostSMS([FromBody] SendSMSRequest sendSMSRequest,
+        [ProducesResponseType(typeof(SendSMSResponse), 201)]
+        public async Task<IActionResult> SendSMS([FromBody] SendSMSRequest sendSMSRequest,
                                                    CancellationToken cancellationToken)
         {
             // Reject password tokens

@@ -49,19 +49,17 @@ namespace MessagingService.Controllers
         #endregion
 
         #region Methods
-
+        
         /// <summary>
-        /// Posts the email.
+        /// Sends the email.
         /// </summary>
         /// <param name="sendEmailRequest">The send email request.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns></returns>
         [HttpPost]
         [Route("")]
-        [SwaggerResponse(201, "Created", typeof(SendEmailResponseDTO))]
-        [SwaggerResponseExample(201, typeof(SendEmailResponseExample))]
-
-        public async Task<IActionResult> PostEmail([FromBody] SendEmailRequestDTO sendEmailRequest,
+        [ProducesResponseType(typeof(SendEmailResponseDTO), 201)]
+        public async Task<IActionResult> SendEmail([FromBody] SendEmailRequestDTO sendEmailRequest,
                                                    CancellationToken cancellationToken)
         {
             // Reject password tokens
