@@ -1,7 +1,11 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
 	  <TargetFrameworks>net5.0;netstandard2.0</TargetFrameworks>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net5.0|AnyCPU'">
+    <DocumentationFile>D:\Projects\StuartFerguson\Messaging\MessagingService.DataTransferObjects\MessagingService.DataTransferObjects.xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>

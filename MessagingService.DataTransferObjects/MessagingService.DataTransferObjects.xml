@@ -1,0 +1,125 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>MessagingService.DataTransferObjects</name>
+    </assembly>
+    <members>
+        <member name="P:MessagingService.DataTransferObjects.SendEmailRequest.MessageId">
+            <summary>
+            Gets or sets the message identifier.
+            </summary>
+            <value>
+            The message identifier.
+            </value>
+        </member>
+        <member name="P:MessagingService.DataTransferObjects.SendEmailRequest.Body">
+            <summary>
+            Gets or sets the body.
+            </summary>
+            <value>
+            The body.
+            </value>
+        </member>
+        <member name="P:MessagingService.DataTransferObjects.SendEmailRequest.ConnectionIdentifier">
+            <summary>
+            Gets or sets the connection identifier.
+            </summary>
+            <value>
+            The connection identifier.
+            </value>
+        </member>
+        <member name="P:MessagingService.DataTransferObjects.SendEmailRequest.FromAddress">
+            <summary>
+            Gets or sets from address.
+            </summary>
+            <value>
+            From address.
+            </value>
+        </member>
+        <member name="P:MessagingService.DataTransferObjects.SendEmailRequest.IsHtml">
+            <summary>
+            Gets or sets a value indicating whether this instance is HTML.
+            </summary>
+            <value>
+              <c>true</c> if this instance is HTML; otherwise, <c>false</c>.
+            </value>
+        </member>
+        <member name="P:MessagingService.DataTransferObjects.SendEmailRequest.Subject">
+            <summary>
+            Gets or sets the subject.
+            </summary>
+            <value>
+            The subject.
+            </value>
+        </member>
+        <member name="P:MessagingService.DataTransferObjects.SendEmailRequest.ToAddresses">
+            <summary>
+            Gets or sets to addresses.
+            </summary>
+            <value>
+            To addresses.
+            </value>
+        </member>
+        <member name="T:MessagingService.DataTransferObjects.SendEmailResponse">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:MessagingService.DataTransferObjects.SendEmailResponse.MessageId">
+            <summary>
+            Gets or sets the message identifier.
+            </summary>
+            <value>
+            The message identifier.
+            </value>
+        </member>
+        <member name="P:MessagingService.DataTransferObjects.SendSMSRequest.ConnectionIdentifier">
+            <summary>
+            Gets or sets the connection identifier.
+            </summary>
+            <value>
+            The connection identifier.
+            </value>
+        </member>
+        <member name="P:MessagingService.DataTransferObjects.SendSMSRequest.Destination">
+            <summary>
+            Gets or sets the destination.
+            </summary>
+            <value>
+            The destination.
+            </value>
+        </member>
+        <member name="P:MessagingService.DataTransferObjects.SendSMSRequest.Message">
+            <summary>
+            Gets or sets the message.
+            </summary>
+            <value>
+            The message.
+            </value>
+        </member>
+        <member name="P:MessagingService.DataTransferObjects.SendSMSRequest.MessageId">
+            <summary>
+            Gets or sets the message identifier.
+            </summary>
+            <value>
+            The message identifier.
+            </value>
+        </member>
+        <member name="P:MessagingService.DataTransferObjects.SendSMSRequest.Sender">
+            <summary>
+            Gets or sets the sender.
+            </summary>
+            <value>
+            The sender.
+            </value>
+        </member>
+        <member name="P:MessagingService.DataTransferObjects.SendSMSResponse.MessageId">
+            <summary>
+            Gets or sets the message identifier.
+            </summary>
+            <value>
+            The message identifier.
+            </value>
+        </member>
+    </members>
+</doc>
