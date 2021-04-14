@@ -58,7 +58,8 @@ namespace MessagingService.Controllers
         /// <returns></returns>
         [HttpPost]
         [Route("")]
-        [ProducesResponseType(typeof(SendEmailResponseDTO), 201)]
+        [SwaggerResponse(201, "Created", typeof(SendEmailResponseDTO))]
+        [SwaggerResponseExample(201, typeof(SendEmailResponseExample))]
         public async Task<IActionResult> SendEmail([FromBody] SendEmailRequestDTO sendEmailRequest,
                                                    CancellationToken cancellationToken)
         {
