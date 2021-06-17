@@ -174,7 +174,18 @@
             String SecurityServiceBaseAddressResolver(String api) => $"https://127.0.0.1:{this.SecurityServicePort}";
             String MessagingServiceBaseAddressResolver(String api) => $"http://127.0.0.1:{this.MessagingServicePort}";
 
-            HttpClient httpClient = new HttpClient();
+            HttpClientHandler clientHandler = new HttpClientHandler
+                                              {
+                                                  ServerCertificateCustomValidationCallback = (message,
+                                                                                               certificate2,
+                                                                                               arg3,
+                                                                                               arg4) =>
+                                                                                              {
+                                                                                                  return true;
+                                                                                              }
+
+                                              };
+            HttpClient httpClient = new HttpClient(clientHandler);
             this.SecurityServiceClient = new SecurityServiceClient(SecurityServiceBaseAddressResolver, httpClient);
             this.MessagingServiceClient = new MessagingServiceClient(MessagingServiceBaseAddressResolver, httpClient);
         }
