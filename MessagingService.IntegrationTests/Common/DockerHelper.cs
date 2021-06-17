@@ -171,7 +171,7 @@
             this.MessagingServicePort = messagingServiceContainer.ToHostExposedEndpoint("5006/tcp").Port;
 
             // Setup the base address resolvers
-            String SecurityServiceBaseAddressResolver(String api) => $"http://127.0.0.1:{this.SecurityServicePort}";
+            String SecurityServiceBaseAddressResolver(String api) => $"https://127.0.0.1:{this.SecurityServicePort}";
             String MessagingServiceBaseAddressResolver(String api) => $"http://127.0.0.1:{this.MessagingServicePort}";
 
             HttpClient httpClient = new HttpClient();
