@@ -5,13 +5,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-	  <PackageReference Include="Shared" Version="1.0.5" />
-	  <PackageReference Include="Shared.EventStore" Version="1.0.5" />
+	  <PackageReference Include="Shared" Version="1.0.12" />
+	  <PackageReference Include="Shared.EventStore" Version="1.0.12" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\MessagingService.EmailMessage.DomainEvents\MessagingService.EmailMessage.DomainEvents.csproj" />
-    <ProjectReference Include="..\SharedCode\SharedCode.csproj" />
   </ItemGroup>
 
 </Project>
