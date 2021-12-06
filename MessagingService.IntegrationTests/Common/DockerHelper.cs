@@ -41,27 +41,12 @@
         /// The containers
         /// </summary>
         protected List<IContainerService> Containers;
-
-        /// <summary>
-        /// The event store container name
-        /// </summary>
-        protected String EventStoreContainerName;
-
+        
         /// <summary>
         /// The event store HTTP port
         /// </summary>
         protected Int32 EventStoreHttpPort;
-
-        /// <summary>
-        /// The security service container name
-        /// </summary>
-        protected String SecurityServiceContainerName;
-
-        /// <summary>
-        /// The messaging service container name
-        /// </summary>
-        protected String MessagingServiceContainerName;
-
+        
         /// <summary>
         /// The security service port
         /// </summary>
@@ -76,11 +61,6 @@
         /// The test networks
         /// </summary>
         protected List<INetworkService> TestNetworks;
-
-        /// <summary>
-        /// The logger
-        /// </summary>
-        private readonly NlogLogger Logger;
 
         /// <summary>
         /// The testing context
@@ -115,7 +95,7 @@
         /// <param name="scenarioName">Name of the scenario.</param>
         public override async Task StartContainersForScenarioRun(String scenarioName)
         {
-            String traceFolder = FdOs.IsWindows() ? $"D:\\home\\txnproc\\trace\\{scenarioName}" : $"//home//txnproc//trace//{scenarioName}";
+            this.HostTraceFolder = FdOs.IsWindows() ? $"D:\\home\\txnproc\\trace\\{scenarioName}" : $"//home//txnproc//trace//{scenarioName}";
 
             Logging.Enabled();
 
@@ -128,35 +108,37 @@
             this.SecurityServiceContainerName = $"securityservice{testGuid:N}";
             this.EventStoreContainerName = $"eventstore{testGuid:N}";
             this.MessagingServiceContainerName = $"messagingservice{testGuid:N}";
-
-            String eventStoreAddress = $"http://{this.EventStoreContainerName}";
-
-            (String, String, String) dockerCredentials = ("https://www.docker.com", "stuartferguson", "Sc0tland");
+            
+            this.DockerCredentials = ("https://www.docker.com", "stuartferguson", "Sc0tland");
 
             INetworkService testNetwork = DockerHelper.SetupTestNetwork();
             this.TestNetworks.Add(testNetwork);
-            IContainerService eventStoreContainer = 
-                DockerHelper.SetupEventStoreContainer(this.EventStoreContainerName, this.Logger, "eventstore/eventstore:20.10.0-buster-slim", testNetwork, traceFolder, true);
 
-            IContainerService securityServiceContainer = DockerHelper.SetupSecurityServiceContainer(this.SecurityServiceContainerName,
-                                                                                                    this.Logger,
-                                                                                                    "stuartferguson/securityservice",
+            IContainerService eventStoreContainer = 
+                this.SetupEventStoreContainer("eventstore/eventstore:20.10.0-buster-slim", testNetwork, true);
+
+            String eventStoreAddress =
+                $"esdb://admin:changeit@{this.EventStoreContainerName}:{DockerHelper.EventStoreHttpDockerPort}?tls=false";
+
+            String insecureEventStoreEnvironmentVariable = "EventStoreSettings:Insecure=true";
+            String persistentSubscriptionPollingInSeconds = "AppSettings:PersistentSubscriptionPollingInSeconds=10";
+            String internalSubscriptionServiceCacheDuration = "AppSettings:InternalSubscriptionServiceCacheDuration=0";
+
+            IContainerService securityServiceContainer = this.SetupSecurityServiceContainer("stuartferguson/securityservice",
                                                                                                     testNetwork,
-                                                                                                    traceFolder,
-                                                                                                    dockerCredentials,
                                                                                                     true);
 
-            IContainerService messagingServiceContainer = DockerHelper.SetupMessagingServiceContainer(this.MessagingServiceContainerName,
-                                                                                                      this.Logger,
-                                                                                                      "messagingservice",
-                                                                                                      new List<INetworkService>{
-                                                                                                                                    testNetwork
-                                                                                                                               },
-                                                                                                      traceFolder,
-                                                                                                      dockerCredentials,
-                                                                                                      this.SecurityServiceContainerName,
-                                                                                                      eventStoreAddress,
-                                                                                                      ("serviceClient", "Secret1"));
+            IContainerService messagingServiceContainer = this.SetupMessagingServiceContainer("messagingservice",
+                                                                                              new List<INetworkService>
+                                                                                              {
+                                                                                                  testNetwork
+                                                                                              },
+                                                                                              additionalEnvironmentVariables:new List<String>
+                                                                                                  {
+                                                                                                      insecureEventStoreEnvironmentVariable,
+                                                                                                      internalSubscriptionServiceCacheDuration,
+                                                                                                      persistentSubscriptionPollingInSeconds
+                                                                                                  });
 
             this.Containers.AddRange(new List<IContainerService>
                                      {
