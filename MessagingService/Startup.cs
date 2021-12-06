@@ -12,11 +12,13 @@ using Microsoft.Extensions.Logging;
 
 namespace MessagingService
 {
+    using System.Diagnostics;
     using System.Diagnostics.CodeAnalysis;
     using System.IO;
     using System.Net.Http;
     using System.Reflection;
     using System.Runtime.Intrinsics;
+    using System.Threading;
     using BusinessLogic.Common;
     using BusinessLogic.EventHandling;
     using BusinessLogic.RequestHandlers;
@@ -48,10 +50,12 @@ namespace MessagingService
     using Shared.EventStore.EventHandling;
     using Shared.EventStore.EventStore;
     using Shared.EventStore.Extensions;
+    using Shared.EventStore.SubscriptionWorker;
     using Shared.Extensions;
     using Shared.General;
     using Shared.Logger;
     using Shared.Repositories;
+    using SMSMessage.DomainEvents;
     using SMSMessageAggregate;
     using Swashbuckle.AspNetCore.Filters;
     using Swashbuckle.AspNetCore.SwaggerGen;
@@ -78,6 +82,16 @@ namespace MessagingService
 
         private static EventStoreClientSettings EventStoreClientSettings;
 
+        public static void LoadTypes()
+        {
+            RequestSentToEmailProviderEvent e = new RequestSentToEmailProviderEvent(Guid.Parse("2AA2D43B-5E24-4327-8029-1135B20F35CE"), "", new List<String>(),
+                                                                                    "", "", true);
+
+            RequestSentToSMSProviderEvent s = new RequestSentToSMSProviderEvent(Guid.NewGuid(), "", "", "");
+
+            TypeProvider.LoadDomainEventsTypeDynamically();
+        }
+
         private static void ConfigureEventStoreSettings(EventStoreClientSettings settings = null)
         {
             if (settings == null)
@@ -95,9 +109,9 @@ namespace MessagingService
                                                                                                      errors) => true,
                                                           }
                                                       };
-            settings.ConnectionName = Startup.Configuration.GetValue<String>("EventStoreSettings:ConnectionName");
             settings.ConnectivitySettings = new EventStoreClientConnectivitySettings
                                             {
+                                                Insecure = Startup.Configuration.GetValue<Boolean>("EventStoreSettings:Insecure"),
                                                 Address = new Uri(Startup.Configuration.GetValue<String>("EventStoreSettings:ConnectionString")),
                                             };
 
@@ -202,8 +216,12 @@ namespace MessagingService
 
             
             services.AddSingleton<IDomainEventHandlerResolver, DomainEventHandlerResolver>();
+
+            Startup.ServiceProvider = services.BuildServiceProvider();
         }
-        
+
+        public static IServiceProvider ServiceProvider { get; set; }
+
         /// <summary>
         /// Registers the email proxy.
         /// </summary>
@@ -367,6 +385,90 @@ namespace MessagingService
             app.UseSwagger();
 
             app.UseSwaggerUI();
+
+            app.PreWarm();
+        }
+    }
+
+    public static class Extensions
+    {
+        static Action<TraceEventType, String, String> log = (tt, subType, message) => {
+            String logMessage = $"{subType} - {message}";
+            switch (tt)
+            {
+                case TraceEventType.Critical:
+                    Logger.LogCritical(new Exception(logMessage));
+                    break;
+                case TraceEventType.Error:
+                    Logger.LogError(new Exception(logMessage));
+                    break;
+                case TraceEventType.Warning:
+                    Logger.LogWarning(logMessage);
+                    break;
+                case TraceEventType.Information:
+                    Logger.LogInformation(logMessage);
+                    break;
+                case TraceEventType.Verbose:
+                    Logger.LogDebug(logMessage);
+                    break;
+            }
+        };
+
+        static Action<TraceEventType, String> concurrentLog = (tt, message) => log(tt, "CONCURRENT", message);
+
+        public static void PreWarm(this IApplicationBuilder applicationBuilder)
+        {
+            Startup.LoadTypes();
+
+            //SubscriptionWorker worker = new SubscriptionWorker()
+            var internalSubscriptionService = Boolean.Parse(ConfigurationReader.GetValue("InternalSubscriptionService"));
+
+            if (internalSubscriptionService)
+            {
+                String eventStoreConnectionString = ConfigurationReader.GetValue("EventStoreSettings", "ConnectionString");
+                Int32 inflightMessages = Int32.Parse(ConfigurationReader.GetValue("AppSettings", "InflightMessages"));
+                Int32 persistentSubscriptionPollingInSeconds = Int32.Parse(ConfigurationReader.GetValue("AppSettings", "PersistentSubscriptionPollingInSeconds"));
+                String filter = ConfigurationReader.GetValue("AppSettings", "InternalSubscriptionServiceFilter");
+                String ignore = ConfigurationReader.GetValue("AppSettings", "InternalSubscriptionServiceIgnore");
+                String streamName = ConfigurationReader.GetValue("AppSettings", "InternalSubscriptionFilterOnStreamName");
+                Int32 cacheDuration = Int32.Parse(ConfigurationReader.GetValue("AppSettings", "InternalSubscriptionServiceCacheDuration"));
+
+                ISubscriptionRepository subscriptionRepository = SubscriptionRepository.Create(eventStoreConnectionString, cacheDuration);
+
+                ((SubscriptionRepository)subscriptionRepository).Trace += (sender, s) => Extensions.log(TraceEventType.Information, "REPOSITORY", s);
+
+                // init our SubscriptionRepository
+                subscriptionRepository.PreWarm(CancellationToken.None).Wait();
+
+                var eventHandlerResolver = Startup.ServiceProvider.GetService<IDomainEventHandlerResolver>();
+
+                SubscriptionWorker concurrentSubscriptions = SubscriptionWorker.CreateConcurrentSubscriptionWorker(eventStoreConnectionString, eventHandlerResolver, subscriptionRepository, inflightMessages, persistentSubscriptionPollingInSeconds);
+
+                concurrentSubscriptions.Trace += (_, args) => concurrentLog(TraceEventType.Information, args.Message);
+                concurrentSubscriptions.Warning += (_, args) => concurrentLog(TraceEventType.Warning, args.Message);
+                concurrentSubscriptions.Error += (_, args) => concurrentLog(TraceEventType.Error, args.Message);
+
+                if (!String.IsNullOrEmpty(ignore))
+                {
+                    concurrentSubscriptions = concurrentSubscriptions.IgnoreSubscriptions(ignore);
+                }
+
+                if (!String.IsNullOrEmpty(filter))
+                {
+                    //NOTE: Not overly happy with this design, but
+                    //the idea is if we supply a filter, this overrides ignore
+                    concurrentSubscriptions = concurrentSubscriptions.FilterSubscriptions(filter)
+                                                                     .IgnoreSubscriptions(null);
+
+                }
+
+                if (!String.IsNullOrEmpty(streamName))
+                {
+                    concurrentSubscriptions = concurrentSubscriptions.FilterByStreamName(streamName);
+                }
+
+                concurrentSubscriptions.StartAsync(CancellationToken.None).Wait();
+            }
         }
     }
 }
