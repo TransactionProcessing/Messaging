@@ -115,7 +115,7 @@
             this.TestNetworks.Add(testNetwork);
 
             IContainerService eventStoreContainer = 
-                this.SetupEventStoreContainer("eventstore/eventstore:20.10.0-buster-slim", testNetwork, true);
+                this.SetupEventStoreContainer("eventstore/eventstore:21.10.0-buster-slim", testNetwork, true);
 
             String eventStoreAddress =
                 $"esdb://admin:changeit@{this.EventStoreContainerName}:{DockerHelper.EventStoreHttpDockerPort}?tls=false";
