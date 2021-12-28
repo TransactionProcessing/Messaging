@@ -4,9 +4,11 @@ using SendEmailResponseDTO = MessagingService.DataTransferObjects.SendEmailRespo
 namespace MessagingService.Controllers
 {
     using System;
+    using System.Collections.Generic;
     using System.Diagnostics.CodeAnalysis;
     using System.Threading;
     using System.Threading.Tasks;
+    using BusinessLogic.Requests;
     using Common;
     using Common.RequestExamples;
     using MediatR;
@@ -71,6 +73,17 @@ namespace MessagingService.Controllers
 
             Guid messageId =  sendEmailRequest.MessageId.HasValue ? sendEmailRequest.MessageId.Value : Guid.NewGuid();
 
+            var emailAttachments = new List<EmailAttachment>();
+            foreach (DataTransferObjects.EmailAttachment emailAttachment in sendEmailRequest.EmailAttachments)
+            {
+                emailAttachments.Add(new EmailAttachment
+                                     {
+                                         FileData = emailAttachment.FileData,
+                                         FileType = this.ConvertFileType(emailAttachment.FileType),
+                                         Filename = emailAttachment.Filename
+                                     });
+            }
+
             // Create the command
             SendEmailRequest request = SendEmailRequest.Create(sendEmailRequest.ConnectionIdentifier,
                                                                messageId,
@@ -78,7 +91,8 @@ namespace MessagingService.Controllers
                                                                sendEmailRequest.ToAddresses,
                                                                sendEmailRequest.Subject,
                                                                sendEmailRequest.Body,
-                                                               sendEmailRequest.IsHtml);
+                                                               sendEmailRequest.IsHtml,
+                                                               emailAttachments);
 
             // Route the command
             await this.Mediator.Send(request, cancellationToken);
@@ -89,6 +103,17 @@ namespace MessagingService.Controllers
                                 {
                                     MessageId = messageId
                                 });
+        }
+
+        private FileType ConvertFileType(DataTransferObjects.FileType emailAttachmentFileType)
+        {
+            switch(emailAttachmentFileType)
+            {
+                case DataTransferObjects.FileType.PDF:
+                    return MessagingService.BusinessLogic.Requests.FileType.PDF;
+                default:
+                    return MessagingService.BusinessLogic.Requests.FileType.None;
+            }
         }
 
         #endregion

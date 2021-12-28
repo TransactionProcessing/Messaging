@@ -8,6 +8,7 @@
     using EmailMessageAggregate;
     using EmailServices;
     using Microsoft.Extensions.Logging;
+    using Requests;
     using Shared.DomainDrivenDesign.EventSourcing;
     using Shared.EventStore.Aggregate;
     using SMSMessageAggregate;
@@ -86,6 +87,7 @@
                                            String subject,
                                            String body,
                                            Boolean isHtml,
+                                           List<EmailAttachment> attachments,
                                            CancellationToken cancellationToken)
         {
             // Rehydrate Email Message aggregate
@@ -96,7 +98,7 @@
 
             // Make call to Email provider here
             EmailServiceProxyResponse emailResponse =
-                await this.EmailServiceProxy.SendEmail(messageId, fromAddress, toAddresses, subject, body, isHtml, cancellationToken);
+                await this.EmailServiceProxy.SendEmail(messageId, fromAddress, toAddresses, subject, body, isHtml, attachments, cancellationToken);
 
             // response message from provider (record event)
             emailAggregate.ReceiveResponseFromProvider(emailResponse.RequestIdentifier, emailResponse.EmailIdentifier);

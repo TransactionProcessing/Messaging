@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
+    using Requests;
 
     public interface IEmailServiceProxy
     {
@@ -18,6 +19,7 @@
         /// <param name="subject">The subject.</param>
         /// <param name="body">The body.</param>
         /// <param name="isHtml">if set to <c>true</c> [is HTML].</param>
+        /// <param name="attachments">The attachments.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns></returns>
         Task<EmailServiceProxyResponse> SendEmail(Guid messageId,
@@ -26,6 +28,7 @@
                                                   String subject,
                                                   String body,
                                                   Boolean isHtml,
+                                                  List<EmailAttachment> attachments,
                                                   CancellationToken cancellationToken);
 
         /// <summary>

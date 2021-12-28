@@ -73,6 +73,15 @@
         [JsonProperty("to_addresses")]
         public List<String> ToAddresses { get; set; }
 
+        /// <summary>
+        /// Gets or sets the email attachments.
+        /// </summary>
+        /// <value>
+        /// The email attachments.
+        /// </value>
+        [JsonProperty("email_attachements")]
+        public List<EmailAttachment> EmailAttachments { get; set; }
+
         #endregion
     }
 }

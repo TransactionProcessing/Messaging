@@ -22,7 +22,7 @@ namespace MessagingService.BusinessLogic.Tests.RequestHandlers
             Mock<IMessagingDomainService> messagingDomainService = new Mock<IMessagingDomainService>();
             MessagingRequestHandler handler = new MessagingRequestHandler(messagingDomainService.Object);
 
-            SendEmailRequest command = TestData.SendEmailRequest;
+            SendEmailRequest command = TestData.SendEmailRequestWithAttachments;
 
             Should.NotThrow(async () =>
                             {

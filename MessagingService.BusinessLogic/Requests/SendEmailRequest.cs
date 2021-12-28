@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using MediatR;
+    using Microsoft.AspNetCore.StaticFiles;
 
     /// <summary>
     /// 
@@ -22,13 +23,15 @@
         /// <param name="subject">The subject.</param>
         /// <param name="body">The body.</param>
         /// <param name="isHtml">if set to <c>true</c> [is HTML].</param>
+        /// <param name="emailAttachments">The email attachments.</param>
         private SendEmailRequest(Guid connectionIdentifier,
                                  Guid messageId,
                                  String fromAddress,
                                  List<String> toAddresses,
                                  String subject,
                                  String body,
-                                 Boolean isHtml)
+                                 Boolean isHtml,
+                                 List<EmailAttachment> emailAttachments)
         {
             this.ConnectionIdentifier = connectionIdentifier;
             this.MessageId = messageId;
@@ -37,6 +40,7 @@
             this.Subject = subject;
             this.Body = body;
             this.IsHtml = isHtml;
+            this.EmailAttachments = emailAttachments;
         }
 
         #endregion
@@ -99,6 +103,14 @@
         /// </value>
         public List<String> ToAddresses { get; }
 
+        /// <summary>
+        /// Gets the attachments.
+        /// </summary>
+        /// <value>
+        /// The attachments.
+        /// </value>
+        public List<EmailAttachment> EmailAttachments { get; }
+
         #endregion
 
         #region Methods
@@ -113,6 +125,7 @@
         /// <param name="subject">The subject.</param>
         /// <param name="body">The body.</param>
         /// <param name="isHtml">if set to <c>true</c> [is HTML].</param>
+        /// <param name="emailAttachments">The email attachments.</param>
         /// <returns></returns>
         public static SendEmailRequest Create(Guid connectionIdentifier,
                                               Guid messageId,
@@ -120,11 +133,27 @@
                                               List<String> toAddresses,
                                               String subject,
                                               String body,
-                                              Boolean isHtml)
+                                              Boolean isHtml,
+                                              List<EmailAttachment> emailAttachments)
         {
-            return new SendEmailRequest(connectionIdentifier, messageId, fromAddress, toAddresses, subject, body, isHtml);
+            return new SendEmailRequest(connectionIdentifier, messageId, fromAddress, toAddresses, subject, body, isHtml, emailAttachments);
         }
 
         #endregion
+    }
+
+    public class EmailAttachment
+    {
+        public String Filename { get; set; }
+
+        public String FileData { get; set; }
+
+        public FileType FileType { get; set; }
+    }
+
+    public enum FileType
+    {
+        None = 0,
+        PDF
     }
 }

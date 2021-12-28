@@ -3,6 +3,7 @@ using Newtonsoft.Json;
 
 namespace MessagingService.Service.Services.Email.Smtp2Go
 {
+    using System.Collections.Generic;
     using System.Diagnostics.CodeAnalysis;
 
     [ExcludeFromCodeCoverage]
@@ -88,5 +89,15 @@ namespace MessagingService.Service.Services.Email.Smtp2Go
         /// </value>
         [JsonProperty("text_body")]
         public String TextBody { get; set; }
+
+        /// <summary>
+        /// Gets or sets the attachments.
+        /// </summary>
+        /// <value>
+        /// The attachments.
+        /// </value>
+        [JsonProperty("attachments")]
+        public List<Smtp2GoAttachment> Attachments { get; set; }
+
     }
 }

@@ -10,6 +10,7 @@ namespace MessagingService.BusinessLogic.Tests.Services
     using BusinessLogic.Services.EmailServices;
     using BusinessLogic.Services.SMSServices;
     using EmailMessageAggregate;
+    using MessagingService.BusinessLogic.Requests;
     using Moq;
     using Shared.DomainDrivenDesign.EventSourcing;
     using Shared.EventStore.Aggregate;
@@ -33,6 +34,7 @@ namespace MessagingService.BusinessLogic.Tests.Services
                                         It.IsAny<String>(),
                                         It.IsAny<String>(),
                                         It.IsAny<Boolean>(),
+                                        It.IsAny<List<EmailAttachment>>(),
                                         It.IsAny<CancellationToken>())).ReturnsAsync(TestData.SuccessfulEmailServiceProxyResponse);
             Mock<ISMSServiceProxy> smsServiceProxy = new Mock<ISMSServiceProxy>();
 
@@ -46,6 +48,7 @@ namespace MessagingService.BusinessLogic.Tests.Services
                                                           TestData.Subject,
                                                           TestData.Body,
                                                           TestData.IsHtmlTrue,
+                                                          TestData.EmailAttachments,
                                                           CancellationToken.None);
         }
 

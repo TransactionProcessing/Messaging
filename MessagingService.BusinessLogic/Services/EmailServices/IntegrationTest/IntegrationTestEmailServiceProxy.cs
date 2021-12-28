@@ -6,6 +6,7 @@
     using System.Net;
     using System.Threading;
     using System.Threading.Tasks;
+    using BusinessLogic.Requests;
     using BusinessLogic.Services.EmailServices;
 
     /// <summary>
@@ -54,6 +55,7 @@
                                                                String subject,
                                                                String body,
                                                                Boolean isHtml,
+                                                               List<EmailAttachment> attachments,
                                                                CancellationToken cancellationToken)
         {
             return new EmailServiceProxyResponse

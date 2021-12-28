@@ -6,6 +6,7 @@ namespace MessagingService.BusinessLogic.Tests.Requests
 {
     using BusinessLogic.Requests;
     using Shouldly;
+    using System.Linq;
     using Testing;
     using Xunit;
 
@@ -20,7 +21,8 @@ namespace MessagingService.BusinessLogic.Tests.Requests
                                                                TestData.ToAddresses,
                                                                TestData.Subject,
                                                                TestData.Body,
-                                                               TestData.IsHtmlTrue);
+                                                               TestData.IsHtmlTrue,
+                                                               TestData.EmailAttachments);
 
             request.ShouldNotBeNull();
             request.ConnectionIdentifier.ShouldBe(TestData.ConnectionIdentifier);
@@ -30,6 +32,11 @@ namespace MessagingService.BusinessLogic.Tests.Requests
             request.Subject.ShouldBe(TestData.Subject);
             request.Body.ShouldBe(TestData.Body);
             request.IsHtml.ShouldBe(TestData.IsHtmlTrue);
+            request.EmailAttachments.Count.ShouldBe(TestData.EmailAttachments.Count);
+            request.EmailAttachments.Single().FileData.ShouldBe(TestData.FileData);
+            request.EmailAttachments.Single().Filename.ShouldBe(TestData.FileName);
+            request.EmailAttachments.Single().FileType.ShouldBe(TestData.FileTypePDF);
+
         }
 
         [Fact]
