@@ -55,6 +55,7 @@
                                                                request.Subject,
                                                                request.Body,
                                                                request.IsHtml,
+                                                               request.EmailAttachments,
                                                                cancellationToken);
 
             return string.Empty;

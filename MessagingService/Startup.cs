@@ -390,6 +390,7 @@ namespace MessagingService
         }
     }
 
+    [ExcludeFromCodeCoverage]
     public static class Extensions
     {
         static Action<TraceEventType, String, String> log = (tt, subType, message) => {

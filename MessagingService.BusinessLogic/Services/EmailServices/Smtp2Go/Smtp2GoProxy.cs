@@ -9,6 +9,7 @@
     using System.Threading;
     using System.Threading.Tasks;
     using Newtonsoft.Json;
+    using Requests;
     using Service.Services.Email.Smtp2Go;
     using Shared.General;
     using Shared.Logger;
@@ -53,6 +54,7 @@
         /// <param name="subject">The subject.</param>
         /// <param name="body">The body.</param>
         /// <param name="isHtml">if set to <c>true</c> [is HTML].</param>
+        /// <param name="attachments">The attachments.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns></returns>
         public async Task<EmailServiceProxyResponse> SendEmail(Guid messageId,
@@ -61,6 +63,7 @@
                                                                String subject,
                                                                String body,
                                                                Boolean isHtml,
+                                                               List<EmailAttachment> attachments,
                                                                CancellationToken cancellationToken)
         {
             EmailServiceProxyResponse response = null;
@@ -76,8 +79,24 @@
                                                      TestMode = false,
                                                      To = toAddresses.ToArray()
                                                  };
+            if (attachments != null && attachments.Any())
+            {
+                apiRequest.Attachments = new List<Smtp2GoAttachment>();
+                foreach (EmailAttachment emailAttachment in attachments)
+                {
+                    apiRequest.Attachments.Add(new Smtp2GoAttachment
+                    {
+                        FileBlob = emailAttachment.FileData,
+                        FileName = emailAttachment.Filename,
+                        MimeType = this.ConvertFileType(emailAttachment.FileType)
+                    });
+                }
+            }
 
-            String requestSerialised = JsonConvert.SerializeObject(apiRequest);
+            String requestSerialised = JsonConvert.SerializeObject(apiRequest, Formatting.Indented, new JsonSerializerSettings
+                                                                                                {
+                                                                                                    TypeNameHandling = TypeNameHandling.None
+                                                                                                });
 
             Logger.LogDebug($"Request Message Sent to Email Provider [SMTP2Go] {requestSerialised}");
 
@@ -103,6 +122,22 @@
                            RequestIdentifier = apiResponse.RequestId
                        };
             return response;
+        }
+
+        /// <summary>
+        /// Converts the type of the file.
+        /// </summary>
+        /// <param name="emailAttachmentFileType">Type of the email attachment file.</param>
+        /// <returns></returns>
+        private String ConvertFileType(FileType emailAttachmentFileType)
+        {
+            switch(emailAttachmentFileType)
+            {
+                case FileType.PDF:
+                    return "application/pdf";
+                default:
+                    return null;
+            }
         }
 
         /// <summary>

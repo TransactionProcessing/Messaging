@@ -185,13 +185,40 @@
                 RequestIdentifier = TestData.RequestIdentifier
             };
 
-        public static SendEmailRequest SendEmailRequest => SendEmailRequest.Create(TestData.ConnectionIdentifier,
+        public static List<EmailAttachment> EmptyEmailAttachments => new List<EmailAttachment>();
+
+        public static List<EmailAttachment> EmailAttachments => new List<EmailAttachment>
+        {
+            new EmailAttachment
+            {
+                FileData  = TestData.FileData,
+                Filename = TestData.FileName,
+                FileType = TestData.FileTypePDF
+            }
+        };
+
+        public static String FileData = "Base64String";
+        public static String FileName = "FileName.pdf";
+        public static FileType FileTypePDF = FileType.PDF;
+
+
+        public static SendEmailRequest SendEmailRequestNoAttachments => SendEmailRequest.Create(TestData.ConnectionIdentifier,
                                                                                    TestData.MessageId,
                                                                                    TestData.FromAddress,
                                                                                    TestData.ToAddresses,
                                                                                    TestData.Subject,
                                                                                    TestData.Body,
-                                                                                   TestData.IsHtmlTrue);
+                                                                                   TestData.IsHtmlTrue,
+                                                                                   TestData.EmptyEmailAttachments);
+
+        public static SendEmailRequest SendEmailRequestWithAttachments => SendEmailRequest.Create(TestData.ConnectionIdentifier,
+                                                                                   TestData.MessageId,
+                                                                                   TestData.FromAddress,
+                                                                                   TestData.ToAddresses,
+                                                                                   TestData.Subject,
+                                                                                   TestData.Body,
+                                                                                   TestData.IsHtmlTrue,
+                                                                                   TestData.EmailAttachments);
 
         public static EmailAggregate GetEmptyEmailAggregate()
         {
