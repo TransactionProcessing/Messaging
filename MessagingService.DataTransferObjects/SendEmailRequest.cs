@@ -8,6 +8,11 @@
     [ExcludeFromCodeCoverage]
     public class SendEmailRequest
     {
+        public SendEmailRequest()
+        {
+            this.EmailAttachments = new List<EmailAttachment>();
+        }
+
         #region Properties
 
         /// <summary>

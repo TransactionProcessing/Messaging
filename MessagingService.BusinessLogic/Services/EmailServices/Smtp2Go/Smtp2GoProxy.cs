@@ -79,7 +79,7 @@
                                                      TestMode = false,
                                                      To = toAddresses.ToArray()
                                                  };
-            if (attachments.Any())
+            if (attachments != null && attachments.Any())
             {
                 apiRequest.Attachments = new List<Smtp2GoAttachment>();
                 foreach (EmailAttachment emailAttachment in attachments)
