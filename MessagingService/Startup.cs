@@ -277,7 +277,7 @@ namespace MessagingService
                                    userCredentials: Startup.EventStoreClientSettings.DefaultCredentials,
                                    name: "Eventstore",
                                    failureStatus: HealthStatus.Unhealthy,
-                                   tags: new string[] { "db", "eventstore" }).AddSecurityService(this.ApiEndpointHttpHandler);
+                                   tags: new string[] { "db", "eventstore" });
             
             services.AddSwaggerGen(c =>
             {
