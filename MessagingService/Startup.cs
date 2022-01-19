@@ -256,6 +256,20 @@ namespace MessagingService
             }
         }
 
+        private HttpClientHandler ApiEndpointHttpHandler(IServiceProvider serviceProvider)
+        {
+            return new HttpClientHandler
+                   {
+                       ServerCertificateCustomValidationCallback = (message,
+                                                                    cert,
+                                                                    chain,
+                                                                    errors) =>
+                                                                   {
+                                                                       return true;
+                                                                   }
+                   };
+        }
+
         private void ConfigureMiddlewareServices(IServiceCollection services)
         {
             services.AddHealthChecks()
@@ -263,7 +277,7 @@ namespace MessagingService
                                    userCredentials: Startup.EventStoreClientSettings.DefaultCredentials,
                                    name: "Eventstore",
                                    failureStatus: HealthStatus.Unhealthy,
-                                   tags: new string[] { "db", "eventstore" });
+                                   tags: new string[] { "db", "eventstore" }).AddSecurityService(this.ApiEndpointHttpHandler);
             
             services.AddSwaggerGen(c =>
             {
