@@ -14,6 +14,7 @@ namespace MessagingService
     using System.Net.Http;
     using EmailMessage.DomainEvents;
     using EventStore.Client;
+    using Lamar.Microsoft.DependencyInjection;
     using Microsoft.Extensions.DependencyInjection;
     using Shared.EventStore.Aggregate;
     using Shared.EventStore.EventHandling;
@@ -40,6 +41,7 @@ namespace MessagingService
                                                                   .AddEnvironmentVariables().Build();
 
             IHostBuilder hostBuilder = Host.CreateDefaultBuilder(args);
+            hostBuilder.UseLamar();
             hostBuilder.ConfigureLogging(logging =>
                                          {
                                              logging.AddConsole();
