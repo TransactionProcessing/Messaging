@@ -19,6 +19,7 @@ namespace MessagingService
     using System.Reflection;
     using System.Runtime.Intrinsics;
     using System.Threading;
+    using Bootstrapper;
     using BusinessLogic.Common;
     using BusinessLogic.EventHandling;
     using BusinessLogic.RequestHandlers;
@@ -33,6 +34,7 @@ namespace MessagingService
     using EmailMessageAggregate;
     using EventStore.Client;
     using HealthChecks.UI.Client;
+    using Lamar;
     using MediatR;
     using Microsoft.AspNetCore.Authentication.JwtBearer;
     using Microsoft.AspNetCore.Diagnostics.HealthChecks;
@@ -80,7 +82,7 @@ namespace MessagingService
 
         public static IWebHostEnvironment WebHostEnvironment { get; set; }
 
-        private static EventStoreClientSettings EventStoreClientSettings;
+        internal static EventStoreClientSettings EventStoreClientSettings;
 
         public static void LoadTypes()
         {
@@ -92,7 +94,7 @@ namespace MessagingService
             TypeProvider.LoadDomainEventsTypeDynamically();
         }
 
-        private static void ConfigureEventStoreSettings(EventStoreClientSettings settings = null)
+        internal static void ConfigureEventStoreSettings(EventStoreClientSettings settings = null)
         {
             if (settings == null)
             {
@@ -120,233 +122,28 @@ namespace MessagingService
             Startup.EventStoreClientSettings = settings;
         }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
-        public void ConfigureServices(IServiceCollection services)
+        public static Container Container;
+
+        public void ConfigureContainer(ServiceRegistry services)
         {
             ConfigurationReader.Initialise(Startup.Configuration);
             
             Startup.ConfigureEventStoreSettings();
-
-            this.ConfigureMiddlewareServices(services);
-
-            services.AddTransient<IMediator, Mediator>();
             
-            Boolean useConnectionStringConfig = Boolean.Parse(ConfigurationReader.GetValue("AppSettings", "UseConnectionStringConfig"));
+            services.IncludeRegistry<MiddlewareRegistry>();
+            services.IncludeRegistry<MediatorRegistry>();
+            services.IncludeRegistry<RepositoryRegistry>();
+            services.IncludeRegistry<DomainServiceRegistry>();
+            services.IncludeRegistry<DomainEventHandlerRegistry>();
+            services.IncludeRegistry<MessagingProxyRegistry>();
 
-            if (useConnectionStringConfig)
-            {
-                String connectionStringConfigurationConnString = ConfigurationReader.GetConnectionString("ConnectionStringConfiguration");
-                services.AddSingleton<IConnectionStringConfigurationRepository, ConnectionStringConfigurationRepository>();
-                services.AddTransient<ConnectionStringConfigurationContext>(c =>
-                {
-                    return new ConnectionStringConfigurationContext(connectionStringConfigurationConnString);
-                });
-                
-                // TODO: Read this from a the database and set
-            }
-            else
-            {
-                services.AddEventStoreClient(Startup.ConfigureEventStoreSettings);
-                services.AddEventStoreProjectionManagementClient(Startup.ConfigureEventStoreSettings);
-                services.AddEventStorePersistentSubscriptionsClient(Startup.ConfigureEventStoreSettings);
-
-                services.AddSingleton<IConnectionStringConfigurationRepository, ConfigurationReaderConnectionStringRepository>();
-            }
-
-
-            services.AddTransient<IEventStoreContext, EventStoreContext>();
-            services.AddSingleton<IMessagingDomainService, MessagingDomainService>();
-            services.AddSingleton<IAggregateRepository<EmailAggregate, DomainEventRecord.DomainEvent>, AggregateRepository<EmailAggregate, DomainEventRecord.DomainEvent>>();
-            services.AddSingleton<IAggregateRepository<SMSAggregate, DomainEventRecord.DomainEvent>, AggregateRepository<SMSAggregate, DomainEventRecord.DomainEvent>>();
-
-            RequestSentToEmailProviderEvent r = new RequestSentToEmailProviderEvent(Guid.Parse("2AA2D43B-5E24-4327-8029-1135B20F35CE"), "", new List<String>(),
-                                                                                    "","",true);
-
-            TypeProvider.LoadDomainEventsTypeDynamically();
-            
-            this.RegisterEmailProxy(services);
-            this.RegisterSMSProxy(services);
-
-            // request & notification handlers
-            services.AddTransient<ServiceFactory>(context =>
-                                                  {
-                                                      return t => context.GetService(t);
-                                                  });
-
-            services.AddSingleton<IRequestHandler<SendEmailRequest, String>, MessagingRequestHandler>();
-            services.AddSingleton<IRequestHandler<SendSMSRequest, String>, MessagingRequestHandler>();
-
-            services.AddSingleton<Func<String, String>>(container => (serviceName) =>
-                                                                     {
-                                                                         return ConfigurationReader.GetBaseServerUri(serviceName).OriginalString;
-                                                                     });
-            var httpMessageHandler = new SocketsHttpHandler
-                                     {
-                                         SslOptions =
-                                         {
-                                             RemoteCertificateValidationCallback = (sender,
-                                                                                    certificate,
-                                                                                    chain,
-                                                                                    errors) => true,
-                                         }
-                                     };
-            HttpClient httpClient = new HttpClient(httpMessageHandler);
-            services.AddSingleton(httpClient);
-
-            Dictionary<String, String[]> eventHandlersConfiguration = new Dictionary<String, String[]>();
-
-            if (Startup.Configuration != null)
-            {
-                IConfigurationSection section = Startup.Configuration.GetSection("AppSettings:EventHandlerConfiguration");
-
-                if (section != null)
-                {
-                    Startup.Configuration.GetSection("AppSettings:EventHandlerConfiguration").Bind(eventHandlersConfiguration);
-                }
-            }
-            services.AddSingleton<EmailDomainEventHandler>();
-            services.AddSingleton<SMSDomainEventHandler>();
-            services.AddSingleton<Dictionary<String, String[]>>(eventHandlersConfiguration);
-
-            services.AddSingleton<Func<Type, IDomainEventHandler>>(container => (type) =>
-                                                                                {
-                                                                                    IDomainEventHandler handler = container.GetService(type) as IDomainEventHandler;
-                                                                                    return handler;
-                                                                                });
-
-            
-            services.AddSingleton<IDomainEventHandlerResolver, DomainEventHandlerResolver>();
+            Startup.Container = new Container(services);
 
             Startup.ServiceProvider = services.BuildServiceProvider();
         }
 
         public static IServiceProvider ServiceProvider { get; set; }
-
-        /// <summary>
-        /// Registers the email proxy.
-        /// </summary>
-        /// <param name="services">The services.</param>
-        private void RegisterEmailProxy(IServiceCollection services)
-        {
-            // read the config setting 
-            String emailProxy = ConfigurationReader.GetValue("AppSettings", "EmailProxy");
-
-            if (emailProxy == "Smtp2Go")
-            {
-                services.AddSingleton<IEmailServiceProxy, Smtp2GoProxy>();
-            }
-            else
-            {
-                services.AddSingleton<IEmailServiceProxy, IntegrationTestEmailServiceProxy>();
-            }
-        }
-
-        private void RegisterSMSProxy(IServiceCollection services)
-        {
-            // read the config setting 
-            String emailProxy = ConfigurationReader.GetValue("AppSettings", "SMSProxy");
-
-            if (emailProxy == "TheSMSWorks")
-            {
-                services.AddSingleton<ISMSServiceProxy, TheSmsWorksProxy>();
-            }
-            else
-            {
-                services.AddSingleton<ISMSServiceProxy, IntegrationTestSMSServiceProxy>();
-            }
-        }
-
-        private HttpClientHandler ApiEndpointHttpHandler(IServiceProvider serviceProvider)
-        {
-            return new HttpClientHandler
-                   {
-                       ServerCertificateCustomValidationCallback = (message,
-                                                                    cert,
-                                                                    chain,
-                                                                    errors) =>
-                                                                   {
-                                                                       return true;
-                                                                   }
-                   };
-        }
-
-        private void ConfigureMiddlewareServices(IServiceCollection services)
-        {
-            services.AddHealthChecks()
-                    .AddEventStore(Startup.EventStoreClientSettings,
-                                   userCredentials: Startup.EventStoreClientSettings.DefaultCredentials,
-                                   name: "Eventstore",
-                                   failureStatus: HealthStatus.Unhealthy,
-                                   tags: new string[] { "db", "eventstore" });
-            
-            services.AddSwaggerGen(c =>
-            {
-                c.SwaggerDoc("v1", new OpenApiInfo
-                                                      {
-                                                          Title = "Messaging API",
-                                                          Version = "1.0",
-                                                          Description = "A REST Api to manage sending of various messages over different formats, currently only Email and SMS are supported.",
-                                                          Contact = new OpenApiContact
-                                                                    {
-                                                                        Name = "Stuart Ferguson",
-                                                                        Email = "golfhandicapping@btinternet.com"
-                                                                    }
-                                                      });
-                // add a custom operation filter which sets default values
-                c.OperationFilter<SwaggerDefaultValues>();
-                c.ExampleFilters();
-
-                //Locate the XML files being generated by ASP.NET...
-                var directory = new DirectoryInfo(AppContext.BaseDirectory);
-                var xmlFiles = directory.GetFiles("*.xml");
-
-                //... and tell Swagger to use those XML comments.
-                foreach (FileInfo fileInfo in xmlFiles)
-                {
-                    c.IncludeXmlComments(fileInfo.FullName);
-                }
-            });
-
-            services.AddSwaggerExamplesFromAssemblyOf<SwaggerJsonConverter>();
-
-            services.AddAuthentication(options =>
-            {
-                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-            })
-                .AddJwtBearer(options =>
-                {
-                    options.BackchannelHttpHandler = new HttpClientHandler
-                                                     {
-                                                         ServerCertificateCustomValidationCallback =
-                                                             (message, certificate, chain, sslPolicyErrors) => true
-                                                     };
-                    options.Authority = ConfigurationReader.GetValue("SecurityConfiguration", "Authority");
-                    options.Audience = ConfigurationReader.GetValue("SecurityConfiguration", "ApiName");
-
-                    options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters()
-                                                        {
-                                                            ValidateAudience = false,
-                                                            ValidAudience = ConfigurationReader.GetValue("SecurityConfiguration", "ApiName"),
-                                                            ValidIssuer = ConfigurationReader.GetValue("SecurityConfiguration", "Authority"),
-                                                        };
-                    options.IncludeErrorDetails = true;
-                });
-
-            services.AddControllers().AddNewtonsoftJson(options =>
-            {
-                options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
-                options.SerializerSettings.TypeNameHandling = TypeNameHandling.Auto;
-                options.SerializerSettings.Formatting = Formatting.Indented;
-                options.SerializerSettings.DateTimeZoneHandling = DateTimeZoneHandling.Utc;
-                options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
-            });
-
-            Assembly assembly = this.GetType().GetTypeInfo().Assembly;
-            services.AddMvcCore().AddApplicationPart(assembly).AddControllersAsServices();
-        }
-
+        
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory)
         {
