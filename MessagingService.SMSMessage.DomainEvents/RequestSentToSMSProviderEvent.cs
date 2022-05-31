@@ -3,7 +3,7 @@
     using System;
     using Shared.DomainDrivenDesign.EventSourcing;
 
-    public record RequestSentToSMSProviderEvent : DomainEventRecord.DomainEvent
+    public record RequestSentToSMSProviderEvent : DomainEvent
     {
         #region Constructors
 

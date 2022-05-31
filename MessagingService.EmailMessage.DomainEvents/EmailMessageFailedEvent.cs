@@ -3,7 +3,7 @@
     using System;
     using Shared.DomainDrivenDesign.EventSourcing;
 
-    public record EmailMessageFailedEvent : DomainEventRecord.DomainEvent
+    public record EmailMessageFailedEvent : DomainEvent
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="" /> .

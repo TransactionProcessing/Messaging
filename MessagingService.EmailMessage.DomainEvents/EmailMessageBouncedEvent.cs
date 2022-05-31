@@ -3,7 +3,7 @@
     using System;
     using Shared.DomainDrivenDesign.EventSourcing;
 
-    public record EmailMessageBouncedEvent : DomainEventRecord.DomainEvent
+    public record EmailMessageBouncedEvent : DomainEvent
     {
         #region Constructors
 

@@ -21,7 +21,7 @@ namespace MessagingService.BusinessLogic.Tests.DomainEventHanders
         [Fact]
         public async Task SMSDomainEventHandler_Handle_ResponseReceivedFromProviderEvent_Delivered_EventIsHandled()
         {
-            Mock<IAggregateRepository<SMSAggregate, DomainEventRecord.DomainEvent>> aggregateRepository = new Mock<IAggregateRepository<SMSAggregate, DomainEventRecord.DomainEvent>>();
+            Mock<IAggregateRepository<SMSAggregate, DomainEvent>> aggregateRepository = new Mock<IAggregateRepository<SMSAggregate, DomainEvent>>();
             aggregateRepository.Setup(a => a.GetLatestVersion(It.IsAny<Guid>(), It.IsAny<CancellationToken>())).ReturnsAsync(TestData.GetSentSMSAggregate);
             Mock<ISMSServiceProxy> smsServiceProxy = new Mock<ISMSServiceProxy>();
             smsServiceProxy.Setup(e => e.GetMessageStatus(It.IsAny<String>(), It.IsAny<CancellationToken>()))
@@ -36,7 +36,7 @@ namespace MessagingService.BusinessLogic.Tests.DomainEventHanders
         [Fact]
         public async Task SMSDomainEventHandler_Handle_ResponseReceivedFromProviderEvent_Expired_EventIsHandled()
         {
-            Mock<IAggregateRepository<SMSAggregate, DomainEventRecord.DomainEvent>> aggregateRepository = new Mock<IAggregateRepository<SMSAggregate, DomainEventRecord.DomainEvent>>();
+            Mock<IAggregateRepository<SMSAggregate, DomainEvent>> aggregateRepository = new Mock<IAggregateRepository<SMSAggregate, DomainEvent>>();
             aggregateRepository.Setup(a => a.GetLatestVersion(It.IsAny<Guid>(), It.IsAny<CancellationToken>())).ReturnsAsync(TestData.GetSentSMSAggregate);
             Mock<ISMSServiceProxy> smsServiceProxy = new Mock<ISMSServiceProxy>();
             smsServiceProxy.Setup(e => e.GetMessageStatus(It.IsAny<String>(), It.IsAny<CancellationToken>()))
@@ -51,7 +51,7 @@ namespace MessagingService.BusinessLogic.Tests.DomainEventHanders
         [Fact]
         public async Task SMSDomainEventHandler_Handle_ResponseReceivedFromProviderEvent_Rejected_EventIsHandled()
         {
-            Mock<IAggregateRepository<SMSAggregate, DomainEventRecord.DomainEvent>> aggregateRepository = new Mock<IAggregateRepository<SMSAggregate, DomainEventRecord.DomainEvent>>();
+            Mock<IAggregateRepository<SMSAggregate, DomainEvent>> aggregateRepository = new Mock<IAggregateRepository<SMSAggregate, DomainEvent>>();
             aggregateRepository.Setup(a => a.GetLatestVersion(It.IsAny<Guid>(), It.IsAny<CancellationToken>())).ReturnsAsync(TestData.GetSentSMSAggregate);
             Mock<ISMSServiceProxy> smsServiceProxy = new Mock<ISMSServiceProxy>();
             smsServiceProxy.Setup(e => e.GetMessageStatus(It.IsAny<String>(), It.IsAny<CancellationToken>()))
@@ -66,7 +66,7 @@ namespace MessagingService.BusinessLogic.Tests.DomainEventHanders
         [Fact]
         public async Task SMSDomainEventHandler_Handle_ResponseReceivedFromProviderEvent_Undelivered_EventIsHandled()
         {
-            Mock<IAggregateRepository<SMSAggregate, DomainEventRecord.DomainEvent>> aggregateRepository = new Mock<IAggregateRepository<SMSAggregate, DomainEventRecord.DomainEvent>>();
+            Mock<IAggregateRepository<SMSAggregate, DomainEvent>> aggregateRepository = new Mock<IAggregateRepository<SMSAggregate, DomainEvent>>();
             aggregateRepository.Setup(a => a.GetLatestVersion(It.IsAny<Guid>(), It.IsAny<CancellationToken>())).ReturnsAsync(TestData.GetSentSMSAggregate);
             Mock<ISMSServiceProxy> smsServiceProxy = new Mock<ISMSServiceProxy>();
             smsServiceProxy.Setup(e => e.GetMessageStatus(It.IsAny<String>(), It.IsAny<CancellationToken>()))

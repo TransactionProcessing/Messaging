@@ -17,7 +17,7 @@
         /// <summary>
         /// The aggregate repository
         /// </summary>
-        private readonly IAggregateRepository<SMSAggregate, DomainEventRecord.DomainEvent> AggregateRepository;
+        private readonly IAggregateRepository<SMSAggregate, DomainEvent> AggregateRepository;
 
         /// <summary>
         /// The email service proxy
@@ -33,7 +33,7 @@
         /// </summary>
         /// <param name="aggregateRepository">The aggregate repository.</param>
         /// <param name="smsServiceProxy">The SMS service proxy.</param>
-        public SMSDomainEventHandler(IAggregateRepository<SMSAggregate, DomainEventRecord.DomainEvent> aggregateRepository,
+        public SMSDomainEventHandler(IAggregateRepository<SMSAggregate, DomainEvent> aggregateRepository,
                                      ISMSServiceProxy smsServiceProxy)
         {
             this.AggregateRepository = aggregateRepository;

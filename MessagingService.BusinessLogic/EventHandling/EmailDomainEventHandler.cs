@@ -17,7 +17,7 @@
         /// <summary>
         /// The aggregate repository
         /// </summary>
-        private readonly IAggregateRepository<EmailAggregate, DomainEventRecord.DomainEvent> AggregateRepository;
+        private readonly IAggregateRepository<EmailAggregate, DomainEvent> AggregateRepository;
 
         /// <summary>
         /// The email service proxy
@@ -33,7 +33,7 @@
         /// </summary>
         /// <param name="aggregateRepository">The aggregate repository.</param>
         /// <param name="emailServiceProxy">The email service proxy.</param>
-        public EmailDomainEventHandler(IAggregateRepository<EmailAggregate, DomainEventRecord.DomainEvent> aggregateRepository,
+        public EmailDomainEventHandler(IAggregateRepository<EmailAggregate, DomainEvent> aggregateRepository,
                                        IEmailServiceProxy emailServiceProxy)
         {
             this.AggregateRepository = aggregateRepository;

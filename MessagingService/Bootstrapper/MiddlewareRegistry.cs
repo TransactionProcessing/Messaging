@@ -167,8 +167,8 @@
 
             this.AddTransient<IEventStoreContext, EventStoreContext>();
 
-            this.AddSingleton<IAggregateRepository<EmailAggregate, DomainEventRecord.DomainEvent>, AggregateRepository<EmailAggregate, DomainEventRecord.DomainEvent>>();
-            this.AddSingleton<IAggregateRepository<SMSAggregate, DomainEventRecord.DomainEvent>, AggregateRepository<SMSAggregate, DomainEventRecord.DomainEvent>>();
+            this.AddSingleton<IAggregateRepository<EmailAggregate, DomainEvent>, AggregateRepository<EmailAggregate, DomainEvent>>();
+            this.AddSingleton<IAggregateRepository<SMSAggregate, DomainEvent>, AggregateRepository<SMSAggregate, DomainEvent>>();
         }
     }
 
