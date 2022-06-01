@@ -3,7 +3,7 @@
     using System;
     using Shared.DomainDrivenDesign.EventSourcing;
 
-    public record EmailMessageMarkedAsSpamEvent : DomainEventRecord.DomainEvent
+    public record EmailMessageMarkedAsSpamEvent : DomainEvent
     {
         #region Constructors
 

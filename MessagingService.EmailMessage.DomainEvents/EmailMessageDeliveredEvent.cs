@@ -3,7 +3,7 @@
     using System;
     using Shared.DomainDrivenDesign.EventSourcing;
 
-    public record EmailMessageDeliveredEvent : DomainEventRecord.DomainEvent
+    public record EmailMessageDeliveredEvent : DomainEvent
     {
         #region Constructors
 

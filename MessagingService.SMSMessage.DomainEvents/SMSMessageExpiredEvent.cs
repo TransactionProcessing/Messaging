@@ -3,7 +3,7 @@
     using System;
     using Shared.DomainDrivenDesign.EventSourcing;
 
-    public record SMSMessageExpiredEvent : DomainEventRecord.DomainEvent
+    public record SMSMessageExpiredEvent : DomainEvent
     {
         #region Constructors
 

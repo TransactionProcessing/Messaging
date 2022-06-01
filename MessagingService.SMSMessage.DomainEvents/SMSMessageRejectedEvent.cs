@@ -3,7 +3,7 @@
     using System;
     using Shared.DomainDrivenDesign.EventSourcing;
 
-    public record SMSMessageRejectedEvent : DomainEventRecord.DomainEvent
+    public record SMSMessageRejectedEvent : DomainEvent
     {
         #region Constructors
 

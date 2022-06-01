@@ -4,7 +4,7 @@
     using System.Collections.Generic;
     using Shared.DomainDrivenDesign.EventSourcing;
 
-    public record RequestSentToEmailProviderEvent : DomainEventRecord.DomainEvent
+    public record RequestSentToEmailProviderEvent : DomainEvent
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="RequestSentToEmailProviderEvent"/> class.

@@ -10,6 +10,7 @@ namespace MessagingService.Tests.General
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.Hosting;
     using Moq;
     using Xunit;
 
@@ -71,7 +72,8 @@ namespace MessagingService.Tests.General
             DiagnosticListener diagnosticSource = new DiagnosticListener(hostingEnvironment.ApplicationName);
             services.AddSingleton<DiagnosticSource>(diagnosticSource);
             services.AddSingleton(diagnosticSource);
-            services.AddSingleton(hostingEnvironment);
+            services.AddSingleton<IWebHostEnvironment>(hostingEnvironment);
+            services.AddSingleton<IHostEnvironment>(hostingEnvironment);
         }
 
         #endregion
