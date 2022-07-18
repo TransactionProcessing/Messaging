@@ -1,41 +1,19 @@
 ﻿namespace MessagingService.Bootstrapper
 {
     using System;
-    using System.Collections.Generic;
     using System.IO;
     using System.Net.Http;
     using System.Reflection;
-    using BusinessLogic.Common;
-    using BusinessLogic.EventHandling;
-    using BusinessLogic.RequestHandlers;
-    using BusinessLogic.Requests;
-    using BusinessLogic.Services;
-    using BusinessLogic.Services.EmailServices;
-    using BusinessLogic.Services.EmailServices.Smtp2Go;
-    using BusinessLogic.Services.SMSServices;
-    using BusinessLogic.Services.SMSServices.TheSMSWorks;
     using Common;
-    using EmailMessageAggregate;
     using Lamar;
-    using MediatR;
     using Microsoft.AspNetCore.Authentication.JwtBearer;
-    using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Diagnostics.HealthChecks;
     using Microsoft.OpenApi.Models;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Serialization;
-    using Service.Services.Email.IntegrationTest;
-    using Service.Services.SMSServices.IntegrationTest;
-    using Shared.DomainDrivenDesign.EventSourcing;
-    using Shared.EntityFramework.ConnectionStringConfiguration;
-    using Shared.EventStore.Aggregate;
-    using Shared.EventStore.EventHandling;
-    using Shared.EventStore.EventStore;
     using Shared.EventStore.Extensions;
     using Shared.General;
-    using Shared.Repositories;
-    using SMSMessageAggregate;
     using Swashbuckle.AspNetCore.Filters;
 
     public class MiddlewareRegistry : ServiceRegistry
@@ -115,153 +93,6 @@
 
             Assembly assembly = this.GetType().GetTypeInfo().Assembly;
             this.AddMvcCore().AddApplicationPart(assembly).AddControllersAsServices();
-        }
-    }
-
-    public class MediatorRegistry : ServiceRegistry
-    {
-        public MediatorRegistry()
-        {
-            this.AddTransient<IMediator, Mediator>();
-            this.AddSingleton<IRequestHandler<SendEmailRequest, String>, MessagingRequestHandler>();
-            this.AddSingleton<IRequestHandler<SendSMSRequest, String>, MessagingRequestHandler>();
-
-            this.AddSingleton<Func<String, String>>(container => (serviceName) =>
-                                                                     {
-                                                                         return ConfigurationReader.GetBaseServerUri(serviceName).OriginalString;
-                                                                     });
-
-            // request & notification handlers
-            this.AddTransient<ServiceFactory>(context =>
-                                                  {
-                                                      return t => context.GetService(t);
-                                                  });
-        }
-    }
-
-    public class RepositoryRegistry: ServiceRegistry
-    {
-        public RepositoryRegistry()
-        {
-            Boolean useConnectionStringConfig = Boolean.Parse(ConfigurationReader.GetValue("AppSettings", "UseConnectionStringConfig"));
-
-            if (useConnectionStringConfig)
-            {
-                String connectionStringConfigurationConnString = ConfigurationReader.GetConnectionString("ConnectionStringConfiguration");
-                this.AddSingleton<IConnectionStringConfigurationRepository, ConnectionStringConfigurationRepository>();
-                this.AddTransient<ConnectionStringConfigurationContext>(c =>
-                                                                        {
-                                                                            return new ConnectionStringConfigurationContext(connectionStringConfigurationConnString);
-                                                                        });
-
-                // TODO: Read this from a the database and set
-            }
-            else
-            {
-                this.AddEventStoreClient(Startup.ConfigureEventStoreSettings);
-                this.AddEventStoreProjectionManagementClient(Startup.ConfigureEventStoreSettings);
-                this.AddEventStorePersistentSubscriptionsClient(Startup.ConfigureEventStoreSettings);
-
-                this.AddSingleton<IConnectionStringConfigurationRepository, ConfigurationReaderConnectionStringRepository>();
-            }
-
-            this.AddTransient<IEventStoreContext, EventStoreContext>();
-
-            this.AddSingleton<IAggregateRepository<EmailAggregate, DomainEvent>, AggregateRepository<EmailAggregate, DomainEvent>>();
-            this.AddSingleton<IAggregateRepository<SMSAggregate, DomainEvent>, AggregateRepository<SMSAggregate, DomainEvent>>();
-        }
-    }
-
-    public class DomainServiceRegistry : ServiceRegistry
-    {
-        public DomainServiceRegistry()
-        {
-            this.AddSingleton<IMessagingDomainService, MessagingDomainService>();
-        }
-    }
-
-    public class DomainEventHandlerRegistry : ServiceRegistry
-    {
-        public DomainEventHandlerRegistry()
-        {
-            Dictionary<String, String[]> eventHandlersConfiguration = new Dictionary<String, String[]>();
-
-            if (Startup.Configuration != null)
-            {
-                IConfigurationSection section = Startup.Configuration.GetSection("AppSettings:EventHandlerConfiguration");
-
-                if (section != null)
-                {
-                    Startup.Configuration.GetSection("AppSettings:EventHandlerConfiguration").Bind(eventHandlersConfiguration);
-                }
-            }
-            this.AddSingleton<EmailDomainEventHandler>();
-            this.AddSingleton<SMSDomainEventHandler>();
-            this.AddSingleton<Dictionary<String, String[]>>(eventHandlersConfiguration);
-
-            this.AddSingleton<Func<Type, IDomainEventHandler>>(container => (type) =>
-                                                                            {
-                                                                                IDomainEventHandler handler = container.GetService(type) as IDomainEventHandler;
-                                                                                return handler;
-                                                                            });
-
-
-            this.AddSingleton<IDomainEventHandlerResolver, DomainEventHandlerResolver>();
-        }
-    }
-
-    public class MessagingProxyRegistry : ServiceRegistry
-    {
-        public MessagingProxyRegistry()
-        {
-            SocketsHttpHandler httpMessageHandler = new SocketsHttpHandler
-                                                    {
-                                                        SslOptions =
-                                                        {
-                                                            RemoteCertificateValidationCallback = (sender,
-                                                                                                   certificate,
-                                                                                                   chain,
-                                                                                                   errors) => true,
-                                                        }
-                                                    };
-            HttpClient httpClient = new HttpClient(httpMessageHandler);
-            this.AddSingleton(httpClient);
-
-            this.RegisterEmailProxy();
-            this.RegisterSMSProxy();
-        }
-        /// <summary>
-        /// Registers the email proxy.
-        /// </summary>
-        /// <param name="services">The services.</param>
-        private void RegisterEmailProxy()
-        {
-            // read the config setting 
-            String emailProxy = ConfigurationReader.GetValue("AppSettings", "EmailProxy");
-
-            if (emailProxy == "Smtp2Go")
-            {
-                this.AddSingleton<IEmailServiceProxy, Smtp2GoProxy>();
-            }
-            else
-            {
-                this.AddSingleton<IEmailServiceProxy, IntegrationTestEmailServiceProxy>();
-            }
-        }
-
-        private void RegisterSMSProxy()
-        {
-            // read the config setting 
-            String emailProxy = ConfigurationReader.GetValue("AppSettings", "SMSProxy");
-
-            if (emailProxy == "TheSMSWorks")
-            {
-                this.AddSingleton<ISMSServiceProxy, TheSmsWorksProxy>();
-            }
-            else
-            {
-                this.AddSingleton<ISMSServiceProxy, IntegrationTestSMSServiceProxy>();
-            }
         }
     }
 }

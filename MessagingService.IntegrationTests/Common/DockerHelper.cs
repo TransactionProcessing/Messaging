@@ -89,12 +89,44 @@
 
         #region Methods
 
+        public Boolean IsSecureEventStore { get; private set; }
+
+        protected override String GenerateEventStoreConnectionString()
+        {
+            // TODO: this could move to shared
+            String eventStoreAddress = $"esdb://admin:changeit@{this.EventStoreContainerName}:{DockerHelper.EventStoreHttpDockerPort}";
+            if (this.IsSecureEventStore)
+            {
+                eventStoreAddress = $"{eventStoreAddress}?tls=true&tlsVerifyCert=false";
+            }
+            else
+            {
+                eventStoreAddress = $"{eventStoreAddress}?tls=false&tlsVerifyCert=false";
+            }
+
+            return eventStoreAddress;
+        }
+
         /// <summary>
         /// Starts the containers for scenario run.
         /// </summary>
         /// <param name="scenarioName">Name of the scenario.</param>
         public override async Task StartContainersForScenarioRun(String scenarioName)
         {
+            String IsSecureEventStoreEnvVar = Environment.GetEnvironmentVariable("IsSecureEventStore");
+
+            if (IsSecureEventStoreEnvVar == null)
+            {
+                // No env var set so default to insecure
+                this.IsSecureEventStore = false;
+            }
+            else
+            {
+                // We have the env var so we set the secure flag based on the value in the env var
+                Boolean.TryParse(IsSecureEventStoreEnvVar, out Boolean isSecure);
+                this.IsSecureEventStore = isSecure;
+            }
+
             this.HostTraceFolder = FdOs.IsWindows() ? $"D:\\home\\txnproc\\trace\\{scenarioName}" : $"//home//txnproc//trace//{scenarioName}";
 
             Logging.Enabled();
@@ -115,12 +147,15 @@
             this.TestNetworks.Add(testNetwork);
 
             IContainerService eventStoreContainer = 
-                this.SetupEventStoreContainer("eventstore/eventstore:21.10.0-buster-slim", testNetwork, true);
+                this.SetupEventStoreContainer("eventstore/eventstore:21.10.0-buster-slim", testNetwork, true, this.IsSecureEventStore);
+            this.EventStoreHttpPort = eventStoreContainer.ToHostExposedEndpoint($"{DockerHelper.EventStoreHttpDockerPort}/tcp").Port;
 
-            String eventStoreAddress =
-                $"esdb://admin:changeit@{this.EventStoreContainerName}:{DockerHelper.EventStoreHttpDockerPort}?tls=false";
+            String insecureEventStoreEnvironmentVariable = "EventStoreSettings:Insecure=True";
+            if (this.IsSecureEventStore)
+            {
+                insecureEventStoreEnvironmentVariable = "EventStoreSettings:Insecure=False";
+            }
 
-            String insecureEventStoreEnvironmentVariable = "EventStoreSettings:Insecure=true";
             String persistentSubscriptionPollingInSeconds = "AppSettings:PersistentSubscriptionPollingInSeconds=10";
             String internalSubscriptionServiceCacheDuration = "AppSettings:InternalSubscriptionServiceCacheDuration=0";
 
