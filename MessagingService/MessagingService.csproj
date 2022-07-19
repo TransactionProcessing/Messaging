@@ -27,7 +27,6 @@
     <PackageReference Include="Swashbuckle.AspNetCore.Swagger" Version="6.3.1" />
     <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="6.3.1" />
     <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="6.3.1" />
-	  <PackageReference Include="EventStore.Client" Version="22.0.0-preview" />
   </ItemGroup>
 
   <ItemGroup>
