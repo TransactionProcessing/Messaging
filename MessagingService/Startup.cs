@@ -99,8 +99,7 @@ namespace MessagingService
             settings.ConnectivitySettings = EventStoreClientConnectivitySettings.Default;
             settings.ConnectivitySettings.Address = new Uri(Startup.Configuration.GetValue<String>("EventStoreSettings:ConnectionString"));
             settings.ConnectivitySettings.Insecure = Startup.Configuration.GetValue<Boolean>("EventStoreSettings:Insecure");
-
-
+            
             settings.DefaultCredentials = new UserCredentials(Startup.Configuration.GetValue<String>("EventStoreSettings:UserName"),
                                                               Startup.Configuration.GetValue<String>("EventStoreSettings:Password"));
             Startup.EventStoreClientSettings = settings;

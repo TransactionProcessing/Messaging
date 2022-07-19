@@ -32,8 +32,7 @@ public class DomainEventHandlerRegistry : ServiceRegistry
                                                                             IDomainEventHandler handler = container.GetService(type) as IDomainEventHandler;
                                                                             return handler;
                                                                         });
-
-
+        
         this.AddSingleton<IDomainEventHandlerResolver, DomainEventHandlerResolver>();
     }
 }
