@@ -53,7 +53,7 @@ public class RepositoryRegistry: ServiceRegistry
 
             this.AddEventStoreProjectionManagementClient(Startup.ConfigureEventStoreSettings);
             this.AddEventStorePersistentSubscriptionsClient(Startup.ConfigureEventStoreSettings);
-
+            
             if (insecureES)
             {
                 this.AddInSecureEventStoreClient(Startup.EventStoreClientSettings.ConnectivitySettings.Address, CreateHttpMessageHandler);
