@@ -26,12 +26,11 @@
     public class MiddlewareRegistry : ServiceRegistry
     {
         public MiddlewareRegistry() {
-
             this.AddHealthChecks()
-                    .AddEventStore(Startup.EventStoreClientSettings,
-                                   name: "Eventstore",
-                                   failureStatus: HealthStatus.Unhealthy,
-                                   tags: new string[] { "db", "eventstore" });
+                .AddEventStore(Startup.EventStoreClientSettings,
+                               name: "Eventstore",
+                               failureStatus: HealthStatus.Unhealthy,
+                               tags: new string[] { "db", "eventstore" });
 
             this.AddSwaggerGen(c =>
                                {
