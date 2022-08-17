@@ -3,8 +3,12 @@
     using System;
     using System.IO;
     using System.Net.Http;
+    using System.Net.Security;
     using System.Reflection;
+    using System.Threading.Tasks;
+    using System.Threading;
     using Common;
+    using EventStore.Client;
     using Lamar;
     using Microsoft.AspNetCore.Authentication.JwtBearer;
     using Microsoft.Extensions.DependencyInjection;
@@ -12,17 +16,19 @@
     using Microsoft.OpenApi.Models;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Serialization;
+    using Shared.EventStore.EventStore;
     using Shared.EventStore.Extensions;
     using Shared.General;
     using Swashbuckle.AspNetCore.Filters;
+    using System.Collections.Generic;
+    using System.Linq;
 
     public class MiddlewareRegistry : ServiceRegistry
     {
-        public MiddlewareRegistry()
-        {
+        public MiddlewareRegistry() {
+
             this.AddHealthChecks()
                     .AddEventStore(Startup.EventStoreClientSettings,
-                                   userCredentials: Startup.EventStoreClientSettings.DefaultCredentials,
                                    name: "Eventstore",
                                    failureStatus: HealthStatus.Unhealthy,
                                    tags: new string[] { "db", "eventstore" });
