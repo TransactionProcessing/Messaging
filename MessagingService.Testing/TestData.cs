@@ -9,6 +9,7 @@
     using EmailMessage.DomainEvents;
     using EmailMessageAggregate;
     using Microsoft.EntityFrameworkCore.SqlServer.Query.Internal;
+    using Shared.DomainDrivenDesign.EventSourcing;
     using SMSMessage.DomainEvents;
     using SMSMessageAggregate;
     using EmailMessageStatus = BusinessLogic.Services.EmailServices.MessageStatus;
@@ -201,15 +202,17 @@
         public static String FileName = "FileName.pdf";
         public static FileType FileTypePDF = FileType.PDF;
 
+        public static ResendEmailRequest ResendEmailRequest => ResendEmailRequest.Create(TestData.ConnectionIdentifier,
+                                                                                         TestData.MessageId);
 
         public static SendEmailRequest SendEmailRequestNoAttachments => SendEmailRequest.Create(TestData.ConnectionIdentifier,
-                                                                                   TestData.MessageId,
-                                                                                   TestData.FromAddress,
-                                                                                   TestData.ToAddresses,
-                                                                                   TestData.Subject,
-                                                                                   TestData.Body,
-                                                                                   TestData.IsHtmlTrue,
-                                                                                   TestData.EmptyEmailAttachments);
+                                                                                                TestData.MessageId,
+                                                                                                TestData.FromAddress,
+                                                                                                TestData.ToAddresses,
+                                                                                                TestData.Subject,
+                                                                                                TestData.Body,
+                                                                                                TestData.IsHtmlTrue,
+                                                                                                TestData.EmptyEmailAttachments);
 
         public static SendEmailRequest SendEmailRequestWithAttachments => SendEmailRequest.Create(TestData.ConnectionIdentifier,
                                                                                    TestData.MessageId,
@@ -262,6 +265,13 @@
             smsAggregate.SendRequestToProvider(TestData.Sender, TestData.Destination, TestData.Message);
             smsAggregate.ReceiveResponseFromProvider(TestData.ProviderSMSReference);
             return smsAggregate;
+        }
+    }
+
+    public record TestEvent : DomainEvent
+    {
+        public TestEvent(Guid aggregateId,
+                 Guid eventId) : base(aggregateId, eventId) {
         }
     }
 }

@@ -92,6 +92,32 @@
             return response;
         }
 
+        public async Task ResendEmail(String accessToken,
+                                ResendEmailRequest resendEmailRequest,
+                                CancellationToken cancellationToken) {
+            String requestUri = this.BuildRequestUrl("/api/email/resend");
+
+            try {
+                String requestSerialised = JsonConvert.SerializeObject(resendEmailRequest);
+
+                StringContent httpContent = new StringContent(requestSerialised, Encoding.UTF8, "application/json");
+
+                // Add the access token to the client headers
+                this.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+
+                // Make the Http Call here
+                HttpResponseMessage httpResponse = await this.HttpClient.PostAsync(requestUri, httpContent, cancellationToken);
+
+                httpResponse.EnsureSuccessStatusCode();
+            }
+            catch(Exception ex) {
+                // An exception has occurred, add some additional information to the message
+                Exception exception = new Exception("Error re-sending email message.", ex);
+
+                throw exception;
+            }
+        }
+
         /// <summary>
         /// Sends the SMS.
         /// </summary>

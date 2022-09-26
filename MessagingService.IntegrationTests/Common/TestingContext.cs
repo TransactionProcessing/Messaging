@@ -39,7 +39,15 @@ namespace MessagingService.IntegrationTests.Common
             return clientDetails;
         }
 
-        public Dictionary<String, SendEmailResponse> EmailResponses;
+        public void AddEmailResponse(String identifier, SendEmailResponse response) {
+            this.EmailResponses.Add(identifier, response);
+        }
+
+        public SendEmailResponse GetEmailResponse(String identifier) {
+            return this.EmailResponses[identifier];
+        }
+
+        private Dictionary<String, SendEmailResponse> EmailResponses;
     }
 
     public class ClientDetails

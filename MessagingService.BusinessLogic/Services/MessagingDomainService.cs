@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Net.Mail;
     using System.Threading;
     using System.Threading.Tasks;
     using EmailMessage.DomainEvents;
@@ -138,6 +139,31 @@
 
             // Save Changes to persistance
             await this.SmsAggregateRepository.SaveChanges(smsAggregate, cancellationToken);
+        }
+
+        public async  Task ResendEmailMessage(Guid connectionIdentifier,
+                                     Guid messageId,
+                                     CancellationToken cancellationToken) {
+            // Rehydrate Email Message aggregate
+            EmailAggregate emailAggregate = await this.EmailAggregateRepository.GetLatestVersion(messageId, cancellationToken);
+
+            // re-send message to provider (record event)
+            emailAggregate.ResendRequestToProvider();
+
+            // Make call to Email provider here
+            EmailServiceProxyResponse emailResponse =
+                await this.EmailServiceProxy.SendEmail(messageId, emailAggregate.FromAddress, 
+                                                       emailAggregate.GetToAddresses(),
+                                                       emailAggregate.Subject,
+                                                       emailAggregate.Body, 
+                                                       emailAggregate.IsHtml, null,
+                                                       cancellationToken);
+
+            // response message from provider (record event)
+            emailAggregate.ReceiveResponseFromProvider(emailResponse.RequestIdentifier, emailResponse.EmailIdentifier);
+
+            // Save Changes to persistance
+            await this.EmailAggregateRepository.SaveChanges(emailAggregate, cancellationToken);
         }
     }
 
