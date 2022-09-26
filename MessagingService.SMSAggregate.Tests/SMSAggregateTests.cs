@@ -289,7 +289,6 @@ namespace MessagingService.SMSAggregate.Tests
             Logger.Initialise(NullLogger.Instance);
             SMSAggregate smsAggregate = new SMSAggregate();
             Should.Throw<Exception>(() => smsAggregate.PlayEvent(new TestEvent(Guid.NewGuid(), Guid.NewGuid())));
-
         }
     }
 }

@@ -95,7 +95,6 @@
         public async Task ResendEmail(String accessToken,
                                 ResendEmailRequest resendEmailRequest,
                                 CancellationToken cancellationToken) {
-
             String requestUri = this.BuildRequestUrl("/api/email/resend");
 
             try {

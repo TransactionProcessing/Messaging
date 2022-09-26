@@ -39,11 +39,9 @@ namespace MessagingService.BusinessLogic.Tests.RequestHandlers
 
             ResendEmailRequest command = TestData.ResendEmailRequest;
 
-            Should.NotThrow(async () =>
-                            {
+            Should.NotThrow(async () => {
                                 await handler.Handle(command, CancellationToken.None);
                             });
-
         }
 
         [Fact]

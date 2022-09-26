@@ -6,7 +6,6 @@ using System.Net.Http;
 using EventStore.Client;
 using Microsoft.Extensions.DependencyInjection;
 
-
 public static class Extensions
 {
     [ExcludeFromCodeCoverage]

@@ -50,7 +50,6 @@ namespace MessagingService.IntegrationTests.Email
             }
         }
 
-
         private async Task SendEmail(TableRow tableRow)
         {
             String fromAddress = SpecflowTableHelper.GetStringRowValue(tableRow, "FromAddress");

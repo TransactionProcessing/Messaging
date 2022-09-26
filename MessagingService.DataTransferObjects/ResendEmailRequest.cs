@@ -7,10 +7,6 @@
     [ExcludeFromCodeCoverage]
     public class ResendEmailRequest
     {
-        public ResendEmailRequest() {
-
-        }
-
         [JsonProperty("message_id")]
         public Guid MessageId { get; set; }
 
