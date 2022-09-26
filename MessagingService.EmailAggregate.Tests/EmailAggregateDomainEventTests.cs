@@ -108,5 +108,15 @@ namespace MessagingService.EmailAggregate.Tests
             messageMarkedAsSpamEvent.ProviderStatus.ShouldBe(TestData.ProviderStatusDescription);
             messageMarkedAsSpamEvent.SpamDateTime.ShouldBe(TestData.SpamDateTime);
         }
+
+        [Fact]
+        public void RequestResentToEmailProviderEvent_CanBeCreated_IsCreated() {
+            RequestResentToEmailProviderEvent requestResentToEmailProviderEvent = new RequestResentToEmailProviderEvent(TestData.MessageId);
+
+            requestResentToEmailProviderEvent.ShouldNotBeNull();
+            requestResentToEmailProviderEvent.AggregateId.ShouldBe(TestData.MessageId);
+            requestResentToEmailProviderEvent.EventId.ShouldNotBe(Guid.Empty);
+            requestResentToEmailProviderEvent.MessageId.ShouldBe(TestData.MessageId);
+        }
     }
 }

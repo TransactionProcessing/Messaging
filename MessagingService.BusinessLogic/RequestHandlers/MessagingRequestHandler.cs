@@ -11,7 +11,9 @@
     /// 
     /// </summary>
     /// <seealso cref="MediatR.IRequestHandler{MessagingService.BusinessLogic.Requests.SendEmailRequest, System.String}" />
-    public class MessagingRequestHandler : IRequestHandler<SendEmailRequest, String>, IRequestHandler<SendSMSRequest, String>
+    public class MessagingRequestHandler : IRequestHandler<SendEmailRequest, String>, 
+                                           IRequestHandler<SendSMSRequest, String>,
+                                           IRequestHandler<ResendEmailRequest,String>
     {
         #region Fields
 
@@ -74,5 +76,12 @@
         }
 
         #endregion
+
+        public async Task<String> Handle(ResendEmailRequest request,
+                                   CancellationToken cancellationToken) {
+            await this.MessagingDomainService.ResendEmailMessage(request.ConnectionIdentifier, request.MessageId, cancellationToken);
+
+            return String.Empty;
+        }
     }
 }

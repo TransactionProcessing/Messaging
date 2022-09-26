@@ -143,14 +143,12 @@ namespace MessagingService.IntegrationTests.Email
         [Xunit.SkippableFactAttribute(DisplayName="Send Email")]
         [Xunit.TraitAttribute("FeatureTitle", "SendEmail")]
         [Xunit.TraitAttribute("Description", "Send Email")]
-        [Xunit.TraitAttribute("Category", "PRTest")]
         public void SendEmail()
         {
-            string[] tagsOfScenario = new string[] {
-                    "PRTest"};
+            string[] tagsOfScenario = ((string[])(null));
             System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
             TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Send Email", null, tagsOfScenario, argumentsOfScenario, featureTags);
-#line 23
+#line 22
 this.ScenarioInitialize(scenarioInfo);
 #line hidden
             if ((TagHelper.ContainsIgnoreTag(tagsOfScenario) || TagHelper.ContainsIgnoreTag(featureTags)))
@@ -181,8 +179,65 @@ this.FeatureBackground();
                             "Test Email 1",
                             "Test Body",
                             "true"});
-#line 24
+#line 23
  testRunner.Given("I send the following Email Messages", ((string)(null)), table5, "Given ");
+#line hidden
+            }
+            this.ScenarioCleanup();
+        }
+        
+        [Xunit.SkippableFactAttribute(DisplayName="Resend Email")]
+        [Xunit.TraitAttribute("FeatureTitle", "SendEmail")]
+        [Xunit.TraitAttribute("Description", "Resend Email")]
+        [Xunit.TraitAttribute("Category", "PRTest")]
+        public void ResendEmail()
+        {
+            string[] tagsOfScenario = new string[] {
+                    "PRTest"};
+            System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
+            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Resend Email", null, tagsOfScenario, argumentsOfScenario, featureTags);
+#line 29
+this.ScenarioInitialize(scenarioInfo);
+#line hidden
+            if ((TagHelper.ContainsIgnoreTag(tagsOfScenario) || TagHelper.ContainsIgnoreTag(featureTags)))
+            {
+                testRunner.SkipScenario();
+            }
+            else
+            {
+                this.ScenarioStart();
+#line 4
+this.FeatureBackground();
+#line hidden
+                TechTalk.SpecFlow.Table table6 = new TechTalk.SpecFlow.Table(new string[] {
+                            "FromAddress",
+                            "ToAddresses",
+                            "Subject",
+                            "Body",
+                            "IsHtml"});
+                table6.AddRow(new string[] {
+                            "fromaddress@testemail.com",
+                            "toaddress1@testemail.com",
+                            "Test Email 1",
+                            "Test Body",
+                            "true"});
+                table6.AddRow(new string[] {
+                            "fromaddress@testemail.com",
+                            "toaddress1@testemail.com,toaddress2@testemail.com",
+                            "Test Email 1",
+                            "Test Body",
+                            "true"});
+#line 30
+ testRunner.Given("I send the following Email Messages", ((string)(null)), table6, "Given ");
+#line hidden
+                TechTalk.SpecFlow.Table table7 = new TechTalk.SpecFlow.Table(new string[] {
+                            "ToAddresses"});
+                table7.AddRow(new string[] {
+                            "toaddress1@testemail.com"});
+                table7.AddRow(new string[] {
+                            "toaddress1@testemail.com,toaddress2@testemail.com"});
+#line 34
+ testRunner.When("I resend the following messages", ((string)(null)), table7, "When ");
 #line hidden
             }
             this.ScenarioCleanup();

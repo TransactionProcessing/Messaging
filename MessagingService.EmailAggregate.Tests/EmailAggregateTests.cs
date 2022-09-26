@@ -4,6 +4,7 @@ namespace MessagingService.EmailAggregate.Tests
 {
     using System;
     using EmailMessageAggregate;
+    using Shared.Logger;
     using Shouldly;
     using Testing;
 
@@ -28,7 +29,8 @@ namespace MessagingService.EmailAggregate.Tests
             emailAggregate.Subject.ShouldBe(TestData.Subject);
             emailAggregate.Body.ShouldBe(TestData.Body);
             emailAggregate.IsHtml.ShouldBe(TestData.IsHtmlTrue);
-            emailAggregate.MessageStatus.ShouldBe(MessageStatus.InProgress);
+            MessageStatus messageStatus = emailAggregate.GetDeliveryStatus();
+            messageStatus.ShouldBe(MessageStatus.InProgress);
             // TODO: Get Recipients
         }
 
@@ -59,7 +61,8 @@ namespace MessagingService.EmailAggregate.Tests
 
             emailAggregate.ProviderRequestReference.ShouldBe(TestData.ProviderRequestReference);
             emailAggregate.ProviderEmailReference.ShouldBe(TestData.ProviderEmailReference);
-            emailAggregate.MessageStatus.ShouldBe(MessageStatus.Sent);
+            MessageStatus messageStatus = emailAggregate.GetDeliveryStatus();
+            messageStatus.ShouldBe(MessageStatus.Sent);
         }
 
         [Fact]
@@ -71,8 +74,8 @@ namespace MessagingService.EmailAggregate.Tests
             emailAggregate.ReceiveResponseFromProvider(TestData.ProviderRequestReference, TestData.ProviderEmailReference);
 
             emailAggregate.MarkMessageAsDelivered(TestData.ProviderStatusDescription, TestData.DeliveredDateTime);
-
-            emailAggregate.MessageStatus.ShouldBe(MessageStatus.Delivered);
+            MessageStatus messageStatus = emailAggregate.GetDeliveryStatus();
+            messageStatus.ShouldBe(MessageStatus.Delivered);
         }
 
         [Theory]
@@ -130,8 +133,8 @@ namespace MessagingService.EmailAggregate.Tests
             emailAggregate.ReceiveResponseFromProvider(TestData.ProviderRequestReference, TestData.ProviderEmailReference);
 
             emailAggregate.MarkMessageAsRejected(TestData.ProviderStatusDescription, TestData.RejectedDateTime);
-
-            emailAggregate.MessageStatus.ShouldBe(MessageStatus.Rejected);
+            MessageStatus messageStatus = emailAggregate.GetDeliveryStatus();
+            messageStatus.ShouldBe(MessageStatus.Rejected);
         }
 
         [Theory]
@@ -188,8 +191,8 @@ namespace MessagingService.EmailAggregate.Tests
             emailAggregate.ReceiveResponseFromProvider(TestData.ProviderRequestReference, TestData.ProviderEmailReference);
 
             emailAggregate.MarkMessageAsFailed(TestData.ProviderStatusDescription, TestData.FailedDateTime);
-
-            emailAggregate.MessageStatus.ShouldBe(MessageStatus.Failed);
+            MessageStatus messageStatus = emailAggregate.GetDeliveryStatus();
+            messageStatus.ShouldBe(MessageStatus.Failed);
         }
 
         [Theory]
@@ -246,8 +249,8 @@ namespace MessagingService.EmailAggregate.Tests
             emailAggregate.ReceiveResponseFromProvider(TestData.ProviderRequestReference, TestData.ProviderEmailReference);
 
             emailAggregate.MarkMessageAsBounced(TestData.ProviderStatusDescription, TestData.BouncedDateTime);
-
-            emailAggregate.MessageStatus.ShouldBe(MessageStatus.Bounced);
+            MessageStatus messageStatus = emailAggregate.GetDeliveryStatus();
+            messageStatus.ShouldBe(MessageStatus.Bounced);
         }
 
         [Theory]
@@ -304,8 +307,8 @@ namespace MessagingService.EmailAggregate.Tests
             emailAggregate.ReceiveResponseFromProvider(TestData.ProviderRequestReference, TestData.ProviderEmailReference);
 
             emailAggregate.MarkMessageAsSpam(TestData.ProviderStatusDescription, TestData.SpamDateTime);
-
-            emailAggregate.MessageStatus.ShouldBe(MessageStatus.Spam);
+            MessageStatus messageStatus = emailAggregate.GetDeliveryStatus();
+            messageStatus.ShouldBe(MessageStatus.Spam);
         }
 
         [Theory]
@@ -351,6 +354,104 @@ namespace MessagingService.EmailAggregate.Tests
             {
                 emailAggregate.MarkMessageAsSpam(TestData.ProviderStatusDescription, TestData.SpamDateTime);
             });
+        }
+
+        
+        
+        [Fact]
+        public void EmailAggregate_ResendRequestToProvider_IsSent_MessageIsResent()
+        {
+            EmailAggregate emailAggregate = EmailAggregate.Create(TestData.MessageId);
+
+            emailAggregate.SendRequestToProvider(TestData.FromAddress, TestData.ToAddresses, TestData.Subject, TestData.Body, TestData.IsHtmlTrue);
+            emailAggregate.ReceiveResponseFromProvider(TestData.ProviderRequestReference, TestData.ProviderEmailReference);
+            emailAggregate.ResendRequestToProvider();
+            
+            emailAggregate.ResendCount.ShouldBe(1);
+            emailAggregate.GetDeliveryStatus(1).ShouldBe(MessageStatus.InProgress);
+        }
+
+        [Fact]
+        public void EmailAggregate_ResendRequestToProvider_IsDelivered_MessageIsResent()
+        {
+            EmailAggregate emailAggregate = EmailAggregate.Create(TestData.MessageId);
+
+            emailAggregate.SendRequestToProvider(TestData.FromAddress, TestData.ToAddresses, TestData.Subject, TestData.Body, TestData.IsHtmlTrue);
+            emailAggregate.ReceiveResponseFromProvider(TestData.ProviderRequestReference, TestData.ProviderEmailReference);
+            emailAggregate.MarkMessageAsDelivered(TestData.ProviderStatusDescription, TestData.DeliveredDateTime);
+            emailAggregate.ResendRequestToProvider();
+
+            emailAggregate.ResendCount.ShouldBe(1);
+            emailAggregate.GetDeliveryStatus(1).ShouldBe(MessageStatus.InProgress);
+        }
+
+        [Fact]
+        public void EmailAggregate_ResendRequestToProvider_NotSet_ErrorThrown()
+        {
+            EmailAggregate emailAggregate = EmailAggregate.Create(TestData.MessageId);
+
+            Should.Throw<InvalidOperationException>(() => emailAggregate.ResendRequestToProvider());
+        }
+
+        [Fact]
+        public void EmailAggregate_ResendRequestToProvider_InProgress_ErrorThrown()
+        {
+            EmailAggregate emailAggregate = EmailAggregate.Create(TestData.MessageId);
+
+            emailAggregate.SendRequestToProvider(TestData.FromAddress, TestData.ToAddresses, TestData.Subject, TestData.Body, TestData.IsHtmlTrue);
+            Should.Throw<InvalidOperationException>(() => emailAggregate.ResendRequestToProvider());
+        }
+
+        [Fact]
+        public void EmailAggregate_ResendRequestToProvider_Rejected_ErrorThrown()
+        {
+            EmailAggregate emailAggregate = EmailAggregate.Create(TestData.MessageId);
+
+            emailAggregate.SendRequestToProvider(TestData.FromAddress, TestData.ToAddresses, TestData.Subject, TestData.Body, TestData.IsHtmlTrue);
+            emailAggregate.ReceiveResponseFromProvider(TestData.ProviderRequestReference, TestData.ProviderEmailReference);
+            emailAggregate.MarkMessageAsRejected(TestData.ProviderStatusDescription, TestData.RejectedDateTime);
+            Should.Throw<InvalidOperationException>(() => emailAggregate.ResendRequestToProvider());
+        }
+
+        [Fact]
+        public void EmailAggregate_ResendRequestToProvider_Failed_ErrorThrown()
+        {
+            EmailAggregate emailAggregate = EmailAggregate.Create(TestData.MessageId);
+
+            emailAggregate.SendRequestToProvider(TestData.FromAddress, TestData.ToAddresses, TestData.Subject, TestData.Body, TestData.IsHtmlTrue);
+            emailAggregate.ReceiveResponseFromProvider(TestData.ProviderRequestReference, TestData.ProviderEmailReference);
+            emailAggregate.MarkMessageAsFailed(TestData.ProviderStatusDescription, TestData.FailedDateTime);
+            Should.Throw<InvalidOperationException>(() => emailAggregate.ResendRequestToProvider());
+        }
+
+        [Fact]
+        public void EmailAggregate_ResendRequestToProvider_Spam_ErrorThrown()
+        {
+            EmailAggregate emailAggregate = EmailAggregate.Create(TestData.MessageId);
+
+            emailAggregate.SendRequestToProvider(TestData.FromAddress, TestData.ToAddresses, TestData.Subject, TestData.Body, TestData.IsHtmlTrue);
+            emailAggregate.ReceiveResponseFromProvider(TestData.ProviderRequestReference, TestData.ProviderEmailReference);
+            emailAggregate.MarkMessageAsSpam(TestData.ProviderStatusDescription, TestData.SpamDateTime);
+            Should.Throw<InvalidOperationException>(() => emailAggregate.ResendRequestToProvider());
+        }
+
+        [Fact]
+        public void EmailAggregate_ResendRequestToProvider_Bounced_ErrorThrown()
+        {
+            EmailAggregate emailAggregate = EmailAggregate.Create(TestData.MessageId);
+
+            emailAggregate.SendRequestToProvider(TestData.FromAddress, TestData.ToAddresses, TestData.Subject, TestData.Body, TestData.IsHtmlTrue);
+            emailAggregate.ReceiveResponseFromProvider(TestData.ProviderRequestReference, TestData.ProviderEmailReference);
+            emailAggregate.MarkMessageAsBounced(TestData.ProviderStatusDescription, TestData.BouncedDateTime);
+            Should.Throw<InvalidOperationException>(() => emailAggregate.ResendRequestToProvider());
+        }
+
+        [Fact]
+        public void EmailAggregate_PlayEvent_UnsupportedEvent_ErrorThrown() {
+            Logger.Initialise(NullLogger.Instance);
+            EmailAggregate emailAggregate = new EmailAggregate();
+            Should.Throw<Exception>(() => emailAggregate.PlayEvent(new TestEvent(Guid.NewGuid(), Guid.NewGuid())));
+
         }
     }
 }

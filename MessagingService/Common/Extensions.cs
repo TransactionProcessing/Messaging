@@ -1,12 +1,15 @@
 ﻿namespace MessagingService.Common;
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Net.Http;
 using EventStore.Client;
 using Microsoft.Extensions.DependencyInjection;
 
+
 public static class Extensions
 {
+    [ExcludeFromCodeCoverage]
     public static IServiceCollection AddInSecureEventStoreClient(
         this IServiceCollection services,
         Uri address,

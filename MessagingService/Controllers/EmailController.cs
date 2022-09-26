@@ -1,5 +1,6 @@
 ﻿using SendEmailRequestDTO = MessagingService.DataTransferObjects.SendEmailRequest;
 using SendEmailResponseDTO = MessagingService.DataTransferObjects.SendEmailResponse;
+using ResendEmailRequestDTO = MessagingService.DataTransferObjects.ResendEmailRequest;
 
 namespace MessagingService.Controllers
 {
@@ -103,6 +104,30 @@ namespace MessagingService.Controllers
                                 {
                                     MessageId = messageId
                                 });
+        }
+
+        [HttpPost]
+        [Route("resend")]
+        [SwaggerResponse(202, "Accepted", typeof(SendEmailResponseDTO))]
+        [SwaggerResponseExample(202, typeof(SendEmailResponseExample))]
+        public async Task<IActionResult> ResendEmail([FromBody] ResendEmailRequestDTO resendEmailRequest,
+                                                   CancellationToken cancellationToken)
+        {
+            // Reject password tokens
+            if (ClaimsHelper.IsPasswordToken(this.User))
+            {
+                return this.Forbid();
+            }
+
+            // Create the command
+            ResendEmailRequest request = ResendEmailRequest.Create(resendEmailRequest.ConnectionIdentifier,
+                                                               resendEmailRequest.MessageId);
+            
+            // Route the command
+            await this.Mediator.Send(request, cancellationToken);
+
+            // return the result
+            return this.Accepted($"{EmailController.ControllerRoute}/{resendEmailRequest.MessageId}");
         }
 
         private FileType ConvertFileType(DataTransferObjects.FileType emailAttachmentFileType)

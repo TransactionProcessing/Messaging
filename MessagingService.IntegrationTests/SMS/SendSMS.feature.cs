@@ -85,53 +85,53 @@ namespace MessagingService.IntegrationTests.SMS
         {
 #line 4
 #line hidden
-            TechTalk.SpecFlow.Table table6 = new TechTalk.SpecFlow.Table(new string[] {
+            TechTalk.SpecFlow.Table table8 = new TechTalk.SpecFlow.Table(new string[] {
                         "Name",
                         "DisplayName",
                         "Description"});
-            table6.AddRow(new string[] {
+            table8.AddRow(new string[] {
                         "messagingService",
                         "Messaging REST Scope",
                         "A scope for Messaging REST"});
 #line 6
- testRunner.Given("I create the following api scopes", ((string)(null)), table6, "Given ");
+ testRunner.Given("I create the following api scopes", ((string)(null)), table8, "Given ");
 #line hidden
-            TechTalk.SpecFlow.Table table7 = new TechTalk.SpecFlow.Table(new string[] {
+            TechTalk.SpecFlow.Table table9 = new TechTalk.SpecFlow.Table(new string[] {
                         "ResourceName",
                         "DisplayName",
                         "Secret",
                         "Scopes",
                         "UserClaims"});
-            table7.AddRow(new string[] {
+            table9.AddRow(new string[] {
                         "messagingService",
                         "Messaging REST",
                         "Secret1",
                         "messagingService",
                         ""});
 #line 10
- testRunner.Given("the following api resources exist", ((string)(null)), table7, "Given ");
+ testRunner.Given("the following api resources exist", ((string)(null)), table9, "Given ");
 #line hidden
-            TechTalk.SpecFlow.Table table8 = new TechTalk.SpecFlow.Table(new string[] {
+            TechTalk.SpecFlow.Table table10 = new TechTalk.SpecFlow.Table(new string[] {
                         "ClientId",
                         "ClientName",
                         "Secret",
                         "AllowedScopes",
                         "AllowedGrantTypes"});
-            table8.AddRow(new string[] {
+            table10.AddRow(new string[] {
                         "serviceClient",
                         "Service Client",
                         "Secret1",
                         "messagingService",
                         "client_credentials"});
 #line 14
- testRunner.Given("the following clients exist", ((string)(null)), table8, "Given ");
+ testRunner.Given("the following clients exist", ((string)(null)), table10, "Given ");
 #line hidden
-            TechTalk.SpecFlow.Table table9 = new TechTalk.SpecFlow.Table(new string[] {
+            TechTalk.SpecFlow.Table table11 = new TechTalk.SpecFlow.Table(new string[] {
                         "ClientId"});
-            table9.AddRow(new string[] {
+            table11.AddRow(new string[] {
                         "serviceClient"});
 #line 18
- testRunner.Given("I have a token to access the messaging service resource", ((string)(null)), table9, "Given ");
+ testRunner.Given("I have a token to access the messaging service resource", ((string)(null)), table11, "Given ");
 #line hidden
         }
         
@@ -163,16 +163,16 @@ this.ScenarioInitialize(scenarioInfo);
 #line 4
 this.FeatureBackground();
 #line hidden
-                TechTalk.SpecFlow.Table table10 = new TechTalk.SpecFlow.Table(new string[] {
+                TechTalk.SpecFlow.Table table12 = new TechTalk.SpecFlow.Table(new string[] {
                             "Sender",
                             "Destination",
                             "Message"});
-                table10.AddRow(new string[] {
+                table12.AddRow(new string[] {
                             "TestSender",
                             "07777777771",
                             "TestSMSMessage"});
 #line 24
- testRunner.Given("I send the following SMS Messages", ((string)(null)), table10, "Given ");
+ testRunner.Given("I send the following SMS Messages", ((string)(null)), table12, "Given ");
 #line hidden
             }
             this.ScenarioCleanup();

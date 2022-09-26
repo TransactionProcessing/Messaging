@@ -32,6 +32,21 @@ namespace MessagingService.BusinessLogic.Tests.RequestHandlers
         }
 
         [Fact]
+        public void MessagingRequestHandler_ResendEmailRequest_IsHandled()
+        {
+            Mock<IMessagingDomainService> messagingDomainService = new Mock<IMessagingDomainService>();
+            MessagingRequestHandler handler = new MessagingRequestHandler(messagingDomainService.Object);
+
+            ResendEmailRequest command = TestData.ResendEmailRequest;
+
+            Should.NotThrow(async () =>
+                            {
+                                await handler.Handle(command, CancellationToken.None);
+                            });
+
+        }
+
+        [Fact]
         public void MessagingRequestHandler_SendSMSRequest_IsHandled()
         {
             Mock<IMessagingDomainService> messagingDomainService = new Mock<IMessagingDomainService>();

@@ -12,8 +12,10 @@ namespace MessagingService.IntegrationTests.Email
     using System.Threading.Tasks;
     using Common;
     using DataTransferObjects;
+    using global::Shared.IntegrationTesting;
     using Newtonsoft.Json;
     using Shouldly;
+    using SpecflowTableHelper = Common.SpecflowTableHelper;
 
     [Binding]
     [Scope(Tag = "email")]
@@ -39,6 +41,16 @@ namespace MessagingService.IntegrationTests.Email
             }
         }
 
+        [When(@"I resend the following messages")]
+        public async Task WhenIResendTheFollowingMessages(Table table)
+        {
+            foreach (TableRow tableRow in table.Rows)
+            {
+                await this.ResendEmail(tableRow);
+            }
+        }
+
+
         private async Task SendEmail(TableRow tableRow)
         {
             String fromAddress = SpecflowTableHelper.GetStringRowValue(tableRow, "FromAddress");
@@ -60,6 +72,28 @@ namespace MessagingService.IntegrationTests.Email
             SendEmailResponse sendEmailResponse = await this.TestingContext.DockerHelper.MessagingServiceClient.SendEmail(this.TestingContext.AccessToken, request, CancellationToken.None).ConfigureAwait(false);
 
             sendEmailResponse.MessageId.ShouldNotBe(Guid.Empty);
+
+            this.TestingContext.AddEmailResponse(toAddresses, sendEmailResponse);
+        }
+
+        private async Task ResendEmail(TableRow tableRow)
+        {
+            String toAddresses = SpecflowTableHelper.GetStringRowValue(tableRow, "ToAddresses");
+            SendEmailResponse sendEmailResponse = this.TestingContext.GetEmailResponse(toAddresses);
+            
+            ResendEmailRequest request = new ResendEmailRequest()
+                                       {
+                                           ConnectionIdentifier = Guid.NewGuid(),
+                                           MessageId = sendEmailResponse.MessageId
+                                       };
+
+            await Retry.For(async () => {
+                          Should.NotThrow(async () => {
+                                              await this.TestingContext.DockerHelper.MessagingServiceClient.ResendEmail(this.TestingContext.AccessToken,
+                                                  request,
+                                                  CancellationToken.None);
+                                          });
+                      });
         }
     }
 }

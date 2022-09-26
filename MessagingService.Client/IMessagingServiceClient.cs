@@ -23,6 +23,10 @@
                                           SendEmailRequest request,
                                           CancellationToken cancellationToken);
 
+        Task ResendEmail(String accessToken,
+                         ResendEmailRequest request,
+                         CancellationToken cancellationToken);
+
         /// <summary>
         /// Sends the SMS.
         /// </summary>

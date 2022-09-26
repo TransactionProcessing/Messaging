@@ -205,6 +205,15 @@
             HttpClient httpClient = new HttpClient(clientHandler);
             this.SecurityServiceClient = new SecurityServiceClient(SecurityServiceBaseAddressResolver, httpClient);
             this.MessagingServiceClient = new MessagingServiceClient(MessagingServiceBaseAddressResolver, httpClient);
+
+            await PopulateSubscriptionServiceConfiguration(this.TestingContext.DockerHelper.IsSecureEventStore);
+        }
+
+        public async Task PopulateSubscriptionServiceConfiguration(Boolean isSecureEventStore)
+        {
+            List<(String streamName, String groupName, Int32 maxRetries)> subscriptions = new List<(String streamName, String groupName, Int32 maxRetries)>();
+            subscriptions.Add(($"$et-ResponseReceivedFromEmailProviderEvent", "Messaging", 2));
+            await this.PopulateSubscriptionServiceConfiguration(this.EventStoreHttpPort, subscriptions, isSecureEventStore);
         }
 
         /// <summary>

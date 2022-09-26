@@ -55,5 +55,13 @@ namespace MessagingService.BusinessLogic.Tests.Requests
             request.Destination.ShouldBe(TestData.Destination);
             request.Message.ShouldBe(TestData.Message);
         }
+
+        [Fact]
+        public void ResendEmailRequest_CanBeCreated_IsCreated() {
+            ResendEmailRequest request = ResendEmailRequest.Create(TestData.ConnectionIdentifier, TestData.MessageId);
+            request.ShouldNotBeNull();
+            request.ConnectionIdentifier.ShouldBe(TestData.ConnectionIdentifier);
+            request.MessageId.ShouldBe(TestData.MessageId);
+        }
     }
 }

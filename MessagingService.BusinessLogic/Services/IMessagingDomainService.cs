@@ -53,6 +53,10 @@
                             String message,
                             CancellationToken cancellationToken);
 
+        Task ResendEmailMessage(Guid connectionIdentifier,
+                            Guid messageId,
+                            CancellationToken cancellationToken);
+
         #endregion
     }
 }

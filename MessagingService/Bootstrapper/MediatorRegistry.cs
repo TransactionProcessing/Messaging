@@ -15,6 +15,7 @@ public class MediatorRegistry : ServiceRegistry
         this.AddTransient<IMediator, Mediator>();
         this.AddSingleton<IRequestHandler<SendEmailRequest, String>, MessagingRequestHandler>();
         this.AddSingleton<IRequestHandler<SendSMSRequest, String>, MessagingRequestHandler>();
+        this.AddSingleton<IRequestHandler<ResendEmailRequest, String>, MessagingRequestHandler>();
 
         this.AddSingleton<Func<String, String>>(container => (serviceName) =>
                                                              {

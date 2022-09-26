@@ -5,6 +5,7 @@ using System.Text;
 namespace MessagingService.SMSAggregate.Tests
 {
     using EmailMessageAggregate;
+    using Shared.Logger;
     using Shouldly;
     using SMSMessageAggregate;
     using Testing;
@@ -280,6 +281,15 @@ namespace MessagingService.SMSAggregate.Tests
             {
                 smsAggregate.MarkMessageAsRejected(TestData.ProviderStatusDescription, TestData.DeliveredDateTime);
             });
+        }
+
+        [Fact]
+        public void EmailAggregate_PlayEvent_UnsupportedEvent_ErrorThrown()
+        {
+            Logger.Initialise(NullLogger.Instance);
+            SMSAggregate smsAggregate = new SMSAggregate();
+            Should.Throw<Exception>(() => smsAggregate.PlayEvent(new TestEvent(Guid.NewGuid(), Guid.NewGuid())));
+
         }
     }
 }

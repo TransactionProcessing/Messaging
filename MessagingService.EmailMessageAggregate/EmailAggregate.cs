@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Diagnostics.CodeAnalysis;
+    using System.Linq;
     using EmailMessage.DomainEvents;
     using Shared.DomainDrivenDesign.EventSourcing;
     using Shared.EventStore.Aggregate;
@@ -18,6 +19,12 @@
         /// </summary>
         private readonly List<MessageRecipient> Recipients;
 
+        private List<String> ToAddresses;
+
+        public List<String> GetToAddresses() {
+            return this.ToAddresses;
+        }
+
         #endregion
 
         #region Constructors
@@ -29,6 +36,9 @@
         public EmailAggregate()
         {
             this.Recipients = new List<MessageRecipient>();
+            this.DeliveryStatusList = new List<MessageStatus> {
+                                                                  MessageStatus.NotSet
+                                                              };
         }
 
         /// <summary>
@@ -42,6 +52,9 @@
             this.AggregateId = aggregateId;
             this.MessageId = aggregateId;
             this.Recipients = new List<MessageRecipient>();
+            this.DeliveryStatusList = new List<MessageStatus> {
+                                                                  MessageStatus.NotSet
+                                                              };
         }
 
         #endregion
@@ -81,14 +94,6 @@
         public Guid MessageId { get; }
 
         /// <summary>
-        /// Gets the message status.
-        /// </summary>
-        /// <value>
-        /// The message status.
-        /// </value>
-        public MessageStatus MessageStatus { get; private set; }
-
-        /// <summary>
         /// Gets the provider email reference.
         /// </summary>
         /// <value>
@@ -111,6 +116,10 @@
         /// The subject.
         /// </value>
         public String Subject { get; private set; }
+
+        public Int32 ResendCount { get; private set; }
+
+        private List<MessageStatus> DeliveryStatusList;
 
         #endregion
 
@@ -229,7 +238,7 @@
                                           String body,
                                           Boolean isHtml)
         {
-            if (this.MessageStatus != MessageStatus.NotSet)
+            if (this.DeliveryStatusList[this.ResendCount] != MessageStatus.NotSet)
             {
                 throw new InvalidOperationException("Cannot send a message to provider that has already been sent");
             }
@@ -237,6 +246,19 @@
             RequestSentToEmailProviderEvent requestSentToProviderEvent = new RequestSentToEmailProviderEvent(this.AggregateId, fromAddress, toAddresses, subject, body, isHtml);
 
             this.ApplyAndAppend(requestSentToProviderEvent);
+        }
+
+        public void ResendRequestToProvider()
+        {
+            if (this.DeliveryStatusList[this.ResendCount] != MessageStatus.Sent &&
+                this.DeliveryStatusList[this.ResendCount] != MessageStatus.Delivered)
+            {
+                throw new InvalidOperationException($"Cannot re-send a message to provider that has not already been sent. Current Status [{this.DeliveryStatusList[this.ResendCount]}]");
+            }
+
+            RequestResentToEmailProviderEvent requestResentToEmailProviderEvent = new RequestResentToEmailProviderEvent(this.AggregateId);
+
+            this.ApplyAndAppend(requestResentToEmailProviderEvent);
         }
 
         /// <summary>
@@ -272,9 +294,9 @@
         /// <exception cref="InvalidOperationException">Message at status {this.MessageStatus} cannot be set to bounced</exception>
         private void CheckMessageCanBeSetToBounced()
         {
-            if (this.MessageStatus != MessageStatus.Sent)
+            if (this.DeliveryStatusList[this.ResendCount] != MessageStatus.Sent)
             {
-                throw new InvalidOperationException($"Message at status {this.MessageStatus} cannot be set to bounced");
+                throw new InvalidOperationException($"Message at status {this.DeliveryStatusList[this.ResendCount]} cannot be set to bounced");
             }
         }
 
@@ -284,9 +306,9 @@
         /// <exception cref="InvalidOperationException">Message at status {this.MessageStatus} cannot be set to delivered</exception>
         private void CheckMessageCanBeSetToDelivered()
         {
-            if (this.MessageStatus != MessageStatus.Sent)
+            if (this.DeliveryStatusList[this.ResendCount] != MessageStatus.Sent)
             {
-                throw new InvalidOperationException($"Message at status {this.MessageStatus} cannot be set to delivered");
+                throw new InvalidOperationException($"Message at status {this.DeliveryStatusList[this.ResendCount]} cannot be set to delivered");
             }
         }
 
@@ -296,9 +318,9 @@
         /// <exception cref="InvalidOperationException">Message at status {this.MessageStatus} cannot be set to failed</exception>
         private void CheckMessageCanBeSetToFailed()
         {
-            if (this.MessageStatus != MessageStatus.Sent)
+            if (this.DeliveryStatusList[this.ResendCount] != MessageStatus.Sent)
             {
-                throw new InvalidOperationException($"Message at status {this.MessageStatus} cannot be set to failed");
+                throw new InvalidOperationException($"Message at status {this.DeliveryStatusList[this.ResendCount]} cannot be set to failed");
             }
         }
 
@@ -308,9 +330,9 @@
         /// <exception cref="InvalidOperationException">Message at status {this.MessageStatus} cannot be set to rejected</exception>
         private void CheckMessageCanBeSetToRejected()
         {
-            if (this.MessageStatus != MessageStatus.Sent)
+            if (this.DeliveryStatusList[this.ResendCount] != MessageStatus.Sent)
             {
-                throw new InvalidOperationException($"Message at status {this.MessageStatus} cannot be set to rejected");
+                throw new InvalidOperationException($"Message at status {this.DeliveryStatusList[this.ResendCount]} cannot be set to rejected");
             }
         }
 
@@ -320,9 +342,9 @@
         /// <exception cref="InvalidOperationException">Message at status {this.MessageStatus} cannot be set to spam</exception>
         private void CheckMessageCanBeSetToSpam()
         {
-            if (this.MessageStatus != MessageStatus.Sent)
+            if (this.DeliveryStatusList[this.ResendCount] != MessageStatus.Sent)
             {
-                throw new InvalidOperationException($"Message at status {this.MessageStatus} cannot be set to spam");
+                throw new InvalidOperationException($"Message at status {this.DeliveryStatusList[this.ResendCount]} cannot be set to spam");
             }
         }
 
@@ -336,7 +358,9 @@
             this.Subject = domainEvent.Subject;
             this.IsHtml = domainEvent.IsHtml;
             this.FromAddress = domainEvent.FromAddress;
-            this.MessageStatus = MessageStatus.InProgress;
+            this.ToAddresses = domainEvent.ToAddresses;
+            this.ResendCount = 0;
+            this.DeliveryStatusList[this.ResendCount] =MessageStatus.InProgress;
 
             foreach (String domainEventToAddress in domainEvent.ToAddresses)
             {
@@ -354,7 +378,12 @@
         {
             this.ProviderEmailReference = domainEvent.ProviderEmailReference;
             this.ProviderRequestReference = domainEvent.ProviderRequestReference;
-            this.MessageStatus = MessageStatus.Sent;
+            this.DeliveryStatusList[this.ResendCount] = MessageStatus.Sent;
+        }
+
+        private void PlayEvent(RequestResentToEmailProviderEvent domainEvent) {
+            this.ResendCount++;
+            this.DeliveryStatusList.Add(MessageStatus.InProgress);
         }
 
         /// <summary>
@@ -363,7 +392,14 @@
         /// <param name="domainEvent">The domain event.</param>
         private void PlayEvent(EmailMessageDeliveredEvent domainEvent)
         {
-            this.MessageStatus = MessageStatus.Delivered;
+            this.DeliveryStatusList[this.ResendCount] = MessageStatus.Delivered;
+        }
+
+        public MessageStatus GetDeliveryStatus(Int32? resendAttempt = null) {
+            if (resendAttempt.HasValue == false) {
+                return this.DeliveryStatusList[this.ResendCount];
+            }
+            return this.DeliveryStatusList[resendAttempt.Value];
         }
 
         /// <summary>
@@ -372,7 +408,7 @@
         /// <param name="domainEvent">The domain event.</param>
         private void PlayEvent(EmailMessageFailedEvent domainEvent)
         {
-            this.MessageStatus = MessageStatus.Failed;
+            this.DeliveryStatusList[this.ResendCount] = MessageStatus.Failed;
         }
 
         /// <summary>
@@ -381,7 +417,7 @@
         /// <param name="domainEvent">The domain event.</param>
         private void PlayEvent(EmailMessageRejectedEvent domainEvent)
         {
-            this.MessageStatus = MessageStatus.Rejected;
+            this.DeliveryStatusList[this.ResendCount] = MessageStatus.Rejected;
         }
 
         /// <summary>
@@ -390,7 +426,7 @@
         /// <param name="domainEvent">The domain event.</param>
         private void PlayEvent(EmailMessageBouncedEvent domainEvent)
         {
-            this.MessageStatus = MessageStatus.Bounced;
+            this.DeliveryStatusList[this.ResendCount] = MessageStatus.Bounced;
         }
 
         /// <summary>
@@ -399,7 +435,7 @@
         /// <param name="domainEvent">The domain event.</param>
         private void PlayEvent(EmailMessageMarkedAsSpamEvent domainEvent)
         {
-            this.MessageStatus = MessageStatus.Spam;
+            this.DeliveryStatusList[this.ResendCount] = MessageStatus.Spam;
         }
 
         #endregion
