@@ -33,36 +33,6 @@
         public IMessagingServiceClient MessagingServiceClient;
 
         /// <summary>
-        /// The test identifier
-        /// </summary>
-        public Guid TestId;
-
-        /// <summary>
-        /// The containers
-        /// </summary>
-        protected List<IContainerService> Containers;
-        
-        /// <summary>
-        /// The event store HTTP port
-        /// </summary>
-        protected Int32 EventStoreHttpPort;
-        
-        /// <summary>
-        /// The security service port
-        /// </summary>
-        protected Int32 SecurityServicePort;
-
-        /// <summary>
-        /// The messaging service port
-        /// </summary>
-        protected Int32 MessagingServicePort;
-
-        /// <summary>
-        /// The test networks
-        /// </summary>
-        protected List<INetworkService> TestNetworks;
-
-        /// <summary>
         /// The testing context
         /// </summary>
         private readonly TestingContext TestingContext;
@@ -76,36 +46,14 @@
         /// </summary>
         /// <param name="logger">The logger.</param>
         /// <param name="testingContext">The testing context.</param>
-        public DockerHelper(NlogLogger logger,
-                            TestingContext testingContext)
+        public DockerHelper()
         {
-            this.Logger = logger;
-            this.TestingContext = testingContext;
-            this.Containers = new List<IContainerService>();
-            this.TestNetworks = new List<INetworkService>();
+            this.TestingContext = new TestingContext();            
         }
 
         #endregion
 
         #region Methods
-
-        public Boolean IsSecureEventStore { get; private set; }
-
-        protected override String GenerateEventStoreConnectionString()
-        {
-            // TODO: this could move to shared
-            String eventStoreAddress = $"esdb://admin:changeit@{this.EventStoreContainerName}:{DockerHelper.EventStoreHttpDockerPort}";
-            if (this.IsSecureEventStore)
-            {
-                eventStoreAddress = $"{eventStoreAddress}?tls=true&tlsVerifyCert=false";
-            }
-            else
-            {
-                eventStoreAddress = $"{eventStoreAddress}?tls=false&tlsVerifyCert=false";
-            }
-
-            return eventStoreAddress;
-        }
 
         /// <summary>
         /// Starts the containers for scenario run.
@@ -113,79 +61,7 @@
         /// <param name="scenarioName">Name of the scenario.</param>
         public override async Task StartContainersForScenarioRun(String scenarioName)
         {
-            String IsSecureEventStoreEnvVar = Environment.GetEnvironmentVariable("IsSecureEventStore");
-
-            if (IsSecureEventStoreEnvVar == null)
-            {
-                // No env var set so default to insecure
-                this.IsSecureEventStore = false;
-            }
-            else
-            {
-                // We have the env var so we set the secure flag based on the value in the env var
-                Boolean.TryParse(IsSecureEventStoreEnvVar, out Boolean isSecure);
-                this.IsSecureEventStore = isSecure;
-            }
-
-            this.HostTraceFolder = FdOs.IsWindows() ? $"C:\\home\\txnproc\\trace\\{scenarioName}" : $"//home//txnproc//trace//{scenarioName}";
-
-            Logging.Enabled();
-
-            Guid testGuid = Guid.NewGuid();
-            this.TestId = testGuid;
-
-            this.Logger.LogInformation($"Test Id is {testGuid}");
-
-            // Setup the container names
-            this.SecurityServiceContainerName = $"securityservice{testGuid:N}";
-            this.EventStoreContainerName = $"eventstore{testGuid:N}";
-            this.MessagingServiceContainerName = $"messagingservice{testGuid:N}";
-            
-            this.DockerCredentials = ("https://www.docker.com", "stuartferguson", "Sc0tland");
-
-            INetworkService testNetwork = DockerHelper.SetupTestNetwork();
-            this.TestNetworks.Add(testNetwork);
-
-            IContainerService eventStoreContainer = 
-                this.SetupEventStoreContainer("eventstore/eventstore:21.10.0-buster-slim", testNetwork, true, this.IsSecureEventStore);
-            this.EventStoreHttpPort = eventStoreContainer.ToHostExposedEndpoint($"{DockerHelper.EventStoreHttpDockerPort}/tcp").Port;
-
-            String insecureEventStoreEnvironmentVariable = "EventStoreSettings:Insecure=True";
-            if (this.IsSecureEventStore)
-            {
-                insecureEventStoreEnvironmentVariable = "EventStoreSettings:Insecure=False";
-            }
-
-            String persistentSubscriptionPollingInSeconds = "AppSettings:PersistentSubscriptionPollingInSeconds=10";
-            String internalSubscriptionServiceCacheDuration = "AppSettings:InternalSubscriptionServiceCacheDuration=0";
-
-            IContainerService securityServiceContainer = this.SetupSecurityServiceContainer("stuartferguson/securityservice",
-                                                                                                    testNetwork,
-                                                                                                    true);
-
-            IContainerService messagingServiceContainer = this.SetupMessagingServiceContainer("messagingservice",
-                                                                                              new List<INetworkService>
-                                                                                              {
-                                                                                                  testNetwork
-                                                                                              },
-                                                                                              additionalEnvironmentVariables:new List<String>
-                                                                                                  {
-                                                                                                      insecureEventStoreEnvironmentVariable,
-                                                                                                      internalSubscriptionServiceCacheDuration,
-                                                                                                      persistentSubscriptionPollingInSeconds
-                                                                                                  });
-
-            this.Containers.AddRange(new List<IContainerService>
-                                     {
-                                         eventStoreContainer,
-                                         securityServiceContainer,
-                                         messagingServiceContainer
-                                     });
-
-            // Cache the ports
-            this.SecurityServicePort = securityServiceContainer.ToHostExposedEndpoint("5001/tcp").Port;
-            this.EventStoreHttpPort = eventStoreContainer.ToHostExposedEndpoint("2113/tcp").Port;
-            this.MessagingServicePort = messagingServiceContainer.ToHostExposedEndpoint("5006/tcp").Port;
+            await base.StartContainersForScenarioRun(scenarioName);
 
             // Setup the base address resolvers
             String SecurityServiceBaseAddressResolver(String api) => $"https://127.0.0.1:{this.SecurityServicePort}";
@@ -205,42 +81,7 @@
             HttpClient httpClient = new HttpClient(clientHandler);
             this.SecurityServiceClient = new SecurityServiceClient(SecurityServiceBaseAddressResolver, httpClient);
             this.MessagingServiceClient = new MessagingServiceClient(MessagingServiceBaseAddressResolver, httpClient);
-
-            await PopulateSubscriptionServiceConfiguration(this.TestingContext.DockerHelper.IsSecureEventStore);
         }
-
-        public async Task PopulateSubscriptionServiceConfiguration(Boolean isSecureEventStore)
-        {
-            List<(String streamName, String groupName, Int32 maxRetries)> subscriptions = new List<(String streamName, String groupName, Int32 maxRetries)>();
-            subscriptions.Add(($"$et-ResponseReceivedFromEmailProviderEvent", "Messaging", 2));
-            await this.PopulateSubscriptionServiceConfiguration(this.EventStoreHttpPort, subscriptions, isSecureEventStore);
-        }
-
-        /// <summary>
-        /// Stops the containers for scenario run.
-        /// </summary>
-        public override async Task StopContainersForScenarioRun()
-        {
-            if (this.Containers.Any())
-            {
-                foreach (IContainerService containerService in this.Containers)
-                {
-                    containerService.StopOnDispose = true;
-                    containerService.RemoveOnDispose = true;
-                    containerService.Dispose();
-                }
-            }
-
-            if (this.TestNetworks.Any())
-            {
-                foreach (INetworkService networkService in this.TestNetworks)
-                {
-                    networkService.Stop();
-                    networkService.Remove(true);
-                }
-            }
-        }
-
         #endregion
     }
 }
