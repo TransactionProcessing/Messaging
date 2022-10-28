@@ -45,6 +45,5 @@ namespace MessagingService.IntegrationTests.Common
 
             return $"server=localhost,{databaseHostPort};database={databaseName};user id={Setup.SqlCredentials.usename};password={Setup.SqlCredentials.password}";
         }
-
     }
 }
