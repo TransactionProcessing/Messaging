@@ -41,7 +41,7 @@ namespace MessagingService.IntegrationTests.Common
             this.TestingContext.DockerHelper.SqlCredentials = Setup.SqlCredentials;
             this.TestingContext.DockerHelper.SqlServerContainerName = "sharedsqlserver";
 
-            this.TestingContext.DockerHelper.SetImageDetails(ContainerType.MessagingService, ("messaging", false));
+            this.TestingContext.DockerHelper.SetImageDetails(ContainerType.MessagingService, ("messagingservice", false));
 
             this.TestingContext.Logger = logger;
             this.TestingContext.Logger.LogInformation("About to Start Containers for Scenario Run");
