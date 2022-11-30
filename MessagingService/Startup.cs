@@ -190,7 +190,6 @@ namespace MessagingService
 
             if (subscriptionWorkersRoot.InternalSubscriptionService)
             {
-
                 String eventStoreConnectionString = ConfigurationReader.GetValue("EventStoreSettings", "ConnectionString");
 
                 ISubscriptionRepository subscriptionRepository = SubscriptionRepository.Create(eventStoreConnectionString, subscriptionWorkersRoot.InternalSubscriptionServiceCacheDuration);
@@ -235,7 +234,6 @@ namespace MessagingService
                     worker.SetIncludeGroups(configurationSubscriptionWorker.IncludeGroups);
                     worker.SetIncludeStreams(configurationSubscriptionWorker.IncludeStreams);
                     workers.Add(worker);
-
                 }
                 else
                 {
