@@ -1,8 +1,5 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
@@ -11,16 +8,7 @@ using Microsoft.Extensions.Logging;
 namespace MessagingService
 {
     using System.Diagnostics.CodeAnalysis;
-    using System.Net.Http;
-    using EmailMessage.DomainEvents;
-    using EventStore.Client;
     using Lamar.Microsoft.DependencyInjection;
-    using Microsoft.Extensions.DependencyInjection;
-    using Shared.EventStore.Aggregate;
-    using Shared.EventStore.EventHandling;
-    using Shared.EventStore.Subscriptions;
-    using Shared.Logger;
-    using SMSMessage.DomainEvents;
 
     [ExcludeFromCodeCoverage]
     public class Program
