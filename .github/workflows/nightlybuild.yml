@@ -34,11 +34,11 @@ jobs:
       run: |
         echo "ASPNETCORE_ENVIRONMENT are > ${ASPNETCORE_ENVIRONMENT}"
         dotnet test --filter FullyQualifiedName!~IntegrationTests
-        env:
-            CollectCoverage: true
-            CoverletOutputFormat: lcov
-            CoverletOutput: ${{ github.workspace }}/lcov.info
-            ExcludeByAttribute: "Obsolete,GeneratedCodeAttribute,CompilerGeneratedAttribute,ExcludeFromCodeCoverageAttribute"
+      env:
+        CollectCoverage: true
+        CoverletOutputFormat: lcov
+        CoverletOutput: ${{ github.workspace }}/lcov.info
+        ExcludeByAttribute: "Obsolete,GeneratedCodeAttribute,CompilerGeneratedAttribute,ExcludeFromCodeCoverageAttribute"
 
     - name: Setup Node.js for use with actions
       uses: actions/setup-node@v1.4.4
