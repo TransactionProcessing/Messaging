@@ -30,15 +30,23 @@ jobs:
     - name: Build Code
       run: dotnet build MessagingService.sln --configuration Release
     
+    #- name: Run Unit Tests
+    #  run: |
+    #    echo "ASPNETCORE_ENVIRONMENT are > ${ASPNETCORE_ENVIRONMENT}"
+    #    dotnet test --filter FullyQualifiedName!~IntegrationTests
+    #  env:
+    #    CollectCoverage: true
+    #    CoverletOutputFormat: lcov
+    #    CoverletOutput: ${{ github.workspace }}/lcov.info
+    #    ExcludeByAttribute: "Obsolete,GeneratedCodeAttribute,CompilerGeneratedAttribute,ExcludeFromCodeCoverageAttribute"
+
     - name: Run Unit Tests
       run: |
         echo "ASPNETCORE_ENVIRONMENT are > ${ASPNETCORE_ENVIRONMENT}"
-        dotnet test --filter FullyQualifiedName!~IntegrationTests
-      env:
-        CollectCoverage: true
-        CoverletOutputFormat: lcov
-        CoverletOutput: ${{ github.workspace }}/lcov.info
-        ExcludeByAttribute: "Obsolete,GeneratedCodeAttribute,CompilerGeneratedAttribute,ExcludeFromCodeCoverageAttribute"
+        dotnet test "MessagingService.BusinessLogic.Tests\MessagingService.BusinessLogic.Tests.csproj" /p:CollectCoverage=true /p:Exclude="[xunit*]*" /p:ExcludeByAttribute="Obsolete" /p:ExcludeByAttribute="GeneratedCodeAttribute" /p:ExcludeByAttribute="CompilerGeneratedAttribute" /p:ExcludeByAttribute="ExcludeFromCodeCoverageAttribute" /p:CoverletOutput="../lcov1.info" /maxcpucount:1 /p:CoverletOutputFormat="lcov"
+        dotnet test "MessagingService.EmailAggregate.Tests\MessagingService.EmailAggregate.Tests.csproj" /p:CollectCoverage=true /p:Exclude="[xunit*]*" /p:ExcludeByAttribute="Obsolete" /p:ExcludeByAttribute="GeneratedCodeAttribute" /p:ExcludeByAttribute="CompilerGeneratedAttribute" /p:ExcludeByAttribute="ExcludeFromCodeCoverageAttribute" /p:CoverletOutput="../lcov2.info" /maxcpucount:1 /p:CoverletOutputFormat="lcov"        
+        dotnet test "MessagingService.EmailAggregate.Tests\MessagingService.EmailAggregate.Tests.csproj" /p:CollectCoverage=true /p:Exclude="[xunit*]*" /p:ExcludeByAttribute="Obsolete" /p:ExcludeByAttribute="GeneratedCodeAttribute" /p:ExcludeByAttribute="CompilerGeneratedAttribute" /p:ExcludeByAttribute="ExcludeFromCodeCoverageAttribute" /p:CoverletOutput="../lcov3.info" /maxcpucount:1 /p:CoverletOutputFormat="lcov"        
+        dotnet test "MessagingService.Tests\MessagingService.Tests.csproj" /p:CollectCoverage=true /p:Exclude="[xunit*]*" /p:ExcludeByAttribute="Obsolete" /p:ExcludeByAttribute="GeneratedCodeAttribute" /p:ExcludeByAttribute="CompilerGeneratedAttribute" /p:ExcludeByAttribute="ExcludeFromCodeCoverageAttribute" /p:CoverletOutput="../lcov3.info" /maxcpucount:1 /p:CoverletOutputFormat="lcov"        
 
     - name: Setup Node.js for use with actions
       uses: actions/setup-node@v1.4.4
@@ -46,7 +54,7 @@ jobs:
     - name: Upload coverage reports to Codecov
       uses: codecov/codecov-action@v3  
       with:
-        files: ./lcov.info
+        files: ./lcov*.info
 
     - name: Build Docker Image
       run: docker build . --file MessagingService/Dockerfile --tag messagingservice:latest
