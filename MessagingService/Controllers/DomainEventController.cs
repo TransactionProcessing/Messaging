@@ -4,7 +4,6 @@
     using System.Collections.Generic;
     using System.Diagnostics.CodeAnalysis;
     using System.Linq;
-    using System.Runtime.InteropServices.ComTypes;
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Mvc;
@@ -42,8 +41,7 @@
         /// Initializes a new instance of the <see cref="DomainEventController"/> class.
         /// </summary>
         /// <param name="domainEventHandlerResolver">The domain event handler resolver.</param>
-        public DomainEventController(IDomainEventHandlerResolver domainEventHandlerResolver)
-        {
+        public DomainEventController(IDomainEventHandlerResolver domainEventHandlerResolver) {
             this.DomainEventHandlerResolver = domainEventHandlerResolver;
         }
 
@@ -59,28 +57,24 @@
         /// <returns></returns>
         [HttpPost]
         public async Task<IActionResult> PostEventAsync([FromBody] Object request,
-                                                        CancellationToken cancellationToken)
-        {
+                                                        CancellationToken cancellationToken) {
             IDomainEvent domainEvent = await this.GetDomainEvent(request);
 
             cancellationToken.Register(() => this.Callback(cancellationToken, domainEvent.EventId));
 
-            try
-            {
+            try {
                 Logger.LogInformation($"Processing event - ID [{domainEvent.EventId}], Type[{domainEvent.GetType().Name}]");
 
                 List<IDomainEventHandler> eventHandlers = this.DomainEventHandlerResolver.GetDomainEventHandlers(domainEvent);
 
-                if (eventHandlers == null || eventHandlers.Any() == false)
-                {
+                if (eventHandlers == null || eventHandlers.Any() == false) {
                     // Log a warning out 
                     Logger.LogWarning($"No event handlers configured for Event Type [{domainEvent.GetType().Name}]");
                     return this.Ok();
                 }
 
                 List<Task> tasks = new List<Task>();
-                foreach (IDomainEventHandler domainEventHandler in eventHandlers)
-                {
+                foreach (IDomainEventHandler domainEventHandler in eventHandlers) {
                     tasks.Add(domainEventHandler.Handle(domainEvent, cancellationToken));
                 }
 
@@ -90,8 +84,7 @@
 
                 return this.Ok();
             }
-            catch(Exception ex)
-            {
+            catch(Exception ex) {
                 String domainEventData = JsonConvert.SerializeObject(domainEvent);
                 Logger.LogError(new Exception($" Failed to Process Event, Event Data received [{domainEventData}]", ex));
 
@@ -99,14 +92,8 @@
             }
         }
 
-        /// <summary>
-        /// Callbacks the specified cancellation token.
-        /// </summary>
-        /// <param name="cancellationToken">The cancellation token.</param>
-        /// <param name="eventId">The event identifier.</param>
         private void Callback(CancellationToken cancellationToken,
-                              Guid eventId)
-        {
+                              Guid eventId) {
             if (cancellationToken.IsCancellationRequested) //I think this would always be true anyway
             {
                 Logger.LogInformation($"Cancel request for EventId {eventId}");
@@ -114,13 +101,7 @@
             }
         }
 
-        /// <summary>
-        /// Gets the domain event.
-        /// </summary>
-        /// <param name="domainEvent">The domain event.</param>
-        /// <returns></returns>
-        private async Task<IDomainEvent> GetDomainEvent(Object domainEvent)
-        {
+        private async Task<IDomainEvent> GetDomainEvent(Object domainEvent) {
             String eventType = this.Request.Headers["eventType"].ToString();
 
             Type type = TypeMap.GetType(eventType);
@@ -129,21 +110,19 @@
                 throw new Exception($"Failed to find a domain event with type {eventType}");
 
             JsonIgnoreAttributeIgnorerContractResolver jsonIgnoreAttributeIgnorerContractResolver = new JsonIgnoreAttributeIgnorerContractResolver();
-            var jsonSerialiserSettings = new JsonSerializerSettings
-                                         {
-                                             ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
-                                             TypeNameHandling = TypeNameHandling.All,
-                                             Formatting = Formatting.Indented,
-                                             DateTimeZoneHandling = DateTimeZoneHandling.Utc,
-                                             ContractResolver = jsonIgnoreAttributeIgnorerContractResolver
-                                         };
+            JsonSerializerSettings jsonSerialiserSettings = new JsonSerializerSettings {
+                                                                                           ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+                                                                                           TypeNameHandling = TypeNameHandling.All,
+                                                                                           Formatting = Formatting.Indented,
+                                                                                           DateTimeZoneHandling = DateTimeZoneHandling.Utc,
+                                                                                           ContractResolver = jsonIgnoreAttributeIgnorerContractResolver
+                                                                                       };
 
-            if (type.IsSubclassOf(typeof(DomainEvent)))
-            {
-                var json = JsonConvert.SerializeObject(domainEvent, jsonSerialiserSettings);
-                
+            if (type.IsSubclassOf(typeof(DomainEvent))) {
+                String json = JsonConvert.SerializeObject(domainEvent, jsonSerialiserSettings);
+
                 DomainEventFactory domainEventFactory = new();
-                String validatedJson = ValidateEvent(json);
+                String validatedJson = this.ValidateEvent(json);
                 return domainEventFactory.CreateDomainEvent(validatedJson, type);
             }
 
@@ -151,9 +130,8 @@
         }
 
         private String ValidateEvent(String domainEventJson) {
-            
             JObject domainEvent = JObject.Parse(domainEventJson);
-            
+
             if (domainEvent.ContainsKey("eventId") == false || domainEvent["eventId"].ToObject<Guid>() == Guid.Empty) {
                 throw new ArgumentException("Domain Event must contain an Event Id");
             }
