@@ -4,10 +4,12 @@
     using System.Collections.Generic;
     using System.Diagnostics.CodeAnalysis;
     using System.Linq;
+    using System.Runtime.InteropServices.ComTypes;
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Mvc;
     using Newtonsoft.Json;
+    using Newtonsoft.Json.Linq;
     using Shared.DomainDrivenDesign.EventSourcing;
     using Shared.EventStore.Aggregate;
     using Shared.EventStore.EventHandling;
@@ -59,7 +61,7 @@
         public async Task<IActionResult> PostEventAsync([FromBody] Object request,
                                                         CancellationToken cancellationToken)
         {
-            var domainEvent = await this.GetDomainEvent(request);
+            IDomainEvent domainEvent = await this.GetDomainEvent(request);
 
             cancellationToken.Register(() => this.Callback(cancellationToken, domainEvent.EventId));
 
@@ -119,9 +121,9 @@
         /// <returns></returns>
         private async Task<IDomainEvent> GetDomainEvent(Object domainEvent)
         {
-            String eventType = this.Request.Query["eventType"].ToString();
+            String eventType = this.Request.Headers["eventType"].ToString();
 
-            var type = TypeMap.GetType(eventType);
+            Type type = TypeMap.GetType(eventType);
 
             if (type == null)
                 throw new Exception($"Failed to find a domain event with type {eventType}");
@@ -139,12 +141,24 @@
             if (type.IsSubclassOf(typeof(DomainEvent)))
             {
                 var json = JsonConvert.SerializeObject(domainEvent, jsonSerialiserSettings);
+                
                 DomainEventFactory domainEventFactory = new();
-
-                return domainEventFactory.CreateDomainEvent(json, type);
+                String validatedJson = ValidateEvent(json);
+                return domainEventFactory.CreateDomainEvent(validatedJson, type);
             }
 
             return null;
+        }
+
+        private String ValidateEvent(String domainEventJson) {
+            
+            JObject domainEvent = JObject.Parse(domainEventJson);
+            
+            if (domainEvent.ContainsKey("EventId") == false || domainEvent["EventId"].ToObject<Guid>() == Guid.Empty) {
+                throw new ArgumentException("Domain Event must contain an Event Id");
+            }
+
+            return domainEventJson;
         }
 
         #endregion
