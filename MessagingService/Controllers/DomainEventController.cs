@@ -154,7 +154,7 @@
             
             JObject domainEvent = JObject.Parse(domainEventJson);
             
-            if (domainEvent.ContainsKey("EventId") == false || domainEvent["EventId"].ToObject<Guid>() == Guid.Empty) {
+            if (domainEvent.ContainsKey("eventId") == false || domainEvent["eventId"].ToObject<Guid>() == Guid.Empty) {
                 throw new ArgumentException("Domain Event must contain an Event Id");
             }
 
