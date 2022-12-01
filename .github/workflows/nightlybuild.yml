@@ -19,8 +19,8 @@ jobs:
     - name: Install NET 7
       uses: actions/setup-dotnet@v3
       with:
-        dotnet-version: '7.0.x'
-        dotnet-quality: 'daily'
+        dotnet-version: '7.0.200-preview.22580.21'
+        dotnet-quality: 'preview'
 
     - name: Set Up Variables
       run: echo "action_url=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" >> $GITHUB_ENV
