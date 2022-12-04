@@ -48,7 +48,7 @@ jobs:
     - name: Upload coverage reports to Codecov
       uses: codecov/codecov-action@v3  
       with:
-        files: ./lcov*.info
+        files: ./lcov1.info,./lcov2.info,./lcov3.info,./lcov4.info
 
     - name: Build Docker Image
       run: docker build . --file MessagingService/Dockerfile --tag messagingservice:latest
