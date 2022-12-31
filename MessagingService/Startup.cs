@@ -14,6 +14,7 @@ namespace MessagingService
     using System.IO;
     using System.Threading;
     using Bootstrapper;
+    using Common;
     using EmailMessage.DomainEvents;
     using EventStore.Client;
     using HealthChecks.UI.Client;
@@ -86,10 +87,10 @@ namespace MessagingService
 
             Startup.Container = new Container(services);
 
-            Startup.ServiceProvider = services.BuildServiceProvider();
+            //Startup.ServiceProvider = services.BuildServiceProvider();
         }
 
-        public static IServiceProvider ServiceProvider { get; set; }
+        //public static IServiceProvider ServiceProvider { get; set; }
         
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory)
@@ -150,141 +151,5 @@ namespace MessagingService
 
             app.PreWarm();
         }
-    }
-
-    [ExcludeFromCodeCoverage]
-    public static class Extensions
-    {
-        static Action<TraceEventType, String, String> log = (tt, subType, message) => {
-            String logMessage = $"{subType} - {message}";
-            switch (tt)
-            {
-                case TraceEventType.Critical:
-                    Logger.LogCritical(new Exception(logMessage));
-                    break;
-                case TraceEventType.Error:
-                    Logger.LogError(new Exception(logMessage));
-                    break;
-                case TraceEventType.Warning:
-                    Logger.LogWarning(logMessage);
-                    break;
-                case TraceEventType.Information:
-                    Logger.LogInformation(logMessage);
-                    break;
-                case TraceEventType.Verbose:
-                    Logger.LogDebug(logMessage);
-                    break;
-            }
-        };
-
-        static Action<TraceEventType, String> mainLog = (tt, message) => Extensions.log(tt, "MAIN", message);
-        static Action<TraceEventType, String> orderedLog = (tt, message) => Extensions.log(tt, "ORDERED", message);
-
-        public static void PreWarm(this IApplicationBuilder applicationBuilder)
-        {
-            Startup.LoadTypes();
-
-            IConfigurationSection subscriptionConfigSection = Startup.Configuration.GetSection("AppSettings:SubscriptionConfiguration");
-            SubscriptionWorkersRoot subscriptionWorkersRoot = new SubscriptionWorkersRoot();
-            subscriptionConfigSection.Bind(subscriptionWorkersRoot);
-
-            if (subscriptionWorkersRoot.InternalSubscriptionService)
-            {
-                String eventStoreConnectionString = ConfigurationReader.GetValue("EventStoreSettings", "ConnectionString");
-
-                ISubscriptionRepository subscriptionRepository = SubscriptionRepository.Create(eventStoreConnectionString, subscriptionWorkersRoot.InternalSubscriptionServiceCacheDuration);
-                ((SubscriptionRepository)subscriptionRepository).Trace += (sender,
-                                                                           s) => Extensions.log(TraceEventType.Information, "REPOSITORY", s);
-
-                // init our SubscriptionRepository
-                subscriptionRepository.PreWarm(CancellationToken.None).Wait();
-
-                List<SubscriptionWorker> workers = ConfigureSubscriptions(subscriptionRepository, subscriptionWorkersRoot);
-                foreach (SubscriptionWorker subscriptionWorker in workers)
-                {
-                    subscriptionWorker.StartAsync(CancellationToken.None).Wait();
-                }
-            }
-        }
-
-        private static List<SubscriptionWorker> ConfigureSubscriptions(ISubscriptionRepository subscriptionRepository, SubscriptionWorkersRoot configuration)
-        {
-            List<SubscriptionWorker> workers = new List<SubscriptionWorker>();
-
-            foreach (SubscriptionWorkerConfig configurationSubscriptionWorker in configuration.SubscriptionWorkers)
-            {
-                if (configurationSubscriptionWorker.Enabled == false)
-                    continue;
-
-                if (configurationSubscriptionWorker.IsOrdered)
-                {
-                    IDomainEventHandlerResolver eventHandlerResolver = Startup.Container.GetInstance<IDomainEventHandlerResolver>("Ordered");
-                    SubscriptionWorker worker = SubscriptionWorker.CreateOrderedSubscriptionWorker(Startup.EventStoreClientSettings,
-                                                                                                   eventHandlerResolver,
-                                                                                                   subscriptionRepository,
-                                                                                                   configuration.PersistentSubscriptionPollingInSeconds);
-                    worker.Trace += (_,
-                                     args) => Extensions.orderedLog(TraceEventType.Information, args.Message);
-                    worker.Warning += (_,
-                                       args) => Extensions.orderedLog(TraceEventType.Warning, args.Message);
-                    worker.Error += (_,
-                                     args) => Extensions.orderedLog(TraceEventType.Error, args.Message);
-                    worker.SetIgnoreGroups(configurationSubscriptionWorker.IgnoreGroups);
-                    worker.SetIgnoreStreams(configurationSubscriptionWorker.IgnoreStreams);
-                    worker.SetIncludeGroups(configurationSubscriptionWorker.IncludeGroups);
-                    worker.SetIncludeStreams(configurationSubscriptionWorker.IncludeStreams);
-                    workers.Add(worker);
-                }
-                else
-                {
-                    for (Int32 i = 0; i < configurationSubscriptionWorker.InstanceCount; i++)
-                    {
-                        IDomainEventHandlerResolver eventHandlerResolver = Startup.Container.GetInstance<IDomainEventHandlerResolver>("Main");
-                        SubscriptionWorker worker = SubscriptionWorker.CreateSubscriptionWorker(Startup.EventStoreClientSettings,
-                                                                                                eventHandlerResolver,
-                                                                                                subscriptionRepository,
-                                                                                                configurationSubscriptionWorker.InflightMessages,
-                                                                                                configuration.PersistentSubscriptionPollingInSeconds);
-
-                        worker.Trace += (_,
-                                         args) => Extensions.mainLog(TraceEventType.Information, args.Message);
-                        worker.Warning += (_,
-                                           args) => Extensions.mainLog(TraceEventType.Warning, args.Message);
-                        worker.Error += (_,
-                                         args) => Extensions.mainLog(TraceEventType.Error, args.Message);
-
-                        worker.SetIgnoreGroups(configurationSubscriptionWorker.IgnoreGroups);
-                        worker.SetIgnoreStreams(configurationSubscriptionWorker.IgnoreStreams);
-                        worker.SetIncludeGroups(configurationSubscriptionWorker.IncludeGroups);
-                        worker.SetIncludeStreams(configurationSubscriptionWorker.IncludeStreams);
-
-                        workers.Add(worker);
-                    }
-                }
-            }
-
-            return workers;
-        }
-    }
-
-    public class SubscriptionWorkersRoot
-    {
-        public Boolean InternalSubscriptionService { get; set; }
-        public Int32 PersistentSubscriptionPollingInSeconds { get; set; }
-        public Int32 InternalSubscriptionServiceCacheDuration { get; set; }
-        public List<SubscriptionWorkerConfig> SubscriptionWorkers { get; set; }
-    }
-
-    public class SubscriptionWorkerConfig
-    {
-        public String WorkerName { get; set; }
-        public String IncludeGroups { get; set; }
-        public String IgnoreGroups { get; set; }
-        public String IncludeStreams { get; set; }
-        public String IgnoreStreams { get; set; }
-        public Boolean Enabled { get; set; }
-        public Int32 InflightMessages { get; set; }
-        public Int32 InstanceCount { get; set; }
-        public Boolean IsOrdered { get; set; }
     }
 }

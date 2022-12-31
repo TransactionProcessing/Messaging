@@ -1,6 +1,7 @@
 ﻿namespace MessagingService.Bootstrapper;
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Net.Http;
 using BusinessLogic.Services.EmailServices;
 using BusinessLogic.Services.EmailServices.Smtp2Go;
@@ -12,6 +13,7 @@ using Service.Services.Email.IntegrationTest;
 using Service.Services.SMSServices.IntegrationTest;
 using Shared.General;
 
+[ExcludeFromCodeCoverage]
 public class MessagingProxyRegistry : ServiceRegistry
 {
     public MessagingProxyRegistry()

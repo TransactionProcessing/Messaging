@@ -1,6 +1,7 @@
 ﻿namespace MessagingService.Bootstrapper;
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Net.Http;
 using System.Net.Security;
 using BusinessLogic.Common;
@@ -17,6 +18,7 @@ using Shared.General;
 using Shared.Repositories;
 using SMSMessageAggregate;
 
+[ExcludeFromCodeCoverage]
 public class RepositoryRegistry: ServiceRegistry
 {
     public RepositoryRegistry()

@@ -22,7 +22,9 @@
     using Swashbuckle.AspNetCore.Filters;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Diagnostics.CodeAnalysis;
 
+    [ExcludeFromCodeCoverage]
     public class MiddlewareRegistry : ServiceRegistry
     {
         public MiddlewareRegistry() {
