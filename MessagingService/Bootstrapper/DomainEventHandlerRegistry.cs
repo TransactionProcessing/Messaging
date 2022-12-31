@@ -9,6 +9,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Shared.EventStore.EventHandling;
 
+[ExcludeFromCodeCoverage]
 public class DomainEventHandlerRegistry : ServiceRegistry
 {
     public DomainEventHandlerRegistry()
