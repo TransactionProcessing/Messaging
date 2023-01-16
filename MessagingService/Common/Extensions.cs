@@ -67,11 +67,9 @@ public static class Extensions
         String eventStoreConnectionString = ConfigurationReader.GetValue("EventStoreSettings", "ConnectionString");
 
         IDomainEventHandlerResolver mainEventHandlerResolver = Startup.Container.GetInstance<IDomainEventHandlerResolver>("Main");
-        IDomainEventHandlerResolver orderedEventHandlerResolver = Startup.Container.GetInstance<IDomainEventHandlerResolver>("Ordered");
-
+        
         Dictionary<String, IDomainEventHandlerResolver> eventHandlerResolvers = new Dictionary<String, IDomainEventHandlerResolver> {
-                                                                                    {"Main", mainEventHandlerResolver},
-                                                                                    {"Ordered", orderedEventHandlerResolver}
+                                                                                    {"Main", mainEventHandlerResolver}
                                                                                 };
 
         applicationBuilder.ConfigureSubscriptionService(subscriptionWorkersRoot,
