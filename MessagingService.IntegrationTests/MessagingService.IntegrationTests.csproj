@@ -6,11 +6,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="ClientProxyBase" Version="1.5.1" />
+    <PackageReference Include="ClientProxyBase" Version="2023.1.0" />
     <PackageReference Include="Ductus.FluentDocker" Version="2.10.57" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.4.0" />
-    <PackageReference Include="SecurityService.Client" Version="1.1.1" />
-    <PackageReference Include="Shared.IntegrationTesting" Version="1.5.1" />
+    <PackageReference Include="SecurityService.Client" Version="2022.12.1" />
+    <PackageReference Include="Shared.IntegrationTesting" Version="2023.1.0" />
     <PackageReference Include="Shouldly" Version="4.1.0" />
     <PackageReference Include="SpecFlow.Tools.MsBuild.Generation" Version="3.9.74" />
     <PackageReference Include="SpecFlow.xUnit" Version="3.9.74" />
