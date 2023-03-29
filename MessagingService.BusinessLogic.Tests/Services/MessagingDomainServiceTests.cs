@@ -10,7 +10,7 @@ namespace MessagingService.BusinessLogic.Tests.Services
     using BusinessLogic.Services.EmailServices;
     using BusinessLogic.Services.SMSServices;
     using EmailMessageAggregate;
-    using MessagingService.BusinessLogic.Requests;
+    using Models;
     using Moq;
     using Shared.DomainDrivenDesign.EventSourcing;
     using Shared.EventStore.Aggregate;
