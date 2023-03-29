@@ -74,7 +74,7 @@ namespace MessagingService.Controllers
 
             Guid messageId =  sendEmailRequest.MessageId.HasValue ? sendEmailRequest.MessageId.Value : Guid.NewGuid();
 
-            var emailAttachments = new List<EmailAttachment>();
+            List<EmailAttachment> emailAttachments = new List<EmailAttachment>();
             foreach (DataTransferObjects.EmailAttachment emailAttachment in sendEmailRequest.EmailAttachments)
             {
                 emailAttachments.Add(new EmailAttachment

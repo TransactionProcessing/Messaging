@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace MessagingService.BusinessLogic.Tests.Mediator
 {
     using System.Threading;
-    using BusinessLogic.Requests;
+    using Models;
 
     public class DummyMessagingDomainService : IMessagingDomainService
     {

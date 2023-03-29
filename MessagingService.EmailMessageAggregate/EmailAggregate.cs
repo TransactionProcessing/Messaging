@@ -5,6 +5,7 @@
     using System.Diagnostics.CodeAnalysis;
     using System.Linq;
     using EmailMessage.DomainEvents;
+    using Models;
     using Shared.DomainDrivenDesign.EventSourcing;
     using Shared.EventStore.Aggregate;
     using Shared.General;
@@ -19,10 +20,17 @@
         /// </summary>
         private readonly List<MessageRecipient> Recipients;
 
+        private readonly List<EmailAttachment> Attachments;
+
         private List<String> ToAddresses;
 
         public List<String> GetToAddresses() {
             return this.ToAddresses;
+        }
+
+        public List<EmailAttachment> GetAttachments()
+        {
+            return this.Attachments;
         }
 
         #endregion
@@ -36,6 +44,7 @@
         public EmailAggregate()
         {
             this.Recipients = new List<MessageRecipient>();
+            this.Attachments = new List<EmailAttachment>();
             this.DeliveryStatusList = new List<MessageStatus> {
                                                                   MessageStatus.NotSet
                                                               };
@@ -52,6 +61,7 @@
             this.AggregateId = aggregateId;
             this.MessageId = aggregateId;
             this.Recipients = new List<MessageRecipient>();
+            this.Attachments = new List<EmailAttachment>();
             this.DeliveryStatusList = new List<MessageStatus> {
                                                                   MessageStatus.NotSet
                                                               };
@@ -223,20 +233,13 @@
 
             this.ApplyAndAppend(responseReceivedFromProviderEvent);
         }
-
-        /// <summary>
-        /// Sends the request to provider.
-        /// </summary>
-        /// <param name="fromAddress">From address.</param>
-        /// <param name="toAddresses">To addresses.</param>
-        /// <param name="subject">The subject.</param>
-        /// <param name="body">The body.</param>
-        /// <param name="isHtml">if set to <c>true</c> [is HTML].</param>
+        
         public void SendRequestToProvider(String fromAddress,
                                           List<String> toAddresses,
                                           String subject,
                                           String body,
-                                          Boolean isHtml)
+                                          Boolean isHtml,
+                                          List<EmailAttachment> attachments)
         {
             if (this.DeliveryStatusList[this.ResendCount] != MessageStatus.NotSet)
             {
@@ -246,6 +249,15 @@
             RequestSentToEmailProviderEvent requestSentToProviderEvent = new RequestSentToEmailProviderEvent(this.AggregateId, fromAddress, toAddresses, subject, body, isHtml);
 
             this.ApplyAndAppend(requestSentToProviderEvent);
+
+            // Record the attachment data
+            foreach (EmailAttachment emailAttachment in attachments){
+                EmailAttachmentRequestSentToProviderEvent emailAttachmentRequestSentToProviderEvent = new EmailAttachmentRequestSentToProviderEvent(this.AggregateId,
+                                                                                                                                                    emailAttachment.Filename,
+                                                                                                                                                    emailAttachment.FileData,
+                                                                                                                                                    (Int32)emailAttachment.FileType);
+                this.ApplyAndAppend(emailAttachmentRequestSentToProviderEvent);
+            }
         }
 
         public void ResendRequestToProvider()
@@ -380,6 +392,15 @@
             this.ProviderRequestReference = domainEvent.ProviderRequestReference;
             this.DeliveryStatusList[this.ResendCount] = MessageStatus.Sent;
         }
+
+        private void PlayEvent(EmailAttachmentRequestSentToProviderEvent domainEvent){
+            this.Attachments.Add(new EmailAttachment{
+                                                        FileData = domainEvent.FileData,
+                                                        FileType = (FileType)domainEvent.FileType,
+                                                        Filename = domainEvent.Filename,
+                                                    });
+        }
+
 
         private void PlayEvent(RequestResentToEmailProviderEvent domainEvent) {
             this.ResendCount++;

@@ -4,6 +4,19 @@
     using System.Collections.Generic;
     using Shared.DomainDrivenDesign.EventSourcing;
 
+    public record EmailAttachmentRequestSentToProviderEvent : DomainEvent{
+        public EmailAttachmentRequestSentToProviderEvent(Guid aggregateId,String fileName, String fileData, Int32 fileType) : base(aggregateId, Guid.NewGuid()){
+            this.MessageId = aggregateId;
+            this.FileData=fileData;
+            this.FileType = fileType;
+            this.Filename = fileName;
+        }
+        public String FileData { get; init; }
+        public String Filename { get; init; }
+        public Int32 FileType { get; init; }
+        public Guid MessageId { get; init; }
+    }
+
     public record RequestSentToEmailProviderEvent : DomainEvent
     {
         /// <summary>

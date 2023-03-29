@@ -23,7 +23,22 @@ namespace MessagingService.EmailAggregate.Tests
             requestSentToProviderEvent.Subject.ShouldBe(TestData.Subject);
             requestSentToProviderEvent.Body.ShouldBe(TestData.Body);
             requestSentToProviderEvent.IsHtml.ShouldBe(TestData.IsHtmlTrue);
+        }
 
+        [Fact]
+        public void EmailAttachmentRequestSentToProviderEvent_CanBeCreated_IsCreated()
+        {
+            EmailAttachmentRequestSentToProviderEvent emailAttachmentRequestSentToProviderEvent = new EmailAttachmentRequestSentToProviderEvent(TestData.MessageId, TestData.FileName, TestData.FileData,
+                                                                                                                                                (Int32)TestData.FileTypePDF);
+
+            emailAttachmentRequestSentToProviderEvent.ShouldNotBeNull();
+            emailAttachmentRequestSentToProviderEvent.AggregateId.ShouldBe(TestData.MessageId);
+            emailAttachmentRequestSentToProviderEvent.EventId.ShouldNotBe(Guid.Empty);
+            emailAttachmentRequestSentToProviderEvent.MessageId.ShouldBe(TestData.MessageId);
+            emailAttachmentRequestSentToProviderEvent.FileType.ShouldBe((Int32)TestData.FileTypePDF);
+            emailAttachmentRequestSentToProviderEvent.Filename.ShouldBe(TestData.FileName);
+            emailAttachmentRequestSentToProviderEvent.FileData.ShouldBe(TestData.FileData);
+            
         }
 
         [Fact]

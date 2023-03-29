@@ -6,8 +6,8 @@
     using System.Net;
     using System.Threading;
     using System.Threading.Tasks;
-    using BusinessLogic.Requests;
     using BusinessLogic.Services.EmailServices;
+    using Models;
 
     /// <summary>
     /// 

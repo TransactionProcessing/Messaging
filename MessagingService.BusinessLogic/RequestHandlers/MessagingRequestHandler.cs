@@ -1,11 +1,13 @@
 ﻿namespace MessagingService.BusinessLogic.RequestHandlers
 {
     using System;
+    using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
     using MediatR;
     using Requests;
     using Services;
+    using EmailAttachment = Models.EmailAttachment;
 
     /// <summary>
     /// 
@@ -48,8 +50,17 @@
         /// Response from the request
         /// </returns>
         public async Task<String> Handle(SendEmailRequest request,
-                                         CancellationToken cancellationToken)
-        {
+                                         CancellationToken cancellationToken){
+            List<EmailAttachment> attachments = new List<Models.EmailAttachment>();
+
+            foreach (Requests.EmailAttachment requestEmailAttachment in request.EmailAttachments){
+                attachments.Add(new EmailAttachment{
+                                                       FileData = requestEmailAttachment.FileData,
+                                                       FileType = this.ConvertFileType(requestEmailAttachment.FileType),
+                                                       Filename = requestEmailAttachment.Filename,
+                                                   });
+            }
+            
             await this.MessagingDomainService.SendEmailMessage(request.ConnectionIdentifier,
                                                                request.MessageId,
                                                                request.FromAddress,
@@ -57,7 +68,7 @@
                                                                request.Subject,
                                                                request.Body,
                                                                request.IsHtml,
-                                                               request.EmailAttachments,
+                                                               attachments,
                                                                cancellationToken);
 
             return string.Empty;
@@ -82,6 +93,17 @@
             await this.MessagingDomainService.ResendEmailMessage(request.ConnectionIdentifier, request.MessageId, cancellationToken);
 
             return String.Empty;
+        }
+
+        private Models.FileType ConvertFileType(FileType emailAttachmentFileType)
+        {
+            switch (emailAttachmentFileType)
+            {
+                case FileType.PDF:
+                    return Models.FileType.PDF;
+                default:
+                    return Models.FileType.None;
+            }
         }
     }
 }

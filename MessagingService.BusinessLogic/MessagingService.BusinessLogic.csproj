@@ -19,6 +19,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\MessagingService.EmailMessageAggregate\MessagingService.EmailMessageAggregate.csproj" />
+    <ProjectReference Include="..\MessagingService.Models\MessagingService.Models.csproj" />
     <ProjectReference Include="..\MessagingService.SMSMessageAggregate\MessagingService.SMSMessageAggregate.csproj" />
   </ItemGroup>
 
