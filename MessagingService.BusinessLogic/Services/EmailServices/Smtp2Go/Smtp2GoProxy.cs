@@ -8,8 +8,8 @@
     using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
+    using Models;
     using Newtonsoft.Json;
-    using Requests;
     using Service.Services.Email.Smtp2Go;
     using Shared.General;
     using Shared.Logger;

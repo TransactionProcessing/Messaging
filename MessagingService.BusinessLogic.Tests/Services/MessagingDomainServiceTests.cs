@@ -48,7 +48,7 @@ namespace MessagingService.BusinessLogic.Tests.Services
                                                           TestData.Subject,
                                                           TestData.Body,
                                                           TestData.IsHtmlTrue,
-                                                          TestData.EmailAttachments,
+                                                          TestData.EmailAttachmentModels,
                                                           CancellationToken.None);
         }
 

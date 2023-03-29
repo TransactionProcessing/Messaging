@@ -33,9 +33,12 @@ namespace MessagingService.BusinessLogic.Tests.Requests
             request.Body.ShouldBe(TestData.Body);
             request.IsHtml.ShouldBe(TestData.IsHtmlTrue);
             request.EmailAttachments.Count.ShouldBe(TestData.EmailAttachments.Count);
-            request.EmailAttachments.Single().FileData.ShouldBe(TestData.FileData);
-            request.EmailAttachments.Single().Filename.ShouldBe(TestData.FileName);
-            request.EmailAttachments.Single().FileType.ShouldBe(TestData.FileTypePDF);
+            request.EmailAttachments[0].FileData.ShouldBe(TestData.FileData);
+            request.EmailAttachments[0].Filename.ShouldBe(TestData.FileName);
+            request.EmailAttachments[0].FileType.ShouldBe(TestData.FileTypePDF);
+            request.EmailAttachments[1].FileData.ShouldBe(TestData.FileData);
+            request.EmailAttachments[1].Filename.ShouldBe(TestData.FileName);
+            request.EmailAttachments[1].FileType.ShouldBe(TestData.FileTypeNone);
 
         }
 

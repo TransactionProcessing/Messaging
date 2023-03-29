@@ -195,12 +195,31 @@
                 FileData  = TestData.FileData,
                 Filename = TestData.FileName,
                 FileType = TestData.FileTypePDF
+            },
+            new EmailAttachment
+            {
+                FileData  = TestData.FileData,
+                Filename = TestData.FileName,
+                FileType = TestData.FileTypeNone
             }
         };
 
+        public static List<Models.EmailAttachment> EmailAttachmentModels => new List<Models.EmailAttachment>
+                                                                {
+                                                                    new Models.EmailAttachment
+                                                                    {
+                                                                        FileData  = TestData.FileData,
+                                                                        Filename = TestData.FileName,
+                                                                        FileType = TestData.ModelFileTypePDF
+                                                                    }
+                                                                };
+
         public static String FileData = "Base64String";
         public static String FileName = "FileName.pdf";
+        public static FileType FileTypeNone = FileType.None;
         public static FileType FileTypePDF = FileType.PDF;
+        public static Models.FileType ModelFileTypePDF = Models.FileType.PDF;
+        public static Models.FileType ModelFileTypeNone = Models.FileType.None;
 
         public static ResendEmailRequest ResendEmailRequest => ResendEmailRequest.Create(TestData.ConnectionIdentifier,
                                                                                          TestData.MessageId);
@@ -234,7 +253,7 @@
         {
             EmailAggregate emailAggregate = new EmailAggregate();
             emailAggregate.SendRequestToProvider(TestData.FromAddress, TestData.ToAddresses, TestData.Subject,
-                                                 TestData.Body, TestData.IsHtmlTrue);
+                                                 TestData.Body, TestData.IsHtmlTrue, TestData.EmailAttachmentModels);
             emailAggregate.ReceiveResponseFromProvider(TestData.ProviderRequestReference, TestData.ProviderEmailReference);
             return emailAggregate;
         }

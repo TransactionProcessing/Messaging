@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\MessagingService.EmailMessage.DomainEvents\MessagingService.EmailMessage.DomainEvents.csproj" />
+    <ProjectReference Include="..\MessagingService.Models\MessagingService.Models.csproj" />
   </ItemGroup>
 
 </Project>

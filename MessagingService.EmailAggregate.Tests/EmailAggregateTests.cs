@@ -3,7 +3,9 @@ using Xunit;
 namespace MessagingService.EmailAggregate.Tests
 {
     using System;
+    using System.Collections.Generic;
     using EmailMessageAggregate;
+    using Models;
     using Shared.Logger;
     using Shouldly;
     using Testing;
@@ -21,7 +23,7 @@ namespace MessagingService.EmailAggregate.Tests
         public void EmailAggregate_SendRequestToProvider_RequestSent() {
             EmailAggregate emailAggregate = EmailAggregate.Create(TestData.MessageId);
 
-            emailAggregate.SendRequestToProvider(TestData.FromAddress, TestData.ToAddresses, TestData.Subject, TestData.Body, TestData.IsHtmlTrue);
+            emailAggregate.SendRequestToProvider(TestData.FromAddress, TestData.ToAddresses, TestData.Subject, TestData.Body, TestData.IsHtmlTrue, TestData.EmailAttachmentModels);
 
             emailAggregate.FromAddress.ShouldBe(TestData.FromAddress);
             emailAggregate.Subject.ShouldBe(TestData.Subject);
@@ -29,21 +31,24 @@ namespace MessagingService.EmailAggregate.Tests
             emailAggregate.IsHtml.ShouldBe(TestData.IsHtmlTrue);
             MessageStatus messageStatus = emailAggregate.GetDeliveryStatus();
             messageStatus.ShouldBe(MessageStatus.InProgress);
-            // TODO: Get Recipients
+            var toAddresses = emailAggregate.GetToAddresses();
+            toAddresses.Count.ShouldBe(TestData.ToAddresses.Count);
+            List<EmailAttachment> attachments = emailAggregate.GetAttachments();
+            attachments.Count.ShouldBe(TestData.EmailAttachmentModels.Count);
         }
 
         [Fact]
         public void EmailAggregate_SendRequestToProvider_RequestAlreadySent_ErrorThrown() {
             EmailAggregate emailAggregate = EmailAggregate.Create(TestData.MessageId);
 
-            emailAggregate.SendRequestToProvider(TestData.FromAddress, TestData.ToAddresses, TestData.Subject, TestData.Body, TestData.IsHtmlTrue);
+            emailAggregate.SendRequestToProvider(TestData.FromAddress, TestData.ToAddresses, TestData.Subject, TestData.Body, TestData.IsHtmlTrue, TestData.EmailAttachmentModels);
 
             Should.Throw<InvalidOperationException>(() => {
                                                         emailAggregate.SendRequestToProvider(TestData.FromAddress,
                                                                                              TestData.ToAddresses,
                                                                                              TestData.Subject,
                                                                                              TestData.Body,
-                                                                                             TestData.IsHtmlTrue);
+                                                                                             TestData.IsHtmlTrue, TestData.EmailAttachmentModels);
                                                     });
         }
 
@@ -51,7 +56,7 @@ namespace MessagingService.EmailAggregate.Tests
         public void EmailAggregate_ReceiveResponseFromProvider_ResponseReceived() {
             EmailAggregate emailAggregate = EmailAggregate.Create(TestData.MessageId);
 
-            emailAggregate.SendRequestToProvider(TestData.FromAddress, TestData.ToAddresses, TestData.Subject, TestData.Body, TestData.IsHtmlTrue);
+            emailAggregate.SendRequestToProvider(TestData.FromAddress, TestData.ToAddresses, TestData.Subject, TestData.Body, TestData.IsHtmlTrue, TestData.EmailAttachmentModels);
             emailAggregate.ReceiveResponseFromProvider(TestData.ProviderRequestReference, TestData.ProviderEmailReference);
 
             emailAggregate.ProviderRequestReference.ShouldBe(TestData.ProviderRequestReference);
@@ -64,7 +69,7 @@ namespace MessagingService.EmailAggregate.Tests
         public void EmailAggregate_MarkMessageAsDelivered_MessageMarkedAsDelivered() {
             EmailAggregate emailAggregate = EmailAggregate.Create(TestData.MessageId);
 
-            emailAggregate.SendRequestToProvider(TestData.FromAddress, TestData.ToAddresses, TestData.Subject, TestData.Body, TestData.IsHtmlTrue);
+            emailAggregate.SendRequestToProvider(TestData.FromAddress, TestData.ToAddresses, TestData.Subject, TestData.Body, TestData.IsHtmlTrue, TestData.EmailAttachmentModels);
             emailAggregate.ReceiveResponseFromProvider(TestData.ProviderRequestReference, TestData.ProviderEmailReference);
 
             emailAggregate.MarkMessageAsDelivered(TestData.ProviderStatusDescription, TestData.DeliveredDateTime);
@@ -82,7 +87,7 @@ namespace MessagingService.EmailAggregate.Tests
         public void EmailAggregate_MarkMessageAsDelivered_IncorrectState_ErrorThrown(MessageStatus messageStatus) {
             EmailAggregate emailAggregate = EmailAggregate.Create(TestData.MessageId);
 
-            emailAggregate.SendRequestToProvider(TestData.FromAddress, TestData.ToAddresses, TestData.Subject, TestData.Body, TestData.IsHtmlTrue);
+            emailAggregate.SendRequestToProvider(TestData.FromAddress, TestData.ToAddresses, TestData.Subject, TestData.Body, TestData.IsHtmlTrue, TestData.EmailAttachmentModels);
 
             switch(messageStatus) {
                 case MessageStatus.Delivered:
@@ -117,7 +122,7 @@ namespace MessagingService.EmailAggregate.Tests
         public void EmailAggregate_MarkMessageAsRejected_MessageMarkedAsRejected() {
             EmailAggregate emailAggregate = EmailAggregate.Create(TestData.MessageId);
 
-            emailAggregate.SendRequestToProvider(TestData.FromAddress, TestData.ToAddresses, TestData.Subject, TestData.Body, TestData.IsHtmlTrue);
+            emailAggregate.SendRequestToProvider(TestData.FromAddress, TestData.ToAddresses, TestData.Subject, TestData.Body, TestData.IsHtmlTrue, TestData.EmailAttachmentModels);
             emailAggregate.ReceiveResponseFromProvider(TestData.ProviderRequestReference, TestData.ProviderEmailReference);
 
             emailAggregate.MarkMessageAsRejected(TestData.ProviderStatusDescription, TestData.RejectedDateTime);
@@ -135,7 +140,7 @@ namespace MessagingService.EmailAggregate.Tests
         public void EmailAggregate_MarkMessageAsRejected_IncorrectState_ErrorThrown(MessageStatus messageStatus) {
             EmailAggregate emailAggregate = EmailAggregate.Create(TestData.MessageId);
 
-            emailAggregate.SendRequestToProvider(TestData.FromAddress, TestData.ToAddresses, TestData.Subject, TestData.Body, TestData.IsHtmlTrue);
+            emailAggregate.SendRequestToProvider(TestData.FromAddress, TestData.ToAddresses, TestData.Subject, TestData.Body, TestData.IsHtmlTrue, TestData.EmailAttachmentModels);
 
             switch(messageStatus) {
                 case MessageStatus.Delivered:
@@ -169,7 +174,7 @@ namespace MessagingService.EmailAggregate.Tests
         public void EmailAggregate_MarkMessageAsFailed_MessageMarkedAsFailed() {
             EmailAggregate emailAggregate = EmailAggregate.Create(TestData.MessageId);
 
-            emailAggregate.SendRequestToProvider(TestData.FromAddress, TestData.ToAddresses, TestData.Subject, TestData.Body, TestData.IsHtmlTrue);
+            emailAggregate.SendRequestToProvider(TestData.FromAddress, TestData.ToAddresses, TestData.Subject, TestData.Body, TestData.IsHtmlTrue, TestData.EmailAttachmentModels);
             emailAggregate.ReceiveResponseFromProvider(TestData.ProviderRequestReference, TestData.ProviderEmailReference);
 
             emailAggregate.MarkMessageAsFailed(TestData.ProviderStatusDescription, TestData.FailedDateTime);
@@ -187,7 +192,7 @@ namespace MessagingService.EmailAggregate.Tests
         public void EmailAggregate_MarkMessageAsFailed_IncorrectState_ErrorThrown(MessageStatus messageStatus) {
             EmailAggregate emailAggregate = EmailAggregate.Create(TestData.MessageId);
 
-            emailAggregate.SendRequestToProvider(TestData.FromAddress, TestData.ToAddresses, TestData.Subject, TestData.Body, TestData.IsHtmlTrue);
+            emailAggregate.SendRequestToProvider(TestData.FromAddress, TestData.ToAddresses, TestData.Subject, TestData.Body, TestData.IsHtmlTrue, TestData.EmailAttachmentModels);
 
             switch(messageStatus) {
                 case MessageStatus.Delivered:
@@ -221,7 +226,7 @@ namespace MessagingService.EmailAggregate.Tests
         public void EmailAggregate_MarkMessageAsBounced_MessageMarkedAsBounced() {
             EmailAggregate emailAggregate = EmailAggregate.Create(TestData.MessageId);
 
-            emailAggregate.SendRequestToProvider(TestData.FromAddress, TestData.ToAddresses, TestData.Subject, TestData.Body, TestData.IsHtmlTrue);
+            emailAggregate.SendRequestToProvider(TestData.FromAddress, TestData.ToAddresses, TestData.Subject, TestData.Body, TestData.IsHtmlTrue, TestData.EmailAttachmentModels);
             emailAggregate.ReceiveResponseFromProvider(TestData.ProviderRequestReference, TestData.ProviderEmailReference);
 
             emailAggregate.MarkMessageAsBounced(TestData.ProviderStatusDescription, TestData.BouncedDateTime);
@@ -239,7 +244,7 @@ namespace MessagingService.EmailAggregate.Tests
         public void EmailAggregate_MarkMessageAsBounced_IncorrectState_ErrorThrown(MessageStatus messageStatus) {
             EmailAggregate emailAggregate = EmailAggregate.Create(TestData.MessageId);
 
-            emailAggregate.SendRequestToProvider(TestData.FromAddress, TestData.ToAddresses, TestData.Subject, TestData.Body, TestData.IsHtmlTrue);
+            emailAggregate.SendRequestToProvider(TestData.FromAddress, TestData.ToAddresses, TestData.Subject, TestData.Body, TestData.IsHtmlTrue, TestData.EmailAttachmentModels);
 
             switch(messageStatus) {
                 case MessageStatus.Delivered:
@@ -273,7 +278,7 @@ namespace MessagingService.EmailAggregate.Tests
         public void EmailAggregate_MarkMessageAsSpam_MessageMarkedAsSpam() {
             EmailAggregate emailAggregate = EmailAggregate.Create(TestData.MessageId);
 
-            emailAggregate.SendRequestToProvider(TestData.FromAddress, TestData.ToAddresses, TestData.Subject, TestData.Body, TestData.IsHtmlTrue);
+            emailAggregate.SendRequestToProvider(TestData.FromAddress, TestData.ToAddresses, TestData.Subject, TestData.Body, TestData.IsHtmlTrue, TestData.EmailAttachmentModels);
             emailAggregate.ReceiveResponseFromProvider(TestData.ProviderRequestReference, TestData.ProviderEmailReference);
 
             emailAggregate.MarkMessageAsSpam(TestData.ProviderStatusDescription, TestData.SpamDateTime);
@@ -291,7 +296,7 @@ namespace MessagingService.EmailAggregate.Tests
         public void EmailAggregate_MarkMessageAsSpam_IncorrectState_ErrorThrown(MessageStatus messageStatus) {
             EmailAggregate emailAggregate = EmailAggregate.Create(TestData.MessageId);
 
-            emailAggregate.SendRequestToProvider(TestData.FromAddress, TestData.ToAddresses, TestData.Subject, TestData.Body, TestData.IsHtmlTrue);
+            emailAggregate.SendRequestToProvider(TestData.FromAddress, TestData.ToAddresses, TestData.Subject, TestData.Body, TestData.IsHtmlTrue, TestData.EmailAttachmentModels);
 
             switch(messageStatus) {
                 case MessageStatus.Delivered:
@@ -327,7 +332,7 @@ namespace MessagingService.EmailAggregate.Tests
         public void EmailAggregate_ResendRequestToProvider_IsSent_MessageIsResent() {
             EmailAggregate emailAggregate = EmailAggregate.Create(TestData.MessageId);
 
-            emailAggregate.SendRequestToProvider(TestData.FromAddress, TestData.ToAddresses, TestData.Subject, TestData.Body, TestData.IsHtmlTrue);
+            emailAggregate.SendRequestToProvider(TestData.FromAddress, TestData.ToAddresses, TestData.Subject, TestData.Body, TestData.IsHtmlTrue, TestData.EmailAttachmentModels);
             emailAggregate.ReceiveResponseFromProvider(TestData.ProviderRequestReference, TestData.ProviderEmailReference);
             emailAggregate.ResendRequestToProvider();
 
@@ -339,7 +344,7 @@ namespace MessagingService.EmailAggregate.Tests
         public void EmailAggregate_ResendRequestToProvider_IsDelivered_MessageIsResent() {
             EmailAggregate emailAggregate = EmailAggregate.Create(TestData.MessageId);
 
-            emailAggregate.SendRequestToProvider(TestData.FromAddress, TestData.ToAddresses, TestData.Subject, TestData.Body, TestData.IsHtmlTrue);
+            emailAggregate.SendRequestToProvider(TestData.FromAddress, TestData.ToAddresses, TestData.Subject, TestData.Body, TestData.IsHtmlTrue, TestData.EmailAttachmentModels);
             emailAggregate.ReceiveResponseFromProvider(TestData.ProviderRequestReference, TestData.ProviderEmailReference);
             emailAggregate.MarkMessageAsDelivered(TestData.ProviderStatusDescription, TestData.DeliveredDateTime);
             emailAggregate.ResendRequestToProvider();
@@ -359,7 +364,7 @@ namespace MessagingService.EmailAggregate.Tests
         public void EmailAggregate_ResendRequestToProvider_InProgress_ErrorThrown() {
             EmailAggregate emailAggregate = EmailAggregate.Create(TestData.MessageId);
 
-            emailAggregate.SendRequestToProvider(TestData.FromAddress, TestData.ToAddresses, TestData.Subject, TestData.Body, TestData.IsHtmlTrue);
+            emailAggregate.SendRequestToProvider(TestData.FromAddress, TestData.ToAddresses, TestData.Subject, TestData.Body, TestData.IsHtmlTrue, TestData.EmailAttachmentModels);
             Should.Throw<InvalidOperationException>(() => emailAggregate.ResendRequestToProvider());
         }
 
@@ -367,7 +372,7 @@ namespace MessagingService.EmailAggregate.Tests
         public void EmailAggregate_ResendRequestToProvider_Rejected_ErrorThrown() {
             EmailAggregate emailAggregate = EmailAggregate.Create(TestData.MessageId);
 
-            emailAggregate.SendRequestToProvider(TestData.FromAddress, TestData.ToAddresses, TestData.Subject, TestData.Body, TestData.IsHtmlTrue);
+            emailAggregate.SendRequestToProvider(TestData.FromAddress, TestData.ToAddresses, TestData.Subject, TestData.Body, TestData.IsHtmlTrue, TestData.EmailAttachmentModels);
             emailAggregate.ReceiveResponseFromProvider(TestData.ProviderRequestReference, TestData.ProviderEmailReference);
             emailAggregate.MarkMessageAsRejected(TestData.ProviderStatusDescription, TestData.RejectedDateTime);
             Should.Throw<InvalidOperationException>(() => emailAggregate.ResendRequestToProvider());
@@ -377,7 +382,7 @@ namespace MessagingService.EmailAggregate.Tests
         public void EmailAggregate_ResendRequestToProvider_Failed_ErrorThrown() {
             EmailAggregate emailAggregate = EmailAggregate.Create(TestData.MessageId);
 
-            emailAggregate.SendRequestToProvider(TestData.FromAddress, TestData.ToAddresses, TestData.Subject, TestData.Body, TestData.IsHtmlTrue);
+            emailAggregate.SendRequestToProvider(TestData.FromAddress, TestData.ToAddresses, TestData.Subject, TestData.Body, TestData.IsHtmlTrue, TestData.EmailAttachmentModels);
             emailAggregate.ReceiveResponseFromProvider(TestData.ProviderRequestReference, TestData.ProviderEmailReference);
             emailAggregate.MarkMessageAsFailed(TestData.ProviderStatusDescription, TestData.FailedDateTime);
             Should.Throw<InvalidOperationException>(() => emailAggregate.ResendRequestToProvider());
@@ -387,7 +392,7 @@ namespace MessagingService.EmailAggregate.Tests
         public void EmailAggregate_ResendRequestToProvider_Spam_ErrorThrown() {
             EmailAggregate emailAggregate = EmailAggregate.Create(TestData.MessageId);
 
-            emailAggregate.SendRequestToProvider(TestData.FromAddress, TestData.ToAddresses, TestData.Subject, TestData.Body, TestData.IsHtmlTrue);
+            emailAggregate.SendRequestToProvider(TestData.FromAddress, TestData.ToAddresses, TestData.Subject, TestData.Body, TestData.IsHtmlTrue, TestData.EmailAttachmentModels);
             emailAggregate.ReceiveResponseFromProvider(TestData.ProviderRequestReference, TestData.ProviderEmailReference);
             emailAggregate.MarkMessageAsSpam(TestData.ProviderStatusDescription, TestData.SpamDateTime);
             Should.Throw<InvalidOperationException>(() => emailAggregate.ResendRequestToProvider());
@@ -397,7 +402,7 @@ namespace MessagingService.EmailAggregate.Tests
         public void EmailAggregate_ResendRequestToProvider_Bounced_ErrorThrown() {
             EmailAggregate emailAggregate = EmailAggregate.Create(TestData.MessageId);
 
-            emailAggregate.SendRequestToProvider(TestData.FromAddress, TestData.ToAddresses, TestData.Subject, TestData.Body, TestData.IsHtmlTrue);
+            emailAggregate.SendRequestToProvider(TestData.FromAddress, TestData.ToAddresses, TestData.Subject, TestData.Body, TestData.IsHtmlTrue, TestData.EmailAttachmentModels);
             emailAggregate.ReceiveResponseFromProvider(TestData.ProviderRequestReference, TestData.ProviderEmailReference);
             emailAggregate.MarkMessageAsBounced(TestData.ProviderStatusDescription, TestData.BouncedDateTime);
             Should.Throw<InvalidOperationException>(() => emailAggregate.ResendRequestToProvider());
