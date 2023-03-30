@@ -3,12 +3,12 @@
 using System;
 using MediatR;
 
-public class ResendEmailRequest : IRequest
+public class ResendSMSRequest : IRequest
 {
     #region Constructors
 
-    private ResendEmailRequest(Guid connectionIdentifier,
-                               Guid messageId)
+    private ResendSMSRequest(Guid connectionIdentifier,
+                             Guid messageId)
     {
         this.ConnectionIdentifier = connectionIdentifier;
         this.MessageId = messageId;
@@ -17,7 +17,7 @@ public class ResendEmailRequest : IRequest
     #endregion
 
     #region Properties
-
+    
     public Guid ConnectionIdentifier { get; }
 
     public Guid MessageId { get; }
@@ -26,10 +26,10 @@ public class ResendEmailRequest : IRequest
 
     #region Methods
 
-    public static ResendEmailRequest Create(Guid connectionIdentifier,
-                                            Guid messageId)
+    public static ResendSMSRequest Create(Guid connectionIdentifier,
+                                          Guid messageId)
     {
-        return new ResendEmailRequest(connectionIdentifier, messageId);
+        return new ResendSMSRequest(connectionIdentifier, messageId);
     }
 
     #endregion

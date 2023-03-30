@@ -9,7 +9,7 @@
     /// 
     /// </summary>
     /// <seealso cref="MediatR.IRequest{System.String}" />
-    public class SendEmailRequest : IRequest<String>
+    public class SendEmailRequest : IRequest
     {
         #region Constructors
 

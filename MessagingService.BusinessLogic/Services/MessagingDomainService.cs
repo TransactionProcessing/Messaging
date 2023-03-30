@@ -107,7 +107,7 @@
             await this.SmsAggregateRepository.SaveChanges(smsAggregate, cancellationToken);
         }
 
-        public async  Task ResendEmailMessage(Guid connectionIdentifier,
+        public async Task ResendEmailMessage(Guid connectionIdentifier,
                                      Guid messageId,
                                      CancellationToken cancellationToken) {
             // Rehydrate Email Message aggregate
@@ -125,13 +125,38 @@
                                                        emailAggregate.IsHtml, null,
                                                        cancellationToken);
 
-            // response message from provider (record event)
-            emailAggregate.ReceiveResponseFromProvider(emailResponse.RequestIdentifier, emailResponse.EmailIdentifier);
+            if (emailResponse.ApiCallSuccessful)
+            {
+                // response message from provider (record event)
+                emailAggregate.ReceiveResponseFromProvider(emailResponse.RequestIdentifier, emailResponse.EmailIdentifier);
+            }
+            else
+            {
+                emailAggregate.ReceiveBadResponseFromProvider(emailResponse.Error, emailResponse.ErrorCode);
+            }
 
             // Save Changes to persistance
             await this.EmailAggregateRepository.SaveChanges(emailAggregate, cancellationToken);
         }
+
+        public async Task ResendSMSMessage(Guid connectionIdentifier, Guid messageId, CancellationToken cancellationToken){
+            // Rehydrate SMS Message aggregate
+            SMSAggregate smsAggregate = await this.SmsAggregateRepository.GetLatestVersion(messageId, cancellationToken);
+
+            // re-send message to provider (record event)
+            smsAggregate.ResendRequestToProvider();
+
+            // Make call to SMS provider here
+            SMSServiceProxyResponse smsResponse =
+                await this.SmsServiceProxy.SendSMS(messageId, smsAggregate.Sender, smsAggregate.Destination, smsAggregate.Message, cancellationToken);
+
+            // response message from provider (record event)
+            smsAggregate.ReceiveResponseFromProvider(smsResponse.SMSIdentifier);
+
+            // Save Changes to persistance
+            await this.SmsAggregateRepository.SaveChanges(smsAggregate, cancellationToken);
+        }
     }
 
-        #endregion
+    #endregion
 }

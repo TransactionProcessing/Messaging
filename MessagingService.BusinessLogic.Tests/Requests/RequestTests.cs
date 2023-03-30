@@ -66,5 +66,14 @@ namespace MessagingService.BusinessLogic.Tests.Requests
             request.ConnectionIdentifier.ShouldBe(TestData.ConnectionIdentifier);
             request.MessageId.ShouldBe(TestData.MessageId);
         }
+
+        [Fact]
+        public void ResendSMSRequest_CanBeCreated_IsCreated()
+        {
+            ResendSMSRequest request = ResendSMSRequest.Create(TestData.ConnectionIdentifier, TestData.MessageId);
+            request.ShouldNotBeNull();
+            request.ConnectionIdentifier.ShouldBe(TestData.ConnectionIdentifier);
+            request.MessageId.ShouldBe(TestData.MessageId);
+        }
     }
 }
