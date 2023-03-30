@@ -66,6 +66,20 @@ namespace MessagingService.EmailAggregate.Tests
         }
 
         [Fact]
+        public void EmailAggregate_ReceiveBadResponseFromProvider_ResponseReceived()
+        {
+            EmailAggregate emailAggregate = EmailAggregate.Create(TestData.MessageId);
+
+            emailAggregate.SendRequestToProvider(TestData.FromAddress, TestData.ToAddresses, TestData.Subject, TestData.Body, TestData.IsHtmlTrue, TestData.EmailAttachmentModels);
+            emailAggregate.ReceiveBadResponseFromProvider(TestData.EmailError, TestData.EmailErrorCode);
+
+            emailAggregate.Error.ShouldBe(TestData.EmailError);
+            emailAggregate.ErrorCode.ShouldBe(TestData.EmailErrorCode);
+            MessageStatus messageStatus = emailAggregate.GetDeliveryStatus();
+            messageStatus.ShouldBe(MessageStatus.Failed);
+        }
+
+        [Fact]
         public void EmailAggregate_MarkMessageAsDelivered_MessageMarkedAsDelivered() {
             EmailAggregate emailAggregate = EmailAggregate.Create(TestData.MessageId);
 

@@ -62,7 +62,7 @@
                    {
                        RequestIdentifier = "requestid",
                        EmailIdentifier = "emailid",
-                       ApiStatusCode = HttpStatusCode.OK,
+                       ApiCallSuccessful = true,
                        Error = string.Empty,
                        ErrorCode = string.Empty
                    };

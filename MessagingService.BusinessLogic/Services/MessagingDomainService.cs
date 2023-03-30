@@ -71,8 +71,13 @@
             EmailServiceProxyResponse emailResponse =
                 await this.EmailServiceProxy.SendEmail(messageId, fromAddress, toAddresses, subject, body, isHtml, attachments, cancellationToken);
 
-            // response message from provider (record event)
-            emailAggregate.ReceiveResponseFromProvider(emailResponse.RequestIdentifier, emailResponse.EmailIdentifier);
+            if (emailResponse.ApiCallSuccessful){
+                // response message from provider (record event)
+                emailAggregate.ReceiveResponseFromProvider(emailResponse.RequestIdentifier, emailResponse.EmailIdentifier);
+            }
+            else{
+                emailAggregate.ReceiveBadResponseFromProvider(emailResponse.Error,emailResponse.ErrorCode);
+            }
 
             // Save Changes to persistance
             await this.EmailAggregateRepository.SaveChanges(emailAggregate, cancellationToken);

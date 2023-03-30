@@ -102,20 +102,31 @@
 
             StringContent content = new StringContent(requestSerialised, Encoding.UTF8, "application/json");
 
-            String requestUri = $"{ConfigurationReader.GetValue("SMTP2GoBaseAddress")}/email/send";
+            String requestUri = $"{ConfigurationReader.GetValue("SMTP2GoBaseAddress")}email/send";
             HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Post, requestUri);
             requestMessage.Content = content;
 
             HttpResponseMessage httpResponse = await this.HttpClient.SendAsync(requestMessage, cancellationToken);
 
-            Smtp2GoSendEmailResponse apiResponse = JsonConvert.DeserializeObject<Smtp2GoSendEmailResponse>(await httpResponse.Content.ReadAsStringAsync());
+            Smtp2GoSendEmailResponse apiResponse = new Smtp2GoSendEmailResponse(){
+                                                                                     Data = new Smtp2GoSendEmailResponseData()
+                                                                                 };
+            if (httpResponse.IsSuccessStatusCode){
+                apiResponse = JsonConvert.DeserializeObject<Smtp2GoSendEmailResponse>(await httpResponse.Content.ReadAsStringAsync());
+            }
+            else{
+                apiResponse = new Smtp2GoSendEmailResponse();
+                apiResponse.Data = new Smtp2GoSendEmailResponseData();
+                apiResponse.Data.Error = httpResponse.StatusCode.ToString();
+                apiResponse.Data.ErrorCode = ((Int32)httpResponse.StatusCode).ToString();
+            }
 
             Logger.LogDebug($"Response Message Received from Email Provider [SMTP2Go] {JsonConvert.SerializeObject(apiResponse)}");
 
             // Translate the Response
             response = new EmailServiceProxyResponse
                        {
-                           ApiStatusCode = httpResponse.StatusCode,
+                           ApiCallSuccessful = httpResponse.IsSuccessStatusCode && String.IsNullOrEmpty(apiResponse.Data.ErrorCode),
                            EmailIdentifier = apiResponse.Data.EmailId,
                            Error = apiResponse.Data.Error,
                            ErrorCode = apiResponse.Data.ErrorCode,

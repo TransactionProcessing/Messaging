@@ -182,9 +182,26 @@
             new EmailServiceProxyResponse
             {
                 EmailIdentifier = TestData.EmailIdentifier,
-                ApiStatusCode = TestData.ApiStatusCodeSuccess,
+                ApiCallSuccessful = true,
                 RequestIdentifier = TestData.RequestIdentifier
             };
+
+        public static EmailServiceProxyResponse FailedAPICallEmailServiceProxyResponse =>
+            new EmailServiceProxyResponse
+            {
+                Error = "NotFound",
+                ErrorCode = "404",
+                ApiCallSuccessful = false,
+            };
+
+        public static EmailServiceProxyResponse FailedEmailServiceProxyResponse =>
+            new EmailServiceProxyResponse
+            {
+                Error = "NotFound",
+                ErrorCode = "404",
+                ApiCallSuccessful = true,
+            };
+
 
         public static List<EmailAttachment> EmptyEmailAttachments => new List<EmailAttachment>();
 
@@ -220,6 +237,9 @@
         public static FileType FileTypePDF = FileType.PDF;
         public static Models.FileType ModelFileTypePDF = Models.FileType.PDF;
         public static Models.FileType ModelFileTypeNone = Models.FileType.None;
+
+        public static String EmailErrorCode = "404";
+        public static String EmailError = "NotFound";
 
         public static ResendEmailRequest ResendEmailRequest => ResendEmailRequest.Create(TestData.ConnectionIdentifier,
                                                                                          TestData.MessageId);
