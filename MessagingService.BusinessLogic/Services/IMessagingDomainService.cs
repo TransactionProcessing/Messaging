@@ -34,6 +34,10 @@
                             Guid messageId,
                             CancellationToken cancellationToken);
 
+        Task ResendSMSMessage(Guid connectionIdentifier,
+                                Guid messageId,
+                                CancellationToken cancellationToken);
+
         #endregion
     }
 }

@@ -12,7 +12,7 @@ namespace MessagingService.SMSAggregate.Tests
     using Xunit;
     using MessageStatus = SMSMessageAggregate.MessageStatus;
 
-    public class EmailAggregateTests
+    public class SMSAggregateTests
     {
         [Fact]
         public void SMSAggregate_CanBeCreated_IsCreated()
@@ -31,7 +31,7 @@ namespace MessagingService.SMSAggregate.Tests
             smsAggregate.Sender.ShouldBe(TestData.Sender);
             smsAggregate.Destination.ShouldBe(TestData.Destination);
             smsAggregate.Message.ShouldBe(TestData.Message);
-            smsAggregate.MessageStatus.ShouldBe(MessageStatus.InProgress);
+            smsAggregate.GetDeliveryStatus().ShouldBe(MessageStatus.InProgress);
         }
 
         [Fact]
@@ -56,7 +56,7 @@ namespace MessagingService.SMSAggregate.Tests
             smsAggregate.ReceiveResponseFromProvider(TestData.ProviderSMSReference);
 
             smsAggregate.ProviderReference.ShouldBe(TestData.ProviderSMSReference);
-            smsAggregate.MessageStatus.ShouldBe(MessageStatus.Sent);
+            smsAggregate.GetDeliveryStatus().ShouldBe(MessageStatus.Sent);
         }
 
         [Fact]
@@ -69,7 +69,7 @@ namespace MessagingService.SMSAggregate.Tests
 
             smsAggregate.MarkMessageAsDelivered(TestData.ProviderStatusDescription, TestData.DeliveredDateTime);
 
-            smsAggregate.MessageStatus.ShouldBe(MessageStatus.Delivered);
+            smsAggregate.GetDeliveryStatus().ShouldBe(MessageStatus.Delivered);
         }
 
         [Theory]
@@ -125,7 +125,7 @@ namespace MessagingService.SMSAggregate.Tests
 
             smsAggregate.MarkMessageAsExpired(TestData.ProviderStatusDescription, TestData.DeliveredDateTime);
 
-            smsAggregate.MessageStatus.ShouldBe(MessageStatus.Expired);
+            smsAggregate.GetDeliveryStatus().ShouldBe(MessageStatus.Expired);
         }
 
         [Theory]
@@ -181,7 +181,7 @@ namespace MessagingService.SMSAggregate.Tests
 
             smsAggregate.MarkMessageAsUndeliverable(TestData.ProviderStatusDescription, TestData.DeliveredDateTime);
 
-            smsAggregate.MessageStatus.ShouldBe(MessageStatus.Undeliverable);
+            smsAggregate.GetDeliveryStatus().ShouldBe(MessageStatus.Undeliverable);
         }
 
         [Theory]
@@ -237,7 +237,7 @@ namespace MessagingService.SMSAggregate.Tests
 
             smsAggregate.MarkMessageAsRejected(TestData.ProviderStatusDescription, TestData.DeliveredDateTime);
 
-            smsAggregate.MessageStatus.ShouldBe(MessageStatus.Rejected);
+            smsAggregate.GetDeliveryStatus().ShouldBe(MessageStatus.Rejected);
         }
 
         [Theory]
@@ -284,7 +284,86 @@ namespace MessagingService.SMSAggregate.Tests
         }
 
         [Fact]
-        public void EmailAggregate_PlayEvent_UnsupportedEvent_ErrorThrown()
+        public void SMSAggregate_ResendRequestToProvider_IsSent_MessageIsResent()
+        {
+            SMSAggregate smsAggregate = SMSAggregate.Create(TestData.MessageId);
+
+            smsAggregate.SendRequestToProvider(TestData.Sender, TestData.Destination, TestData.Message);
+            smsAggregate.ReceiveResponseFromProvider(TestData.ProviderSMSReference);
+
+            smsAggregate.ResendRequestToProvider();
+
+            smsAggregate.ResendCount.ShouldBe(1);
+            smsAggregate.GetDeliveryStatus(1).ShouldBe(MessageStatus.InProgress);
+        }
+
+        
+        [Fact]
+        public void SMSAggregate_ResendRequestToProvider_IsDelivered_MessageIsResent()
+        {
+            SMSAggregate smsAggregate = SMSAggregate.Create(TestData.MessageId);
+
+            smsAggregate.SendRequestToProvider(TestData.Sender, TestData.Destination, TestData.Message);
+            smsAggregate.ReceiveResponseFromProvider(TestData.ProviderSMSReference);
+            smsAggregate.MarkMessageAsDelivered(TestData.ProviderStatusDescription, TestData.DeliveredDateTime);
+            smsAggregate.ResendRequestToProvider();
+
+            smsAggregate.ResendCount.ShouldBe(1);
+            smsAggregate.GetDeliveryStatus(1).ShouldBe(MessageStatus.InProgress);
+        }
+        
+        [Fact]
+        public void SMSAggregate_ResendRequestToProvider_NotSet_ErrorThrown()
+        {
+            SMSAggregate smsAggregate = SMSAggregate.Create(TestData.MessageId);
+
+            Should.Throw<InvalidOperationException>(() => smsAggregate.ResendRequestToProvider());
+        }
+        
+        [Fact]
+        public void SMSAggregate_ResendRequestToProvider_InProgress_ErrorThrown()
+        {
+            SMSAggregate smsAggregate = SMSAggregate.Create(TestData.MessageId);
+
+            smsAggregate.SendRequestToProvider(TestData.Sender, TestData.Destination, TestData.Message);
+            Should.Throw<InvalidOperationException>(() => smsAggregate.ResendRequestToProvider());
+        }
+        
+        [Fact]
+        public void SMSAggregate_ResendRequestToProvider_Rejected_ErrorThrown()
+        {
+            SMSAggregate smsAggregate = SMSAggregate.Create(TestData.MessageId);
+
+            smsAggregate.SendRequestToProvider(TestData.Sender, TestData.Destination, TestData.Message);
+            smsAggregate.ReceiveResponseFromProvider(TestData.ProviderSMSReference);
+            smsAggregate.MarkMessageAsRejected(TestData.ProviderStatusDescription, TestData.RejectedDateTime);
+            Should.Throw<InvalidOperationException>(() => smsAggregate.ResendRequestToProvider());
+        }
+        
+        [Fact]
+        public void SMSAggregate_ResendRequestToProvider_Expired_ErrorThrown()
+        {
+            SMSAggregate smsAggregate = SMSAggregate.Create(TestData.MessageId);
+
+            smsAggregate.SendRequestToProvider(TestData.Sender, TestData.Destination, TestData.Message);
+            smsAggregate.ReceiveResponseFromProvider(TestData.ProviderSMSReference);
+            smsAggregate.MarkMessageAsExpired(TestData.ProviderStatusDescription, TestData.ExpiredDateTime);
+            Should.Throw<InvalidOperationException>(() => smsAggregate.ResendRequestToProvider());
+        }
+
+        [Fact]
+        public void SMSAggregate_ResendRequestToProvider_Undelivered_ErrorThrown()
+        {
+            SMSAggregate smsAggregate = SMSAggregate.Create(TestData.MessageId);
+
+            smsAggregate.SendRequestToProvider(TestData.Sender, TestData.Destination, TestData.Message);
+            smsAggregate.ReceiveResponseFromProvider(TestData.ProviderSMSReference);
+            smsAggregate.MarkMessageAsUndeliverable(TestData.ProviderStatusDescription, TestData.UndeliveredDateTime);
+            Should.Throw<InvalidOperationException>(() => smsAggregate.ResendRequestToProvider());
+        }
+
+        [Fact]
+        public void SMSAggregate_PlayEvent_UnsupportedEvent_ErrorThrown()
         {
             Logger.Initialise(NullLogger.Instance);
             SMSAggregate smsAggregate = new SMSAggregate();

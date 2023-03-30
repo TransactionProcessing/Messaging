@@ -35,5 +35,8 @@ namespace MessagingService.BusinessLogic.Tests.Mediator
                                              Guid messageId,
                                              CancellationToken cancellationToken) {
         }
+
+        public async Task ResendSMSMessage(Guid connectionIdentifier, Guid messageId, CancellationToken cancellationToken){
+        }
     }
 }

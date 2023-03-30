@@ -82,7 +82,7 @@ namespace MessagingService.BusinessLogic.Services.SMSServices.TheSMSWorks
 
                         response = new SMSServiceProxyResponse
                         {
-                                       ApiStatusCode = apiSendSMSMessageHttpResponse.StatusCode,
+                                       ApiCallSuccessful = true,
                                        SMSIdentifier = apiTheSmsWorksSendSmsResponse.MessageId,
                         };
                     }

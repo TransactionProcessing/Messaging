@@ -82,6 +82,30 @@
                                 });
         }
 
+        [HttpPost]
+        [Route("resend")]
+        [SwaggerResponse(202, "Accepted", typeof(SendSMSResponse))]
+        [SwaggerResponseExample(202, typeof(SendSMSResponseExample))]
+        public async Task<IActionResult> ResendSMS([FromBody] ResendSMSRequest resendSMSRequest,
+                                                     CancellationToken cancellationToken)
+        {
+            // Reject password tokens
+            if (ClaimsHelper.IsPasswordToken(this.User))
+            {
+                return this.Forbid();
+            }
+
+            // Create the command
+            BusinessLogic.Requests.ResendSMSRequest request = BusinessLogic.Requests.ResendSMSRequest.Create(resendSMSRequest.ConnectionIdentifier,
+                                                                                                             resendSMSRequest.MessageId);
+
+            // Route the command
+            await this.Mediator.Send(request, cancellationToken);
+
+            // return the result
+            return this.Accepted($"{SMSController.ControllerRoute}/{resendSMSRequest.MessageId}");
+        }
+
         #endregion
 
         #region Others

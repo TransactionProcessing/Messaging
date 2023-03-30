@@ -51,7 +51,7 @@
         {
             return new SMSServiceProxyResponse
                    {
-                       ApiStatusCode = HttpStatusCode.OK,
+                       ApiCallSuccessful = true,
                        Error = string.Empty,
                        ErrorCode = string.Empty,
                        SMSIdentifier = "smsid"

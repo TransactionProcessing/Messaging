@@ -24,6 +24,9 @@ namespace MessagingService.SMSMessageAggregate
         [ExcludeFromCodeCoverage]
         public SMSAggregate()
         {
+            this.DeliveryStatusList = new List<MessageStatus> {
+                                                                  MessageStatus.NotSet
+                                                              };
         }
 
         /// <summary>
@@ -36,6 +39,9 @@ namespace MessagingService.SMSMessageAggregate
 
             this.AggregateId = aggregateId;
             this.MessageId = aggregateId;
+            this.DeliveryStatusList = new List<MessageStatus> {
+                                                                  MessageStatus.NotSet
+                                                              };
         }
 
         #endregion
@@ -82,7 +88,7 @@ namespace MessagingService.SMSMessageAggregate
         /// <value>
         /// The message status.
         /// </value>
-        public MessageStatus MessageStatus { get; private set; }
+        //public MessageStatus MessageStatus { get; private set; }
 
         /// <summary>
         /// Creates the specified aggregate identifier.
@@ -117,7 +123,7 @@ namespace MessagingService.SMSMessageAggregate
                                           String destination,
                                           String message)
         {
-            if (this.MessageStatus != MessageStatus.NotSet)
+            if (this.DeliveryStatusList[this.ResendCount] != MessageStatus.NotSet)
             {
                 throw new InvalidOperationException("Cannot send a message to provider that has already been sent");
             }
@@ -194,9 +200,9 @@ namespace MessagingService.SMSMessageAggregate
         /// <exception cref="System.InvalidOperationException">Message at status {this.MessageStatus} cannot be set to expired</exception>
         private void CheckMessageCanBeSetToExpired()
         {
-            if (this.MessageStatus != MessageStatus.Sent)
+            if (this.DeliveryStatusList[this.ResendCount] != MessageStatus.Sent)
             {
-                throw new InvalidOperationException($"Message at status {this.MessageStatus} cannot be set to expired");
+                throw new InvalidOperationException($"Message at status {this.DeliveryStatusList[this.ResendCount]} cannot be set to expired");
             }
         }
 
@@ -206,9 +212,9 @@ namespace MessagingService.SMSMessageAggregate
         /// <exception cref="System.InvalidOperationException">Message at status {this.MessageStatus} cannot be set to rejected</exception>
         private void CheckMessageCanBeSetToRejected()
         {
-            if (this.MessageStatus != MessageStatus.Sent)
+            if (this.DeliveryStatusList[this.ResendCount] != MessageStatus.Sent)
             {
-                throw new InvalidOperationException($"Message at status {this.MessageStatus} cannot be set to rejected");
+                throw new InvalidOperationException($"Message at status {this.DeliveryStatusList[this.ResendCount]} cannot be set to rejected");
             }
         }
         /// <summary>
@@ -217,9 +223,9 @@ namespace MessagingService.SMSMessageAggregate
         /// <exception cref="System.InvalidOperationException">Message at status {this.MessageStatus} cannot be set to delivered</exception>
         private void CheckMessageCanBeSetToDelivered()
         {
-            if (this.MessageStatus != MessageStatus.Sent)
+            if (this.DeliveryStatusList[this.ResendCount] != MessageStatus.Sent)
             {
-                throw new InvalidOperationException($"Message at status {this.MessageStatus} cannot be set to delivered");
+                throw new InvalidOperationException($"Message at status {this.DeliveryStatusList[this.ResendCount]} cannot be set to delivered");
             }
         }
 
@@ -229,9 +235,9 @@ namespace MessagingService.SMSMessageAggregate
         /// <exception cref="System.InvalidOperationException">Message at status {this.MessageStatus} cannot be set to undeliverable</exception>
         private void CheckMessageCanBeSetToUndeliverable()
         {
-            if (this.MessageStatus != MessageStatus.Sent)
+            if (this.DeliveryStatusList[this.ResendCount] != MessageStatus.Sent)
             {
-                throw new InvalidOperationException($"Message at status {this.MessageStatus} cannot be set to undeliverable");
+                throw new InvalidOperationException($"Message at status {this.DeliveryStatusList[this.ResendCount]} cannot be set to undeliverable");
             }
         }
 
@@ -268,10 +274,10 @@ namespace MessagingService.SMSMessageAggregate
         /// <param name="domainEvent">The domain event.</param>
         private void PlayEvent(RequestSentToSMSProviderEvent domainEvent)
         {
-            this.MessageStatus = MessageStatus.InProgress;
             this.Sender = domainEvent.Sender;
             this.Destination = domainEvent.Destination;
             this.Message = domainEvent.Message;
+            this.DeliveryStatusList[this.ResendCount] = MessageStatus.InProgress;
         }
 
         /// <summary>
@@ -281,7 +287,7 @@ namespace MessagingService.SMSMessageAggregate
         private void PlayEvent(ResponseReceivedFromSMSProviderEvent domainEvent)
         {
             this.ProviderReference = domainEvent.ProviderSMSReference;
-            this.MessageStatus = MessageStatus.Sent;
+            this.DeliveryStatusList[this.ResendCount] = MessageStatus.Sent;
         }
 
         /// <summary>
@@ -290,7 +296,7 @@ namespace MessagingService.SMSMessageAggregate
         /// <param name="domainEvent">The domain event.</param>
         private void PlayEvent(SMSMessageExpiredEvent domainEvent)
         {
-            this.MessageStatus = MessageStatus.Expired;
+            this.DeliveryStatusList[this.ResendCount] = MessageStatus.Expired;
         }
 
         /// <summary>
@@ -299,7 +305,7 @@ namespace MessagingService.SMSMessageAggregate
         /// <param name="domainEvent">The domain event.</param>
         private void PlayEvent(SMSMessageDeliveredEvent domainEvent)
         {
-            this.MessageStatus = MessageStatus.Delivered;
+            this.DeliveryStatusList[this.ResendCount] = MessageStatus.Delivered;
         }
 
         /// <summary>
@@ -308,7 +314,7 @@ namespace MessagingService.SMSMessageAggregate
         /// <param name="domainEvent">The domain event.</param>
         private void PlayEvent(SMSMessageRejectedEvent domainEvent)
         {
-            this.MessageStatus = MessageStatus.Rejected;
+            this.DeliveryStatusList[this.ResendCount] = MessageStatus.Rejected;
         }
 
         /// <summary>
@@ -317,7 +323,38 @@ namespace MessagingService.SMSMessageAggregate
         /// <param name="domainEvent">The domain event.</param>
         private void PlayEvent(SMSMessageUndeliveredEvent domainEvent)
         {
-            this.MessageStatus = MessageStatus.Undeliverable;
+            this.DeliveryStatusList[this.ResendCount] = MessageStatus.Undeliverable;
+        }
+
+        public Int32 ResendCount { get; private set; }
+        private List<MessageStatus> DeliveryStatusList;
+
+        public void ResendRequestToProvider()
+        {
+            if (this.DeliveryStatusList[this.ResendCount] != MessageStatus.Sent &&
+                this.DeliveryStatusList[this.ResendCount] != MessageStatus.Delivered)
+            {
+                throw new InvalidOperationException($"Cannot re-send a message to provider that has not already been sent. Current Status [{this.DeliveryStatusList[this.ResendCount]}]");
+            }
+
+            RequestResentToSMSProviderEvent requestResentToSMSProviderEvent = new RequestResentToSMSProviderEvent(this.AggregateId);
+
+            this.ApplyAndAppend(requestResentToSMSProviderEvent);
+        }
+
+        public MessageStatus GetDeliveryStatus(Int32? resendAttempt = null)
+        {
+            if (resendAttempt.HasValue == false)
+            {
+                return this.DeliveryStatusList[this.ResendCount];
+            }
+            return this.DeliveryStatusList[resendAttempt.Value];
+        }
+
+        private void PlayEvent(RequestResentToSMSProviderEvent domainEvent)
+        {
+            this.ResendCount++;
+            this.DeliveryStatusList.Add(MessageStatus.InProgress);
         }
     }
 }

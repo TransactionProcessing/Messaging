@@ -13,9 +13,10 @@
     /// 
     /// </summary>
     /// <seealso cref="MediatR.IRequestHandler{MessagingService.BusinessLogic.Requests.SendEmailRequest, System.String}" />
-    public class MessagingRequestHandler : IRequestHandler<SendEmailRequest, String>, 
-                                           IRequestHandler<SendSMSRequest, String>,
-                                           IRequestHandler<ResendEmailRequest,String>
+    public class MessagingRequestHandler : IRequestHandler<SendEmailRequest>, 
+                                           IRequestHandler<SendSMSRequest>,
+                                           IRequestHandler<ResendEmailRequest>,
+                                           IRequestHandler<ResendSMSRequest>
     {
         #region Fields
 
@@ -49,7 +50,7 @@
         /// <returns>
         /// Response from the request
         /// </returns>
-        public async Task<String> Handle(SendEmailRequest request,
+        public async Task<Unit> Handle(SendEmailRequest request,
                                          CancellationToken cancellationToken){
             List<EmailAttachment> attachments = new List<Models.EmailAttachment>();
 
@@ -71,11 +72,11 @@
                                                                attachments,
                                                                cancellationToken);
 
-            return string.Empty;
+            return Unit.Value;
         }
 
-        public async Task<String> Handle(SendSMSRequest request,
-                                         CancellationToken cancellationToken)
+        public async Task<Unit> Handle(SendSMSRequest request,
+                                       CancellationToken cancellationToken)
         {
             await this.MessagingDomainService.SendSMSMessage(request.ConnectionIdentifier,
                                                              request.MessageId,
@@ -83,16 +84,16 @@
                                                              request.Destination,
                                                              request.Message,
                                                              cancellationToken);
-            return string.Empty;
+            return Unit.Value;
         }
 
         #endregion
 
-        public async Task<String> Handle(ResendEmailRequest request,
-                                   CancellationToken cancellationToken) {
+        public async Task<Unit> Handle(ResendEmailRequest request,
+                                       CancellationToken cancellationToken) {
             await this.MessagingDomainService.ResendEmailMessage(request.ConnectionIdentifier, request.MessageId, cancellationToken);
 
-            return String.Empty;
+            return Unit.Value;
         }
 
         private Models.FileType ConvertFileType(FileType emailAttachmentFileType)
@@ -104,6 +105,12 @@
                 default:
                     return Models.FileType.None;
             }
+        }
+
+        public async Task<Unit> Handle(ResendSMSRequest request, CancellationToken cancellationToken){
+            await this.MessagingDomainService.ResendSMSMessage(request.ConnectionIdentifier, request.MessageId, cancellationToken);
+
+            return Unit.Value;
         }
     }
 }

@@ -244,6 +244,9 @@
         public static ResendEmailRequest ResendEmailRequest => ResendEmailRequest.Create(TestData.ConnectionIdentifier,
                                                                                          TestData.MessageId);
 
+        public static ResendSMSRequest ResendSMSRequest => ResendSMSRequest.Create(TestData.ConnectionIdentifier,
+                                                                                   TestData.MessageId);
+
         public static SendEmailRequest SendEmailRequestNoAttachments => SendEmailRequest.Create(TestData.ConnectionIdentifier,
                                                                                                 TestData.MessageId,
                                                                                                 TestData.FromAddress,
@@ -288,7 +291,24 @@
             new SMSServiceProxyResponse
             {
                 SMSIdentifier = TestData.SMSIdentifier,
-                ApiStatusCode = TestData.ApiStatusCodeSuccess
+                ApiCallSuccessful = true
+            };
+        
+
+        public static SMSServiceProxyResponse FailedAPICallSMSServiceProxyResponse =>
+            new SMSServiceProxyResponse
+            {
+                Error = "NotFound",
+                ErrorCode = "404",
+                ApiCallSuccessful = false,
+            };
+
+        public static SMSServiceProxyResponse FailedSMSServiceProxyResponse =>
+            new SMSServiceProxyResponse
+            {
+                Error = "NotFound",
+                ErrorCode = "404",
+                ApiCallSuccessful = true,
             };
 
         public static SMSAggregate GetEmptySMSAggregate()

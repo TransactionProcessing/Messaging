@@ -7,7 +7,7 @@
     /// 
     /// </summary>
     /// <seealso cref="MediatR.IRequest{System.String}" />
-    public class SendSMSRequest : IRequest<String>
+    public class SendSMSRequest : IRequest
     {
         #region Constructors
 

@@ -26,3 +26,5 @@ public record SMSMessageRejectedEvent(Guid MessageId,
 public record SMSMessageUndeliveredEvent(Guid MessageId,
                                          String ProviderStatus,
                                          DateTime UndeliveredDateTime) : DomainEvent(MessageId, Guid.NewGuid());
+
+public record RequestResentToSMSProviderEvent(Guid MessageId) : DomainEvent(MessageId, Guid.NewGuid());
