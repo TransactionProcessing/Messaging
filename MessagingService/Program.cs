@@ -20,15 +20,16 @@ namespace MessagingService
 
         public static IHostBuilder CreateHostBuilder(string[] args)
         {
-            Console.Title = "Messaging Service";
-
             //At this stage, we only need our hosting file for ip and ports
-            IConfigurationRoot config = new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory())
-                                                                  .AddJsonFile("hosting.json", optional: true)
+            FileInfo fi = new FileInfo(System.Reflection.Assembly.GetExecutingAssembly().Location);
+
+            IConfigurationRoot config = new ConfigurationBuilder().SetBasePath(fi.Directory.FullName)
+                                                                  .AddJsonFile("hosting.json", optional: false)
                                                                   .AddJsonFile("hosting.development.json", optional: true)
                                                                   .AddEnvironmentVariables().Build();
 
             IHostBuilder hostBuilder = Host.CreateDefaultBuilder(args);
+            hostBuilder.UseWindowsService();
             hostBuilder.UseLamar();
             hostBuilder.ConfigureLogging(logging =>
                                          {
