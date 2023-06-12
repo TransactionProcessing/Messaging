@@ -1,6 +1,4 @@
-﻿namespace MessagingService.BusinessLogic.RequestHandlers
-{
-    using System;
+﻿namespace MessagingService.BusinessLogic.RequestHandlers{
     using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
@@ -8,16 +6,16 @@
     using Requests;
     using Services;
     using EmailAttachment = Models.EmailAttachment;
+    using FileType = Models.FileType;
 
     /// <summary>
     /// 
     /// </summary>
     /// <seealso cref="MediatR.IRequestHandler{MessagingService.BusinessLogic.Requests.SendEmailRequest, System.String}" />
-    public class MessagingRequestHandler : IRequestHandler<SendEmailRequest>, 
+    public class MessagingRequestHandler : IRequestHandler<SendEmailRequest>,
                                            IRequestHandler<SendSMSRequest>,
                                            IRequestHandler<ResendEmailRequest>,
-                                           IRequestHandler<ResendSMSRequest>
-    {
+                                           IRequestHandler<ResendSMSRequest>{
         #region Fields
 
         /// <summary>
@@ -33,8 +31,7 @@
         /// Initializes a new instance of the <see cref="MessagingRequestHandler" /> class.
         /// </summary>
         /// <param name="messagingDomainService">The messaging domain service.</param>
-        public MessagingRequestHandler(IMessagingDomainService messagingDomainService)
-        {
+        public MessagingRequestHandler(IMessagingDomainService messagingDomainService){
             this.MessagingDomainService = messagingDomainService;
         }
 
@@ -50,9 +47,9 @@
         /// <returns>
         /// Response from the request
         /// </returns>
-        public async Task<Unit> Handle(SendEmailRequest request,
-                                         CancellationToken cancellationToken){
-            List<EmailAttachment> attachments = new List<Models.EmailAttachment>();
+        public async Task Handle(SendEmailRequest request,
+                                 CancellationToken cancellationToken){
+            List<EmailAttachment> attachments = new List<EmailAttachment>();
 
             foreach (Requests.EmailAttachment requestEmailAttachment in request.EmailAttachments){
                 attachments.Add(new EmailAttachment{
@@ -61,7 +58,7 @@
                                                        Filename = requestEmailAttachment.Filename,
                                                    });
             }
-            
+
             await this.MessagingDomainService.SendEmailMessage(request.ConnectionIdentifier,
                                                                request.MessageId,
                                                                request.FromAddress,
@@ -71,46 +68,36 @@
                                                                request.IsHtml,
                                                                attachments,
                                                                cancellationToken);
-
-            return Unit.Value;
         }
 
-        public async Task<Unit> Handle(SendSMSRequest request,
-                                       CancellationToken cancellationToken)
-        {
+        public async Task Handle(SendSMSRequest request,
+                                 CancellationToken cancellationToken){
             await this.MessagingDomainService.SendSMSMessage(request.ConnectionIdentifier,
                                                              request.MessageId,
                                                              request.Sender,
                                                              request.Destination,
                                                              request.Message,
                                                              cancellationToken);
-            return Unit.Value;
         }
 
-        #endregion
-
-        public async Task<Unit> Handle(ResendEmailRequest request,
-                                       CancellationToken cancellationToken) {
+        public async Task Handle(ResendEmailRequest request,
+                                 CancellationToken cancellationToken){
             await this.MessagingDomainService.ResendEmailMessage(request.ConnectionIdentifier, request.MessageId, cancellationToken);
-
-            return Unit.Value;
         }
 
-        private Models.FileType ConvertFileType(FileType emailAttachmentFileType)
-        {
-            switch (emailAttachmentFileType)
-            {
-                case FileType.PDF:
-                    return Models.FileType.PDF;
+        public async Task Handle(ResendSMSRequest request, CancellationToken cancellationToken){
+            await this.MessagingDomainService.ResendSMSMessage(request.ConnectionIdentifier, request.MessageId, cancellationToken);
+        }
+
+        private FileType ConvertFileType(Requests.FileType emailAttachmentFileType){
+            switch(emailAttachmentFileType){
+                case Requests.FileType.PDF:
+                    return FileType.PDF;
                 default:
-                    return Models.FileType.None;
+                    return FileType.None;
             }
         }
 
-        public async Task<Unit> Handle(ResendSMSRequest request, CancellationToken cancellationToken){
-            await this.MessagingDomainService.ResendSMSMessage(request.ConnectionIdentifier, request.MessageId, cancellationToken);
-
-            return Unit.Value;
-        }
+        #endregion
     }
 }
