@@ -11,25 +11,259 @@
     using Shared.General;
     using Shared.Logger;
 
-    public class EmailAggregate : Aggregate
+    public static class EmailAggregateExtensions{
+        public static void MarkMessageAsBounced(this EmailAggregate aggregate, String providerStatus,
+                                         DateTime bouncedDateTime)
+        {
+            aggregate.CheckMessageCanBeSetToBounced();
+
+            EmailMessageBouncedEvent messageBouncedEvent = new EmailMessageBouncedEvent(aggregate.AggregateId, providerStatus, bouncedDateTime);
+
+            aggregate.ApplyAndAppend(messageBouncedEvent);
+        }
+
+        public static void MarkMessageAsDelivered(this EmailAggregate aggregate, String providerStatus,
+                                                  DateTime deliveredDateTime)
+        {
+            aggregate.CheckMessageCanBeSetToDelivered();
+
+            EmailMessageDeliveredEvent messageDeliveredEvent = new EmailMessageDeliveredEvent(aggregate.AggregateId, providerStatus, deliveredDateTime);
+
+            aggregate.ApplyAndAppend(messageDeliveredEvent);
+        }
+
+        public static void MarkMessageAsFailed(this EmailAggregate aggregate, String providerStatus,
+                                        DateTime failedDateTime)
+        {
+            aggregate.CheckMessageCanBeSetToFailed();
+
+            EmailMessageFailedEvent messageFailedEvent = new EmailMessageFailedEvent(aggregate.AggregateId, providerStatus, failedDateTime);
+
+            aggregate.ApplyAndAppend(messageFailedEvent);
+        }
+
+        public static void MarkMessageAsRejected(this EmailAggregate aggregate, String providerStatus,
+                                          DateTime rejectedDateTime)
+        {
+            aggregate.CheckMessageCanBeSetToRejected();
+
+            EmailMessageRejectedEvent messageRejectedEvent = new EmailMessageRejectedEvent(aggregate.AggregateId, providerStatus, rejectedDateTime);
+
+            aggregate.ApplyAndAppend(messageRejectedEvent);
+        }
+
+        public static void MarkMessageAsSpam(this EmailAggregate aggregate, String providerStatus,
+                                      DateTime spamDateTime)
+        {
+            aggregate.CheckMessageCanBeSetToSpam();
+
+            EmailMessageMarkedAsSpamEvent messageMarkedAsSpamEvent = new EmailMessageMarkedAsSpamEvent(aggregate.AggregateId, providerStatus, spamDateTime);
+
+            aggregate.ApplyAndAppend(messageMarkedAsSpamEvent);
+        }
+
+        public static void ReceiveResponseFromProvider(this EmailAggregate aggregate, String providerRequestReference,
+                                                String providerEmailReference)
+        {
+            ResponseReceivedFromEmailProviderEvent responseReceivedFromProviderEvent =
+                new ResponseReceivedFromEmailProviderEvent(aggregate.AggregateId, providerRequestReference, providerEmailReference);
+
+            aggregate.ApplyAndAppend(responseReceivedFromProviderEvent);
+        }
+
+        public static void ReceiveBadResponseFromProvider(this EmailAggregate aggregate, String error, String errorCode)
+        {
+            BadResponseReceivedFromEmailProviderEvent badResponseReceivedFromProviderEvent =
+                new BadResponseReceivedFromEmailProviderEvent(aggregate.AggregateId, errorCode, error);
+
+            aggregate.ApplyAndAppend(badResponseReceivedFromProviderEvent);
+        }
+
+        public static void SendRequestToProvider(this EmailAggregate aggregate, String fromAddress,
+                                          List<String> toAddresses,
+                                          String subject,
+                                          String body,
+                                          Boolean isHtml,
+                                          List<EmailAttachment> attachments)
+        {
+            if (aggregate.DeliveryStatusList[aggregate.ResendCount] != MessageStatus.NotSet)
+            {
+                throw new InvalidOperationException("Cannot send a message to provider that has already been sent");
+            }
+
+            RequestSentToEmailProviderEvent requestSentToProviderEvent = new RequestSentToEmailProviderEvent(aggregate.AggregateId, fromAddress, toAddresses, subject, body, isHtml);
+
+            aggregate.ApplyAndAppend(requestSentToProviderEvent);
+
+            // Record the attachment data
+            foreach (EmailAttachment emailAttachment in attachments)
+            {
+                EmailAttachmentRequestSentToProviderEvent emailAttachmentRequestSentToProviderEvent = new EmailAttachmentRequestSentToProviderEvent(aggregate.AggregateId,
+                                                                                                                                                    emailAttachment.Filename,
+                                                                                                                                                    emailAttachment.FileData,
+                                                                                                                                                    (Int32)emailAttachment.FileType);
+                aggregate.ApplyAndAppend(emailAttachmentRequestSentToProviderEvent);
+            }
+        }
+
+        public static void ResendRequestToProvider(this EmailAggregate aggregate)
+        {
+            if (aggregate.DeliveryStatusList[aggregate.ResendCount] != MessageStatus.Sent &&
+                aggregate.DeliveryStatusList[aggregate.ResendCount] != MessageStatus.Delivered)
+            {
+                throw new InvalidOperationException($"Cannot re-send a message to provider that has not already been sent. Current Status [{aggregate.DeliveryStatusList[aggregate.ResendCount]}]");
+            }
+
+            RequestResentToEmailProviderEvent requestResentToEmailProviderEvent = new RequestResentToEmailProviderEvent(aggregate.AggregateId);
+
+            aggregate.ApplyAndAppend(requestResentToEmailProviderEvent);
+        }
+
+        private static void CheckMessageCanBeSetToBounced(this EmailAggregate aggregate)
+        {
+            if (aggregate.DeliveryStatusList[aggregate.ResendCount] != MessageStatus.Sent)
+            {
+                throw new InvalidOperationException($"Message at status {aggregate.DeliveryStatusList[aggregate.ResendCount]} cannot be set to bounced");
+            }
+        }
+
+        private static void CheckMessageCanBeSetToDelivered(this EmailAggregate aggregate)
+        {
+            if (aggregate.DeliveryStatusList[aggregate.ResendCount] != MessageStatus.Sent)
+            {
+                throw new InvalidOperationException($"Message at status {aggregate.DeliveryStatusList[aggregate.ResendCount]} cannot be set to delivered");
+            }
+        }
+
+        private static void CheckMessageCanBeSetToFailed(this EmailAggregate aggregate)
+        {
+            if (aggregate.DeliveryStatusList[aggregate.ResendCount] != MessageStatus.Sent)
+            {
+                throw new InvalidOperationException($"Message at status {aggregate.DeliveryStatusList[aggregate.ResendCount]} cannot be set to failed");
+            }
+        }
+
+        private static void CheckMessageCanBeSetToRejected(this EmailAggregate aggregate)
+        {
+            if (aggregate.DeliveryStatusList[aggregate.ResendCount] != MessageStatus.Sent)
+            {
+                throw new InvalidOperationException($"Message at status {aggregate.DeliveryStatusList[aggregate.ResendCount]} cannot be set to rejected");
+            }
+        }
+
+        private static void CheckMessageCanBeSetToSpam(this EmailAggregate aggregate)
+        {
+            if (aggregate.DeliveryStatusList[aggregate.ResendCount] != MessageStatus.Sent)
+            {
+                throw new InvalidOperationException($"Message at status {aggregate.DeliveryStatusList[aggregate.ResendCount]} cannot be set to spam");
+            }
+        }
+
+        public static void PlayEvent(this EmailAggregate aggregate, RequestSentToEmailProviderEvent domainEvent)
+        {
+            aggregate.Body = domainEvent.Body;
+            aggregate.Subject = domainEvent.Subject;
+            aggregate.IsHtml = domainEvent.IsHtml;
+            aggregate.FromAddress = domainEvent.FromAddress;
+            aggregate.ToAddresses = domainEvent.ToAddresses;
+            aggregate.ResendCount = 0;
+            aggregate.DeliveryStatusList[aggregate.ResendCount] = MessageStatus.InProgress;
+
+            foreach (String domainEventToAddress in domainEvent.ToAddresses)
+            {
+                MessageRecipient messageRecipient = new MessageRecipient();
+                messageRecipient.Create(domainEventToAddress);
+                aggregate.Recipients.Add(messageRecipient);
+            }
+        }
+
+        public static void PlayEvent(this EmailAggregate aggregate, ResponseReceivedFromEmailProviderEvent domainEvent)
+        {
+            aggregate.ProviderEmailReference = domainEvent.ProviderEmailReference;
+            aggregate.ProviderRequestReference = domainEvent.ProviderRequestReference;
+            aggregate.DeliveryStatusList[aggregate.ResendCount] = MessageStatus.Sent;
+        }
+
+        public static void PlayEvent(this EmailAggregate aggregate, BadResponseReceivedFromEmailProviderEvent domainEvent)
+        {
+            aggregate.Error = domainEvent.Error;
+            aggregate.ErrorCode = domainEvent.ErrorCode;
+            aggregate.DeliveryStatusList[aggregate.ResendCount] = MessageStatus.Failed;
+        }
+
+        public static void PlayEvent(this EmailAggregate aggregate, EmailAttachmentRequestSentToProviderEvent domainEvent)
+        {
+            aggregate.Attachments.Add(new EmailAttachment
+                                      {
+                                          FileData = domainEvent.FileData,
+                                          FileType = (FileType)domainEvent.FileType,
+                                          Filename = domainEvent.Filename,
+                                      });
+        }
+
+
+        public static void PlayEvent(this EmailAggregate aggregate, RequestResentToEmailProviderEvent domainEvent)
+        {
+            aggregate.ResendCount++;
+            aggregate.DeliveryStatusList.Add(MessageStatus.InProgress);
+        }
+
+        public static void PlayEvent(this EmailAggregate aggregate, EmailMessageDeliveredEvent domainEvent)
+        {
+            aggregate.DeliveryStatusList[aggregate.ResendCount] = MessageStatus.Delivered;
+        }
+
+        public static MessageStatus GetDeliveryStatus(this EmailAggregate aggregate, Int32? resendAttempt = null)
+        {
+            if (resendAttempt.HasValue == false)
+            {
+                return aggregate.DeliveryStatusList[aggregate.ResendCount];
+            }
+            return aggregate.DeliveryStatusList[resendAttempt.Value];
+        }
+
+        public static void PlayEvent(this EmailAggregate aggregate, EmailMessageFailedEvent domainEvent)
+        {
+            aggregate.DeliveryStatusList[aggregate.ResendCount] = MessageStatus.Failed;
+        }
+
+        public static void PlayEvent(this EmailAggregate aggregate, EmailMessageRejectedEvent domainEvent)
+        {
+            aggregate.DeliveryStatusList[aggregate.ResendCount] = MessageStatus.Rejected;
+        }
+
+        public static void PlayEvent(this EmailAggregate aggregate, EmailMessageBouncedEvent domainEvent)
+        {
+            aggregate.DeliveryStatusList[aggregate.ResendCount] = MessageStatus.Bounced;
+        }
+
+        public static void PlayEvent(this EmailAggregate aggregate, EmailMessageMarkedAsSpamEvent domainEvent)
+        {
+            aggregate.DeliveryStatusList[aggregate.ResendCount] = MessageStatus.Spam;
+        }
+
+        public static List<String> GetToAddresses(this EmailAggregate aggregate)
+        {
+            return aggregate.ToAddresses;
+        }
+
+        public static List<EmailAttachment> GetAttachments(this EmailAggregate aggregate)
+        {
+            return aggregate.Attachments;
+        }
+
+    }
+
+    public record EmailAggregate : Aggregate
     {
         #region Fields
 
-        private readonly List<MessageRecipient> Recipients;
+        internal readonly List<MessageRecipient> Recipients;
 
-        private readonly List<EmailAttachment> Attachments;
+        internal readonly List<EmailAttachment> Attachments;
 
-        private List<String> ToAddresses;
-
-        public List<String> GetToAddresses() {
-            return this.ToAddresses;
-        }
-
-        public List<EmailAttachment> GetAttachments()
-        {
-            return this.Attachments;
-        }
-
+        internal List<String> ToAddresses;
+        
         #endregion
 
         #region Constructors
@@ -61,27 +295,27 @@
 
         #region Properties
 
-        public String Body { get; private set; }
+        public String Body { get; internal set; }
 
-        public String FromAddress { get; private set; }
+        public String FromAddress { get; internal set; }
 
-        public Boolean IsHtml { get; private set; }
+        public Boolean IsHtml { get; internal set; }
 
         public Guid MessageId { get; }
 
-        public String ProviderEmailReference { get; private set; }
+        public String ProviderEmailReference { get; internal set; }
 
-        public String ProviderRequestReference { get; private set; }
+        public String ProviderRequestReference { get; internal set; }
 
-        public String Error { get; private set; }
+        public String Error { get; internal set; }
 
-        public String ErrorCode { get; private set; }
+        public String ErrorCode { get; internal set; }
 
-        public String Subject { get; private set; }
+        public String Subject { get; internal set; }
 
-        public Int32 ResendCount { get; private set; }
+        public Int32 ResendCount { get; internal set; }
 
-        private List<MessageStatus> DeliveryStatusList;
+        internal List<MessageStatus> DeliveryStatusList;
 
         #endregion
 
@@ -91,249 +325,14 @@
         {
             return new EmailAggregate(aggregateId);
         }
-
-        public void MarkMessageAsBounced(String providerStatus,
-                                         DateTime bouncedDateTime)
-        {
-            this.CheckMessageCanBeSetToBounced();
-
-            EmailMessageBouncedEvent messageBouncedEvent = new EmailMessageBouncedEvent(this.AggregateId, providerStatus, bouncedDateTime);
-
-            this.ApplyAndAppend(messageBouncedEvent);
-        }
-
-        public void MarkMessageAsDelivered(String providerStatus,
-                                           DateTime deliveredDateTime)
-        {
-            this.CheckMessageCanBeSetToDelivered();
-
-            EmailMessageDeliveredEvent messageDeliveredEvent = new EmailMessageDeliveredEvent(this.AggregateId, providerStatus, deliveredDateTime);
-
-            this.ApplyAndAppend(messageDeliveredEvent);
-        }
-
-        public void MarkMessageAsFailed(String providerStatus,
-                                        DateTime failedDateTime)
-        {
-            this.CheckMessageCanBeSetToFailed();
-
-            EmailMessageFailedEvent messageFailedEvent = new EmailMessageFailedEvent(this.AggregateId, providerStatus, failedDateTime);
-
-            this.ApplyAndAppend(messageFailedEvent);
-        }
-
-        public void MarkMessageAsRejected(String providerStatus,
-                                          DateTime rejectedDateTime)
-        {
-            this.CheckMessageCanBeSetToRejected();
-
-            EmailMessageRejectedEvent messageRejectedEvent = new EmailMessageRejectedEvent(this.AggregateId, providerStatus, rejectedDateTime);
-
-            this.ApplyAndAppend(messageRejectedEvent);
-        }
-
-        public void MarkMessageAsSpam(String providerStatus,
-                                      DateTime spamDateTime)
-        {
-            this.CheckMessageCanBeSetToSpam();
-
-            EmailMessageMarkedAsSpamEvent messageMarkedAsSpamEvent = new EmailMessageMarkedAsSpamEvent(this.AggregateId, providerStatus, spamDateTime);
-
-            this.ApplyAndAppend(messageMarkedAsSpamEvent);
-        }
-
-        public void ReceiveResponseFromProvider(String providerRequestReference,
-                                                String providerEmailReference)
-        {
-            ResponseReceivedFromEmailProviderEvent responseReceivedFromProviderEvent =
-                new ResponseReceivedFromEmailProviderEvent(this.AggregateId, providerRequestReference, providerEmailReference);
-
-            this.ApplyAndAppend(responseReceivedFromProviderEvent);
-        }
-
-        public void ReceiveBadResponseFromProvider(String error, String errorCode)
-        {
-            BadResponseReceivedFromEmailProviderEvent badResponseReceivedFromProviderEvent =
-                new BadResponseReceivedFromEmailProviderEvent(this.AggregateId, errorCode,error);
-
-            this.ApplyAndAppend(badResponseReceivedFromProviderEvent);
-        }
-
-        public void SendRequestToProvider(String fromAddress,
-                                          List<String> toAddresses,
-                                          String subject,
-                                          String body,
-                                          Boolean isHtml,
-                                          List<EmailAttachment> attachments)
-        {
-            if (this.DeliveryStatusList[this.ResendCount] != MessageStatus.NotSet)
-            {
-                throw new InvalidOperationException("Cannot send a message to provider that has already been sent");
-            }
-
-            RequestSentToEmailProviderEvent requestSentToProviderEvent = new RequestSentToEmailProviderEvent(this.AggregateId, fromAddress, toAddresses, subject, body, isHtml);
-
-            this.ApplyAndAppend(requestSentToProviderEvent);
-
-            // Record the attachment data
-            foreach (EmailAttachment emailAttachment in attachments){
-                EmailAttachmentRequestSentToProviderEvent emailAttachmentRequestSentToProviderEvent = new EmailAttachmentRequestSentToProviderEvent(this.AggregateId,
-                                                                                                                                                    emailAttachment.Filename,
-                                                                                                                                                    emailAttachment.FileData,
-                                                                                                                                                    (Int32)emailAttachment.FileType);
-                this.ApplyAndAppend(emailAttachmentRequestSentToProviderEvent);
-            }
-        }
-
-        public void ResendRequestToProvider()
-        {
-            if (this.DeliveryStatusList[this.ResendCount] != MessageStatus.Sent &&
-                this.DeliveryStatusList[this.ResendCount] != MessageStatus.Delivered)
-            {
-                throw new InvalidOperationException($"Cannot re-send a message to provider that has not already been sent. Current Status [{this.DeliveryStatusList[this.ResendCount]}]");
-            }
-
-            RequestResentToEmailProviderEvent requestResentToEmailProviderEvent = new RequestResentToEmailProviderEvent(this.AggregateId);
-
-            this.ApplyAndAppend(requestResentToEmailProviderEvent);
-        }
-
+        
         [ExcludeFromCodeCoverage]
         protected override Object GetMetadata()
         {
             return null;
         }
 
-        public override void PlayEvent(IDomainEvent domainEvent)
-        {
-            this.PlayEvent((dynamic)domainEvent);
-        }
-
-        private void PlayEvent(Object @event)
-        {
-            Exception ex = new Exception($"Failed to apply event {@event.GetType()} to Aggregate {this.GetType().Name}");
-
-            Logger.LogCritical(ex);
-            throw ex;
-        }
-
-        private void CheckMessageCanBeSetToBounced()
-        {
-            if (this.DeliveryStatusList[this.ResendCount] != MessageStatus.Sent)
-            {
-                throw new InvalidOperationException($"Message at status {this.DeliveryStatusList[this.ResendCount]} cannot be set to bounced");
-            }
-        }
-
-        private void CheckMessageCanBeSetToDelivered()
-        {
-            if (this.DeliveryStatusList[this.ResendCount] != MessageStatus.Sent)
-            {
-                throw new InvalidOperationException($"Message at status {this.DeliveryStatusList[this.ResendCount]} cannot be set to delivered");
-            }
-        }
-
-        private void CheckMessageCanBeSetToFailed()
-        {
-            if (this.DeliveryStatusList[this.ResendCount] != MessageStatus.Sent)
-            {
-                throw new InvalidOperationException($"Message at status {this.DeliveryStatusList[this.ResendCount]} cannot be set to failed");
-            }
-        }
-
-        private void CheckMessageCanBeSetToRejected()
-        {
-            if (this.DeliveryStatusList[this.ResendCount] != MessageStatus.Sent)
-            {
-                throw new InvalidOperationException($"Message at status {this.DeliveryStatusList[this.ResendCount]} cannot be set to rejected");
-            }
-        }
-
-        private void CheckMessageCanBeSetToSpam()
-        {
-            if (this.DeliveryStatusList[this.ResendCount] != MessageStatus.Sent)
-            {
-                throw new InvalidOperationException($"Message at status {this.DeliveryStatusList[this.ResendCount]} cannot be set to spam");
-            }
-        }
-
-        private void PlayEvent(RequestSentToEmailProviderEvent domainEvent)
-        {
-            this.Body = domainEvent.Body;
-            this.Subject = domainEvent.Subject;
-            this.IsHtml = domainEvent.IsHtml;
-            this.FromAddress = domainEvent.FromAddress;
-            this.ToAddresses = domainEvent.ToAddresses;
-            this.ResendCount = 0;
-            this.DeliveryStatusList[this.ResendCount] =MessageStatus.InProgress;
-
-            foreach (String domainEventToAddress in domainEvent.ToAddresses)
-            {
-                MessageRecipient messageRecipient = new MessageRecipient();
-                messageRecipient.Create(domainEventToAddress);
-                this.Recipients.Add(messageRecipient);
-            }
-        }
-
-        private void PlayEvent(ResponseReceivedFromEmailProviderEvent domainEvent)
-        {
-            this.ProviderEmailReference = domainEvent.ProviderEmailReference;
-            this.ProviderRequestReference = domainEvent.ProviderRequestReference;
-            this.DeliveryStatusList[this.ResendCount] = MessageStatus.Sent;
-        }
-
-        private void PlayEvent(BadResponseReceivedFromEmailProviderEvent domainEvent)
-        {
-            this.Error = domainEvent.Error;
-            this.ErrorCode = domainEvent.ErrorCode;
-            this.DeliveryStatusList[this.ResendCount] = MessageStatus.Failed;
-        }
-
-        private void PlayEvent(EmailAttachmentRequestSentToProviderEvent domainEvent){
-            this.Attachments.Add(new EmailAttachment{
-                                                        FileData = domainEvent.FileData,
-                                                        FileType = (FileType)domainEvent.FileType,
-                                                        Filename = domainEvent.Filename,
-                                                    });
-        }
-
-
-        private void PlayEvent(RequestResentToEmailProviderEvent domainEvent) {
-            this.ResendCount++;
-            this.DeliveryStatusList.Add(MessageStatus.InProgress);
-        }
-
-        private void PlayEvent(EmailMessageDeliveredEvent domainEvent)
-        {
-            this.DeliveryStatusList[this.ResendCount] = MessageStatus.Delivered;
-        }
-
-        public MessageStatus GetDeliveryStatus(Int32? resendAttempt = null) {
-            if (resendAttempt.HasValue == false) {
-                return this.DeliveryStatusList[this.ResendCount];
-            }
-            return this.DeliveryStatusList[resendAttempt.Value];
-        }
-
-        private void PlayEvent(EmailMessageFailedEvent domainEvent)
-        {
-            this.DeliveryStatusList[this.ResendCount] = MessageStatus.Failed;
-        }
-
-        private void PlayEvent(EmailMessageRejectedEvent domainEvent)
-        {
-            this.DeliveryStatusList[this.ResendCount] = MessageStatus.Rejected;
-        }
-
-        private void PlayEvent(EmailMessageBouncedEvent domainEvent)
-        {
-            this.DeliveryStatusList[this.ResendCount] = MessageStatus.Bounced;
-        }
-
-        private void PlayEvent(EmailMessageMarkedAsSpamEvent domainEvent)
-        {
-            this.DeliveryStatusList[this.ResendCount] = MessageStatus.Spam;
-        }
+        public override void PlayEvent(IDomainEvent domainEvent) => EmailAggregateExtensions.PlayEvent(this, (dynamic)domainEvent);
 
         #endregion
     }

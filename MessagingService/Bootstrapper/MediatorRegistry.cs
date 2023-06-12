@@ -24,11 +24,5 @@ public class MediatorRegistry : ServiceRegistry
                                                              {
                                                                  return ConfigurationReader.GetBaseServerUri(serviceName).OriginalString;
                                                              });
-
-        // request & notification handlers
-        this.AddTransient<ServiceFactory>(context =>
-                                          {
-                                              return t => context.GetService(t);
-                                          });
     }
 }
