@@ -20,6 +20,8 @@ jobs:
         fetch-depth: 0
 
     - name: Restore Nuget Packages
+      env:
+          GITHUBTOKEN: ${{ secrets.PRIVATEFEED_APIKEY }}
       run: dotnet restore MessagingService.sln --source ${{ secrets.PUBLICFEEDURL }} --source ${{ secrets.PRIVATEFEED_URL }}
 
     - name: Build Code
@@ -51,7 +53,7 @@ jobs:
 
     - name: Publish Images to Docker Hub
       run: |
-        docker build . --file MessagingService/Dockerfile --tag stuartferguson/messagingservice:master
+        docker build . --file MessagingService/Dockerfile --tag stuartferguson/messagingservice:master --build-arg NUGET_TOKEN=${{ secrets.PRIVATEFEED_APIKEY }}
         docker login --username=${{ secrets.DOCKER_USERNAME }} --password=${{ secrets.DOCKER_PASSWORD }}
         docker push stuartferguson/messagingservice:master
 
@@ -69,6 +71,6 @@ jobs:
 
     - name: Publish Windows Images to Docker Hub
       run: |
-        docker build . --file MessagingService/Dockerfilewindows --tag stuartferguson/messagingservicewindows:master
+        docker build . --file MessagingService/Dockerfilewindows --tag stuartferguson/messagingservicewindows:master --build-arg NUGET_TOKEN=${{ secrets.PRIVATEFEED_APIKEY }}
         docker login --username=${{ secrets.DOCKER_USERNAME }} --password=${{ secrets.DOCKER_PASSWORD }}
         docker push stuartferguson/messagingservicewindows:master

@@ -34,7 +34,7 @@ jobs:
     - name: Build Docker Image
       env:
         GITHUBTOKEN: ${{ secrets.PRIVATEFEED_APIKEY }}
-      run: docker build . --file MessagingService/Dockerfile --tag messagingservice:latest
+      run: docker build . --file MessagingService/Dockerfile --tag messagingservice:latest --build-arg NUGET_TOKEN=${{ secrets.PRIVATEFEED_APIKEY }}
         
     - name: Run Integration Tests
       run: dotnet test "MessagingService.IntegrationTests\MessagingService.IntegrationTests.csproj" --filter Category=PRTest
