@@ -46,7 +46,9 @@ jobs:
       run: echo "action_url=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" >> $GITHUB_ENV
 
     - name: Restore Nuget Packages
-      run: dotnet restore MessagingService.sln --source https://api.nuget.org/v3/index.json --source https://www.myget.org/F/transactionprocessing/api/v3/index.json
+      env:
+          GITHUBTOKEN: ${{ secrets.PRIVATEFEED_APIKEY }}
+      run: dotnet restore MessagingService.sln --source ${{ secrets.PUBLICFEEDURL }} --source ${{ secrets.PRIVATEFEED_URL }}
 
     - name: Build Code
       run: dotnet build MessagingService.sln --configuration Release
@@ -68,7 +70,7 @@ jobs:
         files: ./lcov1.info,./lcov2.info,./lcov3.info,./lcov4.info
 
     - name: Build Docker Image
-      run: docker build . --file MessagingService/Dockerfile --tag messagingservice:latest
+      run: docker build . --file MessagingService/Dockerfile --tag messagingservice:latest --build-arg NUGET_TOKEN=${{ secrets.PRIVATEFEED_APIKEY }}
         
     - name: Run Integration Tests
       run: dotnet test "MessagingService.IntegrationTests\MessagingService.IntegrationTests.csproj"

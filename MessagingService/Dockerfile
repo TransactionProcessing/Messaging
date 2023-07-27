@@ -4,8 +4,15 @@ FROM stuartferguson/txnprocbase AS base
 WORKDIR /app
 
 FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
+
+# Set the ARG for your GitHub Secret
+ARG NUGET_TOKEN
+
 WORKDIR /src
 COPY ["MessagingService/NuGet.Config", "."]
+# Replace the placeholders in the NuGet.config file with the GitHub Secret
+RUN sed -i "s|NUGET_TOKEN|${NUGET_TOKEN}|g" NuGet.Config
+
 COPY ["MessagingService/MessagingService.csproj", "MessagingService/"]
 COPY ["MessagingService.BusinessLogic/MessagingService.BusinessLogic.csproj", "MessagingService.BusinessLogic/"]
 COPY ["MessagingService.EmailMessageAggregate/MessagingService.EmailMessageAggregate.csproj", "MessagingService.EmailMessageAggregate/"]

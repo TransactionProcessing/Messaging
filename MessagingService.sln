@@ -35,7 +35,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MessagingService.SMSMessage
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MessagingService.SMSAggregate.Tests", "MessagingService.SMSAggregate.Tests\MessagingService.SMSAggregate.Tests.csproj", "{883DEFD0-7DDB-4F79-9996-2279E71CAF5B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MessagingService.Models", "MessagingService.Models\MessagingService.Models.csproj", "{327FAE7D-AF25-4380-AA8B-9FF7FCF46FBB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MessagingService.Models", "MessagingService.Models\MessagingService.Models.csproj", "{327FAE7D-AF25-4380-AA8B-9FF7FCF46FBB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
