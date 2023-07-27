@@ -18,7 +18,7 @@ jobs:
 
     - name: Restore Nuget Packages
       env:
-          NUGET_TOKEN: ${{ secrets.PRIVATEFEED_APIKEY }}
+          GITHUBTOKEN: ${{ secrets.PRIVATEFEED_APIKEY }}
       run: dotnet restore MessagingService.sln --source ${{ secrets.PUBLICFEEDURL }} --source ${{ secrets.PRIVATEFEED_URL }}
 
     - name: Build Code
