@@ -8,7 +8,7 @@ ARG NUGET_TOKEN
 WORKDIR /src
 COPY ["MessagingService/NuGet.Config", "."]
 # Replace the placeholders in the NuGet.config file with the GitHub Secret
-RUN powershell -Command "(Get-Content C:\NuGet.config) -replace 'NUGET_TOKEN', '${env:NUGET_TOKEN}' | Set-Content C:\NuGet.config"
+RUN powershell -Command "(Get-Content NuGet.Config) -replace 'NUGET_TOKEN', '${env:NUGET_TOKEN}' | Set-Content C:\NuGet.config"
 
 COPY ["MessagingService/NuGet.Config", "."]
 COPY ["MessagingService/MessagingService.csproj", "MessagingService/"]
