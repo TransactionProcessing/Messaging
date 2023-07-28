@@ -2,9 +2,7 @@ FROM stuartferguson/txnprocbasewindows AS base
 USER ContainerAdministrator
 WORKDIR /app
 
-# Set the ARG for your GitHub Secret
-ARG NUGET_TOKEN
-
+FROM mcr.microsoft.com/dotnet/sdk:7.0-windowsservercore-ltsc2019 AS build
 WORKDIR /src
 COPY ["MessagingService/NuGet.Config", "."]
 COPY ["MessagingService/MessagingService.csproj", "MessagingService/"]
