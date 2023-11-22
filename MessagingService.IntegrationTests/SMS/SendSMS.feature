@@ -12,7 +12,7 @@ Background:
 	| messagingService | Messaging REST | Secret1 | messagingService |            |
 
 	Given the following clients exist
-	| ClientId      | ClientName     | Secret  | AllowedScopes    | AllowedGrantTypes  |
+	| ClientId      | ClientName     | Secret  | Scopes    | GrantTypes  |
 	| serviceClient | Service Client | Secret1 | messagingService | client_credentials |
 
 	Given I have a token to access the messaging service resource

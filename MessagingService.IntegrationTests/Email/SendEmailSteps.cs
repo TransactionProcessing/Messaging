@@ -3,6 +3,7 @@ using TechTalk.SpecFlow;
 
 namespace MessagingService.IntegrationTests.Email
 {
+    using System.Collections.Generic;
     using System.Linq;
     using System.Net;
     using System.Net.Http;
@@ -13,9 +14,10 @@ namespace MessagingService.IntegrationTests.Email
     using Common;
     using DataTransferObjects;
     using global::Shared.IntegrationTesting;
+    using IntegrationTesting.Helpers;
     using Newtonsoft.Json;
+    using Shared;
     using Shouldly;
-    using SpecflowTableHelper = Common.SpecflowTableHelper;
 
     [Binding]
     [Scope(Tag = "email")]
@@ -25,74 +27,31 @@ namespace MessagingService.IntegrationTests.Email
 
         private readonly TestingContext TestingContext;
 
+        private readonly MessagingSteps MessagingSteps;
+
         public SendEmailSteps(ScenarioContext scenarioContext,
                               TestingContext testingContext)
         {
             this.ScenarioContext = scenarioContext;
             this.TestingContext = testingContext;
+            this.MessagingSteps = new MessagingSteps(this.TestingContext.DockerHelper.MessagingServiceClient);
         }
 
         [Given(@"I send the following Email Messages")]
-        public async Task GivenISendTheFollowingEmailMessages(Table table)
-        {
-            foreach (TableRow tableRow in table.Rows)
-            {
-                await this.SendEmail(tableRow);
+        public async Task GivenISendTheFollowingEmailMessages(Table table){
+            List<SendEmailRequest> requests = table.Rows.ToSendEmailRequests();
+            List<(String, SendEmailResponse)> results = await this.MessagingSteps.GivenISendTheFollowingEmailMessages(this.TestingContext.AccessToken, requests);
+            foreach ((String, SendEmailResponse) result in results){
+                this.TestingContext.AddEmailResponse(result.Item1, result.Item2);
             }
         }
 
         [When(@"I resend the following messages")]
         public async Task WhenIResendTheFollowingMessages(Table table)
         {
-            foreach (TableRow tableRow in table.Rows)
-            {
-                await this.ResendEmail(tableRow);
-            }
+            List<ResendEmailRequest> requests = table.Rows.ToResendEmailRequests(this.TestingContext.EmailResponses);
+            await this.MessagingSteps.WhenIResendTheFollowingMessages(this.TestingContext.AccessToken, requests);
         }
 
-        private async Task SendEmail(TableRow tableRow)
-        {
-            String fromAddress = SpecflowTableHelper.GetStringRowValue(tableRow, "FromAddress");
-            String toAddresses = SpecflowTableHelper.GetStringRowValue(tableRow, "ToAddresses");
-            String subject = SpecflowTableHelper.GetStringRowValue(tableRow, "Subject");
-            String body = SpecflowTableHelper.GetStringRowValue(tableRow, "Body");
-            Boolean isHtml = SpecflowTableHelper.GetBooleanValue(tableRow, "IsHtml");
-
-            SendEmailRequest request = new SendEmailRequest
-                                       {
-                                           Body = body,
-                                           ConnectionIdentifier = Guid.NewGuid(),
-                                           FromAddress = fromAddress,
-                                           IsHtml = isHtml,
-                                           Subject = subject,
-                                           ToAddresses = toAddresses.Split(",").ToList()
-                                       };
-            
-            SendEmailResponse sendEmailResponse = await this.TestingContext.DockerHelper.MessagingServiceClient.SendEmail(this.TestingContext.AccessToken, request, CancellationToken.None).ConfigureAwait(false);
-
-            sendEmailResponse.MessageId.ShouldNotBe(Guid.Empty);
-
-            this.TestingContext.AddEmailResponse(toAddresses, sendEmailResponse);
-        }
-
-        private async Task ResendEmail(TableRow tableRow)
-        {
-            String toAddresses = SpecflowTableHelper.GetStringRowValue(tableRow, "ToAddresses");
-            SendEmailResponse sendEmailResponse = this.TestingContext.GetEmailResponse(toAddresses);
-            
-            ResendEmailRequest request = new ResendEmailRequest()
-                                       {
-                                           ConnectionIdentifier = Guid.NewGuid(),
-                                           MessageId = sendEmailResponse.MessageId
-                                       };
-
-            await Retry.For(async () => {
-                          Should.NotThrow(async () => {
-                                              await this.TestingContext.DockerHelper.MessagingServiceClient.ResendEmail(this.TestingContext.AccessToken,
-                                                  request,
-                                                  CancellationToken.None);
-                                          });
-                      });
-        }
     }
 }

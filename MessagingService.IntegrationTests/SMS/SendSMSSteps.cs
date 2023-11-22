@@ -3,11 +3,14 @@ using TechTalk.SpecFlow;
 
 namespace MessagingService.IntegrationTests.SMS
 {
+    using System.Collections.Generic;
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
     using Common;
     using DataTransferObjects;
+    using IntegrationTesting.Helpers;
+    using Shared;
     using Shouldly;
     
     [Binding]
@@ -18,39 +21,19 @@ namespace MessagingService.IntegrationTests.SMS
 
         private readonly TestingContext TestingContext;
 
+        private readonly MessagingSteps MessagingSteps;
         public SendSMSSteps(ScenarioContext scenarioContext,
                             TestingContext testingContext)
         {
             this.ScenarioContext = scenarioContext;
             this.TestingContext = testingContext;
+            this.MessagingSteps = new MessagingSteps(testingContext.DockerHelper.MessagingServiceClient);
         }
 
         [Given(@"I send the following SMS Messages")]
-        public async Task GivenISendTheFollowingSMSMessages(Table table)
-        {
-            foreach (TableRow tableRow in table.Rows)
-            {
-                await this.SendSMS(tableRow);
-            }
-        }
-
-        private async Task SendSMS(TableRow tableRow)
-        {
-            String sender = SpecflowTableHelper.GetStringRowValue(tableRow, "Sender");
-            String destination = SpecflowTableHelper.GetStringRowValue(tableRow, "Destination");
-            String message = SpecflowTableHelper.GetStringRowValue(tableRow, "Message");
-
-            SendSMSRequest request = new SendSMSRequest
-            {
-                ConnectionIdentifier = Guid.NewGuid(),
-                Sender = sender,
-                Destination = destination,
-                Message = message
-            };
-
-            SendSMSResponse sendEmailResponse = await this.TestingContext.DockerHelper.MessagingServiceClient.SendSMS(this.TestingContext.AccessToken, request, CancellationToken.None).ConfigureAwait(false);
-
-            sendEmailResponse.MessageId.ShouldNotBe(Guid.Empty);
+        public async Task GivenISendTheFollowingSMSMessages(Table table){
+            List<SendSMSRequest> requests = table.Rows.ToSendSMSRequests();
+            await this.MessagingSteps.GivenISendTheFollowingSMSMessages(this.TestingContext.AccessToken, requests);
         }
     }
 }

@@ -47,7 +47,7 @@ namespace MessagingService.IntegrationTests.Common
             return this.EmailResponses[identifier];
         }
 
-        private Dictionary<String, SendEmailResponse> EmailResponses;
+        public Dictionary<String, SendEmailResponse> EmailResponses;
     }
 
     public class ClientDetails
