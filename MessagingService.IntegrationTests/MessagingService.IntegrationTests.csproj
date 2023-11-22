@@ -30,6 +30,7 @@
     <ProjectReference Include="..\Messaging.IntegrationTesting.Helpers\MessagingService.IntegrationTesting.Helpers.csproj" />
     <ProjectReference Include="..\MessagingService.Client\MessagingService.Client.csproj" />
     <ProjectReference Include="..\MessagingService.DataTransferObjects\MessagingService.DataTransferObjects.csproj" />
+    <ProjectReference Include="..\MessagingService.IntegrationTesting.Helpers\MessagingService.IntegrationTesting.Helpers.csproj" />
   </ItemGroup>
 
   <ItemGroup>
