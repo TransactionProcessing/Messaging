@@ -45,7 +45,8 @@ namespace MessagingService.IntegrationTests.Common
 
             this.TestingContext.Logger = logger;
             this.TestingContext.Logger.LogInformation("About to Start Containers for Scenario Run");
-            await this.TestingContext.DockerHelper.StartContainersForScenarioRun(scenarioName).ConfigureAwait(false);
+            DockerServices dockerServices = DockerServices.MessagingService | DockerServices.EventStore | DockerServices.SecurityService;
+            await this.TestingContext.DockerHelper.StartContainersForScenarioRun(scenarioName, dockerServices).ConfigureAwait(false);
             this.TestingContext.Logger.LogInformation("Containers for Scenario Run Started");
         }
 

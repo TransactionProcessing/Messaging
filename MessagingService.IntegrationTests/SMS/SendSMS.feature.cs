@@ -115,8 +115,8 @@ namespace MessagingService.IntegrationTests.SMS
                         "ClientId",
                         "ClientName",
                         "Secret",
-                        "AllowedScopes",
-                        "AllowedGrantTypes"});
+                        "Scopes",
+                        "GrantTypes"});
             table10.AddRow(new string[] {
                         "serviceClient",
                         "Service Client",

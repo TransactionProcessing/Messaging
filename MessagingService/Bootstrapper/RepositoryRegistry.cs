@@ -14,6 +14,7 @@ using Shared.DomainDrivenDesign.EventSourcing;
 using Shared.EntityFramework.ConnectionStringConfiguration;
 using Shared.EventStore.Aggregate;
 using Shared.EventStore.EventStore;
+using Shared.EventStore.SubscriptionWorker;
 using Shared.General;
 using Shared.Repositories;
 using SMSMessageAggregate;
@@ -72,5 +73,9 @@ public class RepositoryRegistry: ServiceRegistry
 
         this.AddSingleton<IAggregateRepository<EmailAggregate, DomainEvent>, AggregateRepository<EmailAggregate, DomainEvent>>();
         this.AddSingleton<IAggregateRepository<SMSAggregate, DomainEvent>, AggregateRepository<SMSAggregate, DomainEvent>>();
+
+        this.AddSingleton<Func<String, Int32, ISubscriptionRepository>>(cont => (esConnString, cacheDuration) => {
+                                                                                    return SubscriptionRepository.Create(esConnString, cacheDuration);
+                                                                                });
     }
 }

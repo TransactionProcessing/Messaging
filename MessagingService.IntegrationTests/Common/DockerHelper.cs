@@ -11,6 +11,7 @@
     using Ductus.FluentDocker.Model.Builders;
     using Ductus.FluentDocker.Services;
     using Ductus.FluentDocker.Services.Extensions;
+    using global::Shared.IntegrationTesting;
     using global::Shared.Logger;
     using SecurityService.Client;
     
@@ -59,9 +60,8 @@
         /// Starts the containers for scenario run.
         /// </summary>
         /// <param name="scenarioName">Name of the scenario.</param>
-        public override async Task StartContainersForScenarioRun(String scenarioName)
-        {
-            await base.StartContainersForScenarioRun(scenarioName);
+        public override async Task StartContainersForScenarioRun(String scenarioName, DockerServices dockerServices){
+            await base.StartContainersForScenarioRun(scenarioName, dockerServices);
 
             // Setup the base address resolvers
             String SecurityServiceBaseAddressResolver(String api) => $"https://127.0.0.1:{this.SecurityServicePort}";

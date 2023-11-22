@@ -97,7 +97,7 @@ namespace MessagingService.IntegrationTests.Email
  testRunner.Given("I create the following api scopes", ((string)(null)), table1, "Given ");
 #line hidden
             TechTalk.SpecFlow.Table table2 = new TechTalk.SpecFlow.Table(new string[] {
-                        "ResourceName",
+                        "Name",
                         "DisplayName",
                         "Secret",
                         "Scopes",
@@ -115,8 +115,8 @@ namespace MessagingService.IntegrationTests.Email
                         "ClientId",
                         "ClientName",
                         "Secret",
-                        "AllowedScopes",
-                        "AllowedGrantTypes"});
+                        "Scopes",
+                        "GrantTypes"});
             table3.AddRow(new string[] {
                         "serviceClient",
                         "Service Client",
