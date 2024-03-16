@@ -8,6 +8,7 @@ using System;
 namespace MessagingService.IntegrationTests.Common
 {
     using System.Threading.Tasks;
+    using global::Shared.IntegrationTesting;
     using Reqnroll;
 
     [Binding]
@@ -25,8 +26,10 @@ namespace MessagingService.IntegrationTests.Common
             dockerHelper.DockerCredentials = Setup.DockerCredentials;
             dockerHelper.SqlServerContainerName = "sharedsqlserver";
 
-            Setup.DatabaseServerNetwork = dockerHelper.SetupTestNetwork("sharednetwork", true);
-            Setup.DatabaseServerContainer = await dockerHelper.SetupSqlServerContainer(Setup.DatabaseServerNetwork);
+            await Retry.For(async () => {
+                                Setup.DatabaseServerNetwork = dockerHelper.SetupTestNetwork("sharednetwork", true);
+                                Setup.DatabaseServerContainer = await dockerHelper.SetupSqlServerContainer(Setup.DatabaseServerNetwork);
+                            },TimeSpan.FromSeconds(10));
         }
 
         public static String GetConnectionString(String databaseName)
