@@ -6,15 +6,15 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="ClientProxyBase" Version="2023.11.3" />
+    <PackageReference Include="ClientProxyBase" Version="2024.3.3" />
     <PackageReference Include="Ductus.FluentDocker" Version="2.10.59" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.6.2" />
-    <PackageReference Include="SecurityService.Client" Version="2023.11.2" />
-    <PackageReference Include="SecurityService.IntegrationTesting.Helpers" Version="2023.11.2" />
-    <PackageReference Include="Shared.IntegrationTesting" Version="2023.11.3" />
+    <PackageReference Include="Reqnroll.Tools.MsBuild.Generation" Version="1.0.1" />
+    <PackageReference Include="Reqnroll.xUnit" Version="1.0.1" />
+    <PackageReference Include="SecurityService.Client" Version="2023.12.2-build58" />
+    <PackageReference Include="SecurityService.IntegrationTesting.Helpers" Version="2023.12.2-build58" />
+    <PackageReference Include="Shared.IntegrationTesting" Version="2024.3.3" />
     <PackageReference Include="Shouldly" Version="4.2.1" />
-    <PackageReference Include="SpecFlow.Tools.MsBuild.Generation" Version="3.9.74" />
-    <PackageReference Include="SpecFlow.xUnit" Version="3.9.74" />
     <PackageReference Include="xunit" Version="2.4.2" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.4.5">
       <PrivateAssets>all</PrivateAssets>
@@ -33,7 +33,7 @@
     <ProjectReference Include="..\MessagingService.IntegrationTesting.Helpers\MessagingService.IntegrationTesting.Helpers.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
+  <!--<ItemGroup>
     <SpecFlowFeatureFiles Update="Email\SendEmail.feature">
       <Generator>SpecFlowSingleFileGenerator</Generator>
       <LastGenOutput>SendEmail.feature.cs</LastGenOutput>
@@ -43,7 +43,7 @@
       <Generator>SpecFlowSingleFileGenerator</Generator>
       <LastGenOutput>SendSMS.feature.cs</LastGenOutput>
     </SpecFlowFeatureFiles>
-  </ItemGroup>
+  </ItemGroup>-->
 
   <ItemGroup>
     <Compile Update="Email\SendEmail.feature.cs">

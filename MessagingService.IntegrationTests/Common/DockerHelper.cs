@@ -13,6 +13,7 @@
     using Ductus.FluentDocker.Services.Extensions;
     using global::Shared.IntegrationTesting;
     using global::Shared.Logger;
+    using IntegrationTesting.Helpers;
     using SecurityService.Client;
     
     /// <summary>
@@ -55,6 +56,14 @@
         #endregion
 
         #region Methods
+
+        public override async Task CreateSubscriptions(){
+            List<(String streamName, String groupName, Int32 maxRetries)> subscriptions = SubscriptionsHelper.GetSubscriptions();
+            foreach ((String streamName, String groupName, Int32 maxRetries) subscription in subscriptions)
+            {
+                await this.CreatePersistentSubscription(subscription);
+            }
+        }
 
         /// <summary>
         /// Starts the containers for scenario run.
