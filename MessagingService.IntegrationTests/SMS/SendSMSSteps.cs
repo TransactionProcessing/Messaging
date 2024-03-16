@@ -1,5 +1,4 @@
 ﻿using System;
-using TechTalk.SpecFlow;
 
 namespace MessagingService.IntegrationTests.SMS
 {
@@ -10,6 +9,7 @@ namespace MessagingService.IntegrationTests.SMS
     using Common;
     using DataTransferObjects;
     using IntegrationTesting.Helpers;
+    using Reqnroll;
     using Shared;
     using Shouldly;
     

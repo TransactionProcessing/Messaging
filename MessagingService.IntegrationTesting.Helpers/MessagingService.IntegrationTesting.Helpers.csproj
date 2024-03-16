@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net7.0</TargetFramework>
@@ -7,12 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Shared.IntegrationTesting" Version="2023.11.3" />
+    <PackageReference Include="Shared.IntegrationTesting" Version="2024.3.3" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\MessagingService.Client\MessagingService.Client.csproj"   PrivateAssets="All"/>
-    <ProjectReference Include="..\MessagingService.DataTransferObjects\MessagingService.DataTransferObjects.csproj"   PrivateAssets="All"/>
+    <ProjectReference Include="..\MessagingService.Client\MessagingService.Client.csproj" PrivateAssets="All" />
+    <ProjectReference Include="..\MessagingService.DataTransferObjects\MessagingService.DataTransferObjects.csproj" PrivateAssets="All" />
   </ItemGroup>
 
 	<Target Name="IncludeP2PAssets">

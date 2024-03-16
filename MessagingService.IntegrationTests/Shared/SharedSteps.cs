@@ -8,11 +8,11 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using TechTalk.SpecFlow;
 
 namespace MessagingService.IntegrationTests.Shared
 {
     using global::Shared.IntegrationTesting;
+    using Reqnroll;
     using SecurityService.DataTransferObjects;
     using SecurityService.IntegrationTesting.Helpers;
     using ClientDetails = Common.ClientDetails;
@@ -61,10 +61,10 @@ namespace MessagingService.IntegrationTests.Shared
         }
 
         [Given(@"I have a token to access the messaging service resource")]
-        public async Task GivenIHaveATokenToAccessTheMessagingServiceResource(Table table)
+        public async Task GivenIHaveATokenToAccessTheMessagingServiceResource(DataTable table)
         {
-            TableRow firstRow = table.Rows.First();
-            String clientId = SpecflowTableHelper.GetStringRowValue(firstRow, "ClientId");
+            DataTableRow firstRow = table.Rows.First();
+            String clientId = ReqnrollTableHelper.GetStringRowValue(firstRow, "ClientId");
             ClientDetails clientDetails = this.TestingContext.GetClientDetails(clientId);
 
             this.TestingContext.AccessToken = await this.SecurityServiceSteps.GetClientToken(clientDetails.ClientId, clientDetails.ClientSecret, CancellationToken.None);

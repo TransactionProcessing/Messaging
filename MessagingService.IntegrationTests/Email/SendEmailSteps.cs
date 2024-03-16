@@ -1,5 +1,4 @@
 ﻿using System;
-using TechTalk.SpecFlow;
 
 namespace MessagingService.IntegrationTests.Email
 {
@@ -16,6 +15,7 @@ namespace MessagingService.IntegrationTests.Email
     using global::Shared.IntegrationTesting;
     using IntegrationTesting.Helpers;
     using Newtonsoft.Json;
+    using Reqnroll;
     using Shared;
     using Shouldly;
 

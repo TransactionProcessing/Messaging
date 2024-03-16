@@ -1,18 +1,18 @@
 ﻿namespace MessagingService.IntegrationTesting.Helpers;
 
 using MessagingService.DataTransferObjects;
+using Reqnroll;
 using Shared.IntegrationTesting;
-using TechTalk.SpecFlow;
 
-public static class SpecflowExtensions{
-    public static List<SendEmailRequest> ToSendEmailRequests(this TableRows tableRows){
+public static class ReqnrollExtensions{
+    public static List<SendEmailRequest> ToSendEmailRequests(this DataTableRows tableRows){
         List<SendEmailRequest> requests = new List<SendEmailRequest>();
-        foreach (TableRow tableRow in tableRows){
-            String fromAddress = SpecflowTableHelper.GetStringRowValue(tableRow, "FromAddress");
-            String toAddresses = SpecflowTableHelper.GetStringRowValue(tableRow, "ToAddresses");
-            String subject = SpecflowTableHelper.GetStringRowValue(tableRow, "Subject");
-            String body = SpecflowTableHelper.GetStringRowValue(tableRow, "Body");
-            Boolean isHtml = SpecflowTableHelper.GetBooleanValue(tableRow, "IsHtml");
+        foreach (DataTableRow tableRow in tableRows){
+            String fromAddress = ReqnrollTableHelper.GetStringRowValue(tableRow, "FromAddress");
+            String toAddresses = ReqnrollTableHelper.GetStringRowValue(tableRow, "ToAddresses");
+            String subject = ReqnrollTableHelper.GetStringRowValue(tableRow, "Subject");
+            String body = ReqnrollTableHelper.GetStringRowValue(tableRow, "Body");
+            Boolean isHtml = ReqnrollTableHelper.GetBooleanValue(tableRow, "IsHtml");
 
             SendEmailRequest request = new SendEmailRequest
                                        {
@@ -29,12 +29,12 @@ public static class SpecflowExtensions{
         return requests;
     }
 
-    public static List<ResendEmailRequest> ToResendEmailRequests(this TableRows tableRows, Dictionary<String, SendEmailResponse> sendResponses)
+    public static List<ResendEmailRequest> ToResendEmailRequests(this DataTableRows tableRows, Dictionary<String, SendEmailResponse> sendResponses)
     {
         List<ResendEmailRequest> requests = new List<ResendEmailRequest>();
 
-        foreach (TableRow tableRow in tableRows){
-            String toAddresses = SpecflowTableHelper.GetStringRowValue(tableRow, "ToAddresses");
+        foreach (DataTableRow tableRow in tableRows){
+            String toAddresses = ReqnrollTableHelper.GetStringRowValue(tableRow, "ToAddresses");
             SendEmailResponse sendEmailResponse = sendResponses[toAddresses];
 
             ResendEmailRequest request = new ResendEmailRequest()
@@ -47,13 +47,13 @@ public static class SpecflowExtensions{
         return requests;
     }
 
-    public static List<SendSMSRequest> ToSendSMSRequests(this TableRows tableRows){
+    public static List<SendSMSRequest> ToSendSMSRequests(this DataTableRows tableRows){
         List<SendSMSRequest> requests = new List<SendSMSRequest>();
 
-        foreach (TableRow tableRow in tableRows){
-            String sender = SpecflowTableHelper.GetStringRowValue(tableRow, "Sender");
-            String destination = SpecflowTableHelper.GetStringRowValue(tableRow, "Destination");
-            String message = SpecflowTableHelper.GetStringRowValue(tableRow, "Message");
+        foreach (DataTableRow tableRow in tableRows){
+            String sender = ReqnrollTableHelper.GetStringRowValue(tableRow, "Sender");
+            String destination = ReqnrollTableHelper.GetStringRowValue(tableRow, "Destination");
+            String message = ReqnrollTableHelper.GetStringRowValue(tableRow, "Message");
 
             SendSMSRequest request = new SendSMSRequest
                                      {
