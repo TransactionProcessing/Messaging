@@ -29,7 +29,7 @@ namespace MessagingService.IntegrationTests.Common
             await Retry.For(async () => {
                                 Setup.DatabaseServerNetwork = dockerHelper.SetupTestNetwork("sharednetwork", true);
                                 Setup.DatabaseServerContainer = await dockerHelper.SetupSqlServerContainer(Setup.DatabaseServerNetwork);
-                            },TimeSpan.FromSeconds(10));
+                            },TimeSpan.FromSeconds(60));
         }
 
         public static String GetConnectionString(String databaseName)
