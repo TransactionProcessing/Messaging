@@ -24,6 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\MessagingService.Testing\MessagingService.Testing.csproj" />
     <ProjectReference Include="..\MessagingService\MessagingService.csproj" />
   </ItemGroup>
 

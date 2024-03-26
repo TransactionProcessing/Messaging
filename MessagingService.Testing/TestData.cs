@@ -16,6 +16,7 @@
     using SMSMessageStatus = BusinessLogic.Services.SMSServices.MessageStatus;
     using EmailMessageStatusResponse = BusinessLogic.Services.EmailServices.MessageStatusResponse;
     using SMSMessageStatusResponse = BusinessLogic.Services.SMSServices.MessageStatusResponse;
+    using Microsoft.Extensions.Configuration;
 
     public class TestData
     {
@@ -324,6 +325,27 @@
             smsAggregate.SendRequestToProvider(TestData.Sender, TestData.Destination, TestData.Message);
             smsAggregate.ReceiveResponseFromProvider(TestData.ProviderSMSReference);
             return smsAggregate;
+        }
+
+        public static Dictionary<String,String> GetStandardMemoryConfiguration()
+        {
+            Dictionary<String, String> configuration = new Dictionary<String, String>();
+
+            IConfigurationBuilder builder = new ConfigurationBuilder();
+
+            configuration.Add("AppSettings:EmailProxy", "UnitTest");
+            configuration.Add("AppSettings:SMSProxy", "UnitTest");
+            configuration.Add("ConnectionStrings:HealthCheck", "HeathCheckConnString");
+            configuration.Add("SecurityConfiguration:Authority", "https://127.0.0.1");
+            configuration.Add("EventStoreSettings:ConnectionString", "esdb://127.0.0.1:2113");
+            configuration.Add("EventStoreSettings:ConnectionName", "UnitTestConnection");
+            configuration.Add("EventStoreSettings:UserName", "admin");
+            configuration.Add("EventStoreSettings:Password", "changeit");
+            configuration.Add("AppSettings:UseConnectionStringConfig", "false");
+            configuration.Add("AppSettings:SecurityService", "http://127.0.0.1");
+            configuration.Add("AppSettings:MessagingServiceApi", "http://127.0.0.1");
+
+            return configuration;
         }
     }
 
