@@ -63,13 +63,9 @@ namespace MessagingService
 
         public static void ConfigureEventStoreSettings(EventStoreClientSettings settings)
         {
-            settings.ConnectivitySettings = EventStoreClientConnectivitySettings.Default;
-            settings.ConnectivitySettings.Address = new Uri(Startup.Configuration.GetValue<String>("EventStoreSettings:ConnectionString"));
-            settings.ConnectivitySettings.Insecure = Startup.Configuration.GetValue<Boolean>("EventStoreSettings:Insecure");
+            String connectionString = Startup.Configuration.GetValue<String>("EventStoreSettings:ConnectionString");
             
-            settings.DefaultCredentials = new UserCredentials(Startup.Configuration.GetValue<String>("EventStoreSettings:UserName"),
-                                                              Startup.Configuration.GetValue<String>("EventStoreSettings:Password"));
-            Startup.EventStoreClientSettings = settings;
+            Startup.EventStoreClientSettings = EventStoreClientSettings.Create(connectionString); ;
         }
 
         public static Container Container;
