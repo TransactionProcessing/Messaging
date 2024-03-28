@@ -49,11 +49,6 @@ namespace MessagingService
 
         public static IWebHostEnvironment WebHostEnvironment { get; set; }
         
-        public static void LoadTypes()
-        {
-            TypeProvider.LoadDomainEventsTypeDynamically();
-        }
-
         public static Container Container;
 
         public void ConfigureContainer(ServiceRegistry services)
