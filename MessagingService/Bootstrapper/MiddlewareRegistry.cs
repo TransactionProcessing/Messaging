@@ -16,20 +16,24 @@
     using Microsoft.OpenApi.Models;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Serialization;
-    using Shared.EventStore.EventStore;
     using Shared.EventStore.Extensions;
     using Shared.General;
     using Swashbuckle.AspNetCore.Filters;
     using System.Collections.Generic;
     using System.Linq;
     using System.Diagnostics.CodeAnalysis;
+    using Microsoft.Extensions.Configuration;
 
     [ExcludeFromCodeCoverage]
     public class MiddlewareRegistry : ServiceRegistry
     {
         public MiddlewareRegistry() {
+
+            String connectionString = Startup.Configuration.GetValue<String>("EventStoreSettings:ConnectionString");
+            EventStoreClientSettings eventStoreConnectionSettings = EventStoreClientSettings.Create(connectionString);
+
             this.AddHealthChecks()
-                .AddEventStore(Startup.EventStoreClientSettings,
+                .AddEventStore(eventStoreConnectionSettings,
                                name: "Eventstore",
                                failureStatus: HealthStatus.Unhealthy,
                                tags: new string[] { "db", "eventstore" });

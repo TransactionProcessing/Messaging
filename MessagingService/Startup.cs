@@ -48,24 +48,10 @@ namespace MessagingService
         public static IConfigurationRoot Configuration { get; set; }
 
         public static IWebHostEnvironment WebHostEnvironment { get; set; }
-
-        internal static EventStoreClientSettings EventStoreClientSettings;
-
+        
         public static void LoadTypes()
         {
-            RequestSentToEmailProviderEvent e = new RequestSentToEmailProviderEvent(Guid.Parse("2AA2D43B-5E24-4327-8029-1135B20F35CE"), "", new List<String>(),
-                                                                                    "", "", true);
-
-            RequestSentToSMSProviderEvent s = new RequestSentToSMSProviderEvent(Guid.NewGuid(), "", "", "");
-
             TypeProvider.LoadDomainEventsTypeDynamically();
-        }
-
-        public static void ConfigureEventStoreSettings(EventStoreClientSettings settings)
-        {
-            String connectionString = Startup.Configuration.GetValue<String>("EventStoreSettings:ConnectionString");
-            
-            Startup.EventStoreClientSettings = EventStoreClientSettings.Create(connectionString); ;
         }
 
         public static Container Container;
@@ -82,11 +68,7 @@ namespace MessagingService
             services.IncludeRegistry<MessagingProxyRegistry>();
 
             Startup.Container = new Container(services);
-
-            //Startup.ServiceProvider = services.BuildServiceProvider();
         }
-
-        //public static IServiceProvider ServiceProvider { get; set; }
         
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory)

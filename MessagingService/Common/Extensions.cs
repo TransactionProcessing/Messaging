@@ -19,19 +19,6 @@ using Shared.Logger;
 [ExcludeFromCodeCoverage]
 public static class Extensions
 {
-    public static IServiceCollection AddInSecureEventStoreClient(
-        this IServiceCollection services,
-        Uri address,
-        Func<HttpMessageHandler>? createHttpMessageHandler = null)
-    {
-        return services.AddEventStoreClient((Action<EventStoreClientSettings>)(options =>
-                                                                               {
-                                                                                   options.ConnectivitySettings.Address = address;
-                                                                                   options.ConnectivitySettings.Insecure = true;
-                                                                                   options.CreateHttpMessageHandler = createHttpMessageHandler;
-                                                                               }));
-    }
-
     static Action<TraceEventType, String, String> log = (tt,
                                                              subType,
                                                              message) => {
@@ -74,9 +61,12 @@ public static class Extensions
 
         Func<String, Int32, ISubscriptionRepository> subscriptionRepositoryResolver = Startup.Container.GetInstance<Func<String, Int32, ISubscriptionRepository>>();
 
+
+        String connectionString = Startup.Configuration.GetValue<String>("EventStoreSettings:ConnectionString");
+        EventStoreClientSettings eventStoreConnectionSettings = EventStoreClientSettings.Create(connectionString);
         applicationBuilder.ConfigureSubscriptionService(subscriptionWorkersRoot,
                                                         eventStoreConnectionString,
-                                                        Startup.EventStoreClientSettings,
+                                                        eventStoreConnectionSettings,
                                                         eventHandlerResolvers,
                                                         Extensions.log,
                                                         subscriptionRepositoryResolver,
