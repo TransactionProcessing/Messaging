@@ -10,6 +10,7 @@ using EventStore.Client;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Shared.EventStore.Aggregate;
 using Shared.EventStore.EventHandling;
 using Shared.EventStore.Extensions;
 using Shared.EventStore.SubscriptionWorker;
@@ -19,19 +20,6 @@ using Shared.Logger;
 [ExcludeFromCodeCoverage]
 public static class Extensions
 {
-    public static IServiceCollection AddInSecureEventStoreClient(
-        this IServiceCollection services,
-        Uri address,
-        Func<HttpMessageHandler>? createHttpMessageHandler = null)
-    {
-        return services.AddEventStoreClient((Action<EventStoreClientSettings>)(options =>
-                                                                               {
-                                                                                   options.ConnectivitySettings.Address = address;
-                                                                                   options.ConnectivitySettings.Insecure = true;
-                                                                                   options.CreateHttpMessageHandler = createHttpMessageHandler;
-                                                                               }));
-    }
-
     static Action<TraceEventType, String, String> log = (tt,
                                                              subType,
                                                              message) => {
@@ -58,7 +46,7 @@ public static class Extensions
     
     public static void PreWarm(this IApplicationBuilder applicationBuilder)
     {
-        Startup.LoadTypes();
+        TypeProvider.LoadDomainEventsTypeDynamically();
 
         IConfigurationSection subscriptionConfigSection = Startup.Configuration.GetSection("AppSettings:SubscriptionConfiguration");
         SubscriptionWorkersRoot subscriptionWorkersRoot = new SubscriptionWorkersRoot();
@@ -74,9 +62,12 @@ public static class Extensions
 
         Func<String, Int32, ISubscriptionRepository> subscriptionRepositoryResolver = Startup.Container.GetInstance<Func<String, Int32, ISubscriptionRepository>>();
 
+
+        String connectionString = Startup.Configuration.GetValue<String>("EventStoreSettings:ConnectionString");
+        EventStoreClientSettings eventStoreConnectionSettings = EventStoreClientSettings.Create(connectionString);
         applicationBuilder.ConfigureSubscriptionService(subscriptionWorkersRoot,
                                                         eventStoreConnectionString,
-                                                        Startup.EventStoreClientSettings,
+                                                        eventStoreConnectionSettings,
                                                         eventHandlerResolvers,
                                                         Extensions.log,
                                                         subscriptionRepositoryResolver,
