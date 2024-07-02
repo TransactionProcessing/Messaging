@@ -1,4 +1,6 @@
-﻿namespace MessagingService.Bootstrapper
+﻿using Microsoft.Extensions.Logging;
+
+namespace MessagingService.Bootstrapper
 {
     using System;
     using System.IO;
@@ -23,6 +25,7 @@
     using System.Linq;
     using System.Diagnostics.CodeAnalysis;
     using Microsoft.Extensions.Configuration;
+    using Shared.Middleware;
 
     [ExcludeFromCodeCoverage]
     public class MiddlewareRegistry : ServiceRegistry
@@ -104,6 +107,37 @@
 
             Assembly assembly = this.GetType().GetTypeInfo().Assembly;
             this.AddMvcCore().AddApplicationPart(assembly).AddControllersAsServices();
+
+            bool logRequests = ConfigurationReaderExtensions.GetValueOrDefault<Boolean>("MiddlewareLogging", "LogRequests", true);
+            bool logResponses = ConfigurationReaderExtensions.GetValueOrDefault<Boolean>("MiddlewareLogging", "LogResponses", true);
+            LogLevel middlewareLogLevel = ConfigurationReaderExtensions.GetValueOrDefault<LogLevel>("MiddlewareLogging", "MiddlewareLogLevel", LogLevel.Warning);
+
+            RequestResponseMiddlewareLoggingConfig config =
+                new RequestResponseMiddlewareLoggingConfig(middlewareLogLevel, logRequests, logResponses);
+
+            this.AddSingleton(config);
+        }
+    }
+
+    public static class ConfigurationReaderExtensions
+    {
+        public static T GetValueOrDefault<T>(String sectionName, String keyName, T defaultValue)
+        {
+            try
+            {
+                var value = ConfigurationReader.GetValue(sectionName, keyName);
+
+                if (String.IsNullOrEmpty(value))
+                {
+                    return defaultValue;
+                }
+
+                return (T)Convert.ChangeType(value, typeof(T));
+            }
+            catch (KeyNotFoundException kex)
+            {
+                return defaultValue;
+            }
         }
     }
 }

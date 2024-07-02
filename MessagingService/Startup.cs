@@ -72,6 +72,12 @@ namespace MessagingService
 
             if (env.IsDevelopment())
             {
+                var developmentNlogConfigFilename = "nlog.development.config";
+                if (File.Exists(Path.Combine(env.ContentRootPath, developmentNlogConfigFilename)))
+                {
+                    nlogConfigFilename = developmentNlogConfigFilename;
+                }
+
                 app.UseDeveloperExceptionPage();
             }
 
@@ -81,12 +87,7 @@ namespace MessagingService
             Microsoft.Extensions.Logging.ILogger logger = loggerFactory.CreateLogger("MessagingService");
 
             Logger.Initialise(logger);
-
-            Action<String> loggerAction = message =>
-                                          {
-                                              Logger.LogInformation(message);
-                                          };
-            Startup.Configuration.LogConfiguration(loggerAction);
+            Startup.Configuration.LogConfiguration(Logger.LogWarning);
             
             foreach (KeyValuePair<Type, String> type in TypeMap.Map)
             {
