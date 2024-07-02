@@ -67,10 +67,8 @@ public static class Extensions
         EventStoreClientSettings eventStoreConnectionSettings = EventStoreClientSettings.Create(connectionString);
         applicationBuilder.ConfigureSubscriptionService(subscriptionWorkersRoot,
                                                         eventStoreConnectionString,
-                                                        eventStoreConnectionSettings,
                                                         eventHandlerResolvers,
                                                         Extensions.log,
-                                                        subscriptionRepositoryResolver,
-                                                        CancellationToken.None).Wait(CancellationToken.None);
+                                                        subscriptionRepositoryResolver).Wait(CancellationToken.None);
     }
 }

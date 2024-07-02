@@ -7,6 +7,8 @@ using BusinessLogic.EventHandling;
 using Lamar;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Shared.DomainDrivenDesign.EventSourcing;
+using Shared.EventStore.Aggregate;
 using Shared.EventStore.EventHandling;
 
 [ExcludeFromCodeCoverage]
@@ -37,5 +39,6 @@ public class DomainEventHandlerRegistry : ServiceRegistry
 
         this.For<IDomainEventHandlerResolver>().Use<DomainEventHandlerResolver>().Named("Main")
             .Ctor<Dictionary<String, String[]>>().Is(eventHandlersConfiguration).Singleton();
+        this.AddSingleton<IDomainEventFactory<IDomainEvent>, DomainEventFactory>();
     }
 }
