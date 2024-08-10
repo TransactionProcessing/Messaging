@@ -52,7 +52,7 @@ jobs:
       
     - name: Build Release Package
       run: |
-         cd /home/runner/work/MessagingService/publishOutput
+         cd /home/runner/work/Messaging/Messaging/publishOutput
          zip -r ../messagingservice.zip ./*
 
     - name: Upload the artifact
