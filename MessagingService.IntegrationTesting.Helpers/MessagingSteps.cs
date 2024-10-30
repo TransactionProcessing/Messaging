@@ -19,10 +19,10 @@
         public async Task<List<(String, SendEmailResponse)>> GivenISendTheFollowingEmailMessages(String accessToken, List<SendEmailRequest> requests){
             List<(String, SendEmailResponse)> results = new List<(String, SendEmailResponse)>();
             foreach (SendEmailRequest sendEmailRequest in requests){
-                SendEmailResponse sendEmailResponse = await this.MessagingServiceClient.SendEmail(accessToken, sendEmailRequest, CancellationToken.None).ConfigureAwait(false);
+                var result = await this.MessagingServiceClient.SendEmail(accessToken, sendEmailRequest, CancellationToken.None).ConfigureAwait(false);
 
-                sendEmailResponse.MessageId.ShouldNotBe(Guid.Empty);
-                results.Add((String.Join(",", sendEmailRequest.ToAddresses),  sendEmailResponse));
+                result.IsSuccess.ShouldBeTrue();
+                results.Add((String.Join(",", sendEmailRequest.ToAddresses),  null));
             }
             return results;
         }
@@ -31,9 +31,9 @@
         {
             foreach (SendSMSRequest sendSmsRequest in requests)
             {
-                SendSMSResponse sendEmailResponse = await this.MessagingServiceClient.SendSMS(accessToken, sendSmsRequest, CancellationToken.None).ConfigureAwait(false);
+                var result = await this.MessagingServiceClient.SendSMS(accessToken, sendSmsRequest, CancellationToken.None).ConfigureAwait(false);
 
-                sendEmailResponse.MessageId.ShouldNotBe(Guid.Empty);
+                result.IsSuccess.ShouldBeTrue();
             }
         }
 

@@ -1,4 +1,6 @@
-﻿namespace MessagingService.BusinessLogic.Services
+﻿using SimpleResults;
+
+namespace MessagingService.BusinessLogic.Services
 {
     using System;
     using System.Collections.Generic;
@@ -13,28 +15,28 @@
     {
         #region Methods
 
-        Task SendEmailMessage(Guid connectionIdentifier,
-                              Guid messageId,
-                              String fromAddress,
-                              List<String> toAddresses,
-                              String subject,
-                              String body,
-                              Boolean isHtml,
-                              List<EmailAttachment> attachments,
-                              CancellationToken cancellationToken);
+        Task<Result> SendEmailMessage(Guid connectionIdentifier,
+                                      Guid messageId,
+                                      String fromAddress,
+                                      List<String> toAddresses,
+                                      String subject,
+                                      String body,
+                                      Boolean isHtml,
+                                      List<EmailAttachment> attachments,
+                                      CancellationToken cancellationToken);
 
-        Task SendSMSMessage(Guid connectionIdentifier,
-                            Guid messageId,
-                            String sender,
-                            String destination,
-                            String message,
-                            CancellationToken cancellationToken);
+        Task<Result> SendSMSMessage(Guid connectionIdentifier,
+                                    Guid messageId,
+                                    String sender,
+                                    String destination,
+                                    String message,
+                                    CancellationToken cancellationToken);
 
-        Task ResendEmailMessage(Guid connectionIdentifier,
-                            Guid messageId,
-                            CancellationToken cancellationToken);
+        Task<Result> ResendEmailMessage(Guid connectionIdentifier,
+                                        Guid messageId,
+                                        CancellationToken cancellationToken);
 
-        Task ResendSMSMessage(Guid connectionIdentifier,
+        Task<Result> ResendSMSMessage(Guid connectionIdentifier,
                                 Guid messageId,
                                 CancellationToken cancellationToken);
 

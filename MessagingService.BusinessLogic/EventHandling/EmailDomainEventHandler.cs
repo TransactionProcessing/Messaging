@@ -1,4 +1,8 @@
-﻿namespace MessagingService.BusinessLogic.EventHandling
+﻿using MediatR;
+using MessagingService.BusinessLogic.Requests;
+using SimpleResults;
+
+namespace MessagingService.BusinessLogic.EventHandling
 {
     using System.Threading;
     using System.Threading.Tasks;
@@ -14,10 +18,7 @@
     {
         #region Fields
 
-        /// <summary>
-        /// The aggregate repository
-        /// </summary>
-        private readonly IAggregateRepository<EmailAggregate, DomainEvent> AggregateRepository;
+        private readonly IMediator Mediator;
 
         /// <summary>
         /// The email service proxy
@@ -28,15 +29,10 @@
 
         #region Constructors
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="EmailDomainEventHandler"/> class.
-        /// </summary>
-        /// <param name="aggregateRepository">The aggregate repository.</param>
-        /// <param name="emailServiceProxy">The email service proxy.</param>
-        public EmailDomainEventHandler(IAggregateRepository<EmailAggregate, DomainEvent> aggregateRepository,
+        public EmailDomainEventHandler(IMediator mediator,
                                        IEmailServiceProxy emailServiceProxy)
         {
-            this.AggregateRepository = aggregateRepository;
+            this.Mediator = mediator;
             this.EmailServiceProxy = emailServiceProxy;
         }
 
@@ -49,9 +45,9 @@
         /// </summary>
         /// <param name="domainEvent">The domain event.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
-        public async Task Handle(IDomainEvent domainEvent, CancellationToken cancellationToken)
+        public async Task<Result> Handle(IDomainEvent domainEvent, CancellationToken cancellationToken)
         {
-            await this.HandleSpecificDomainEvent((dynamic)domainEvent, cancellationToken);
+            return await this.HandleSpecificDomainEvent((dynamic)domainEvent, cancellationToken);
         }
 
         /// <summary>
@@ -59,43 +55,20 @@
         /// </summary>
         /// <param name="domainEvent">The domain event.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
-        private async Task HandleSpecificDomainEvent(ResponseReceivedFromEmailProviderEvent domainEvent,
+        private async Task<Result> HandleSpecificDomainEvent(ResponseReceivedFromEmailProviderEvent domainEvent,
                                                      CancellationToken cancellationToken)
         {
-            EmailAggregate emailAggregate = await this.AggregateRepository.GetLatestVersion(domainEvent.MessageId, cancellationToken);
-
-            // Update the aggregate with the status request information
-
             // Get the message status from the provider
             MessageStatusResponse messageStatus = await this.EmailServiceProxy.GetMessageStatus(domainEvent.ProviderEmailReference,
                                                                                                 domainEvent.EventTimestamp.DateTime,
                                                                                                 domainEvent.EventTimestamp.DateTime,
                                                                                                 cancellationToken);
 
-            // Update the aggregate with the response
-            switch (messageStatus.MessageStatus)
-            {
-                case MessageStatus.Failed:
-                    emailAggregate.MarkMessageAsFailed(messageStatus.ProviderStatusDescription, messageStatus.Timestamp);
-                    break;
-                case MessageStatus.Rejected:
-                    emailAggregate.MarkMessageAsRejected(messageStatus.ProviderStatusDescription, messageStatus.Timestamp);
-                    break;
-                case MessageStatus.Bounced:
-                    emailAggregate.MarkMessageAsBounced(messageStatus.ProviderStatusDescription, messageStatus.Timestamp);
-                    break;
-                case MessageStatus.Spam:
-                    emailAggregate.MarkMessageAsSpam(messageStatus.ProviderStatusDescription, messageStatus.Timestamp);
-                    break;
-                case MessageStatus.Delivered:
-                    emailAggregate.MarkMessageAsDelivered(messageStatus.ProviderStatusDescription, messageStatus.Timestamp);
-                    break;
-                case MessageStatus.Unknown:
-                    break;
-            }
+            // Now update the aggregate
+            EmailCommands.UpdateMessageStatusCommand command = new(domainEvent.MessageId, messageStatus.MessageStatus,
+                messageStatus.ProviderStatusDescription, messageStatus.Timestamp);
 
-            // Save the changes
-            await this.AggregateRepository.SaveChanges(emailAggregate, cancellationToken);
+            return await this.Mediator.Send(command, cancellationToken);
         }
 
         #endregion

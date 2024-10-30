@@ -1,4 +1,5 @@
-﻿using SendEmailRequestDTO = MessagingService.DataTransferObjects.SendEmailRequest;
+﻿using SimpleResults;
+using SendEmailRequestDTO = MessagingService.DataTransferObjects.SendEmailRequest;
 using SendEmailResponseDTO = MessagingService.DataTransferObjects.SendEmailResponse;
 using ResendEmailRequestDTO = MessagingService.DataTransferObjects.ResendEmailRequest;
 
@@ -17,7 +18,6 @@ namespace MessagingService.Controllers
     using Microsoft.AspNetCore.Mvc;
     using Swashbuckle.AspNetCore.Annotations;
     using Swashbuckle.AspNetCore.Filters;
-    using SendEmailRequest = BusinessLogic.Requests.SendEmailRequest;
 
     /// <summary>
     /// 
@@ -86,7 +86,7 @@ namespace MessagingService.Controllers
             }
 
             // Create the command
-            SendEmailRequest request = SendEmailRequest.Create(sendEmailRequest.ConnectionIdentifier,
+            EmailCommands.SendEmailCommand command= new(sendEmailRequest.ConnectionIdentifier,
                                                                messageId,
                                                                sendEmailRequest.FromAddress,
                                                                sendEmailRequest.ToAddresses,
@@ -96,7 +96,7 @@ namespace MessagingService.Controllers
                                                                emailAttachments);
 
             // Route the command
-            await this.Mediator.Send(request, cancellationToken);
+            var result = await this.Mediator.Send(command, cancellationToken);
 
             // return the result
             return this.Created($"{EmailController.ControllerRoute}/{messageId}",
@@ -120,11 +120,10 @@ namespace MessagingService.Controllers
             }
 
             // Create the command
-            ResendEmailRequest request = ResendEmailRequest.Create(resendEmailRequest.ConnectionIdentifier,
-                                                               resendEmailRequest.MessageId);
+            EmailCommands.ResendEmailCommand command = new(resendEmailRequest.ConnectionIdentifier, resendEmailRequest.MessageId);
             
             // Route the command
-            await this.Mediator.Send(request, cancellationToken);
+            Result result = await this.Mediator.Send(command, cancellationToken);
 
             // return the result
             return this.Accepted($"{EmailController.ControllerRoute}/{resendEmailRequest.MessageId}");

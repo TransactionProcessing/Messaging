@@ -1,4 +1,6 @@
-﻿namespace MessagingService.BusinessLogic.RequestHandlers{
+﻿using SimpleResults;
+
+namespace MessagingService.BusinessLogic.RequestHandlers{
     using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
@@ -12,10 +14,10 @@
     /// 
     /// </summary>
     /// <seealso cref="MediatR.IRequestHandler{MessagingService.BusinessLogic.Requests.SendEmailRequest, System.String}" />
-    public class MessagingRequestHandler : IRequestHandler<SendEmailRequest>,
-                                           IRequestHandler<SendSMSRequest>,
-                                           IRequestHandler<ResendEmailRequest>,
-                                           IRequestHandler<ResendSMSRequest>{
+    public class MessagingRequestHandler : IRequestHandler<EmailCommands.SendEmailCommand, Result>,
+                                           IRequestHandler<SMSCommands.SendSMSCommand, Result>,
+                                           IRequestHandler<EmailCommands.ResendEmailCommand,Result>,
+                                           IRequestHandler<SMSCommands.ResendSMSCommand, Result>{
         #region Fields
 
         /// <summary>
@@ -47,11 +49,11 @@
         /// <returns>
         /// Response from the request
         /// </returns>
-        public async Task Handle(SendEmailRequest request,
+        public async Task<Result> Handle(EmailCommands.SendEmailCommand command,
                                  CancellationToken cancellationToken){
             List<EmailAttachment> attachments = new List<EmailAttachment>();
 
-            foreach (Requests.EmailAttachment requestEmailAttachment in request.EmailAttachments){
+            foreach (Requests.EmailAttachment requestEmailAttachment in command.EmailAttachments){
                 attachments.Add(new EmailAttachment{
                                                        FileData = requestEmailAttachment.FileData,
                                                        FileType = this.ConvertFileType(requestEmailAttachment.FileType),
@@ -59,34 +61,34 @@
                                                    });
             }
 
-            await this.MessagingDomainService.SendEmailMessage(request.ConnectionIdentifier,
-                                                               request.MessageId,
-                                                               request.FromAddress,
-                                                               request.ToAddresses,
-                                                               request.Subject,
-                                                               request.Body,
-                                                               request.IsHtml,
+            return await this.MessagingDomainService.SendEmailMessage(command.ConnectionIdentifier,
+                                                               command.MessageId,
+                                                               command.FromAddress,
+                                                               command.ToAddresses,
+                                                               command.Subject,
+                                                               command.Body,
+                                                               command.IsHtml,
                                                                attachments,
                                                                cancellationToken);
         }
 
-        public async Task Handle(SendSMSRequest request,
-                                 CancellationToken cancellationToken){
-            await this.MessagingDomainService.SendSMSMessage(request.ConnectionIdentifier,
-                                                             request.MessageId,
-                                                             request.Sender,
-                                                             request.Destination,
-                                                             request.Message,
+        public async Task<Result> Handle(SMSCommands.SendSMSCommand command,
+                                         CancellationToken cancellationToken){
+            return await this.MessagingDomainService.SendSMSMessage(command.ConnectionIdentifier,
+                                                             command.MessageId,
+                                                             command.Sender,
+                                                             command.Destination,
+                                                             command.Message,
                                                              cancellationToken);
         }
 
-        public async Task Handle(ResendEmailRequest request,
-                                 CancellationToken cancellationToken){
-            await this.MessagingDomainService.ResendEmailMessage(request.ConnectionIdentifier, request.MessageId, cancellationToken);
+        public async Task<Result> Handle(EmailCommands.ResendEmailCommand command,
+                                         CancellationToken cancellationToken){
+            return await this.MessagingDomainService.ResendEmailMessage(command.ConnectionIdentifier, command.MessageId, cancellationToken);
         }
 
-        public async Task Handle(ResendSMSRequest request, CancellationToken cancellationToken){
-            await this.MessagingDomainService.ResendSMSMessage(request.ConnectionIdentifier, request.MessageId, cancellationToken);
+        public async Task<Result> Handle(SMSCommands.ResendSMSCommand command, CancellationToken cancellationToken){
+            return await this.MessagingDomainService.ResendSMSMessage(command.ConnectionIdentifier, command.MessageId, cancellationToken);
         }
 
         private FileType ConvertFileType(Requests.FileType emailAttachmentFileType){

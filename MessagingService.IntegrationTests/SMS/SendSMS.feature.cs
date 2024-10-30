@@ -83,53 +83,53 @@ namespace MessagingService.IntegrationTests.SMS
         {
 #line 4
 #line hidden
-            Reqnroll.Table table8 = new Reqnroll.Table(new string[] {
+            Reqnroll.Table table6 = new Reqnroll.Table(new string[] {
                         "Name",
                         "DisplayName",
                         "Description"});
-            table8.AddRow(new string[] {
+            table6.AddRow(new string[] {
                         "messagingService",
                         "Messaging REST Scope",
                         "A scope for Messaging REST"});
 #line 6
- await testRunner.GivenAsync("I create the following api scopes", ((string)(null)), table8, "Given ");
+ await testRunner.GivenAsync("I create the following api scopes", ((string)(null)), table6, "Given ");
 #line hidden
-            Reqnroll.Table table9 = new Reqnroll.Table(new string[] {
+            Reqnroll.Table table7 = new Reqnroll.Table(new string[] {
                         "ResourceName",
                         "DisplayName",
                         "Secret",
                         "Scopes",
                         "UserClaims"});
-            table9.AddRow(new string[] {
+            table7.AddRow(new string[] {
                         "messagingService",
                         "Messaging REST",
                         "Secret1",
                         "messagingService",
                         ""});
 #line 10
- await testRunner.GivenAsync("the following api resources exist", ((string)(null)), table9, "Given ");
+ await testRunner.GivenAsync("the following api resources exist", ((string)(null)), table7, "Given ");
 #line hidden
-            Reqnroll.Table table10 = new Reqnroll.Table(new string[] {
+            Reqnroll.Table table8 = new Reqnroll.Table(new string[] {
                         "ClientId",
                         "ClientName",
                         "Secret",
                         "Scopes",
                         "GrantTypes"});
-            table10.AddRow(new string[] {
+            table8.AddRow(new string[] {
                         "serviceClient",
                         "Service Client",
                         "Secret1",
                         "messagingService",
                         "client_credentials"});
 #line 14
- await testRunner.GivenAsync("the following clients exist", ((string)(null)), table10, "Given ");
+ await testRunner.GivenAsync("the following clients exist", ((string)(null)), table8, "Given ");
 #line hidden
-            Reqnroll.Table table11 = new Reqnroll.Table(new string[] {
+            Reqnroll.Table table9 = new Reqnroll.Table(new string[] {
                         "ClientId"});
-            table11.AddRow(new string[] {
+            table9.AddRow(new string[] {
                         "serviceClient"});
 #line 18
- await testRunner.GivenAsync("I have a token to access the messaging service resource", ((string)(null)), table11, "Given ");
+ await testRunner.GivenAsync("I have a token to access the messaging service resource", ((string)(null)), table9, "Given ");
 #line hidden
         }
         
@@ -155,16 +155,16 @@ this.ScenarioInitialize(scenarioInfo);
 #line 4
 await this.FeatureBackgroundAsync();
 #line hidden
-                Reqnroll.Table table12 = new Reqnroll.Table(new string[] {
+                Reqnroll.Table table10 = new Reqnroll.Table(new string[] {
                             "Sender",
                             "Destination",
                             "Message"});
-                table12.AddRow(new string[] {
+                table10.AddRow(new string[] {
                             "TestSender",
                             "07777777771",
                             "TestSMSMessage"});
 #line 24
- await testRunner.GivenAsync("I send the following SMS Messages", ((string)(null)), table12, "Given ");
+ await testRunner.GivenAsync("I send the following SMS Messages", ((string)(null)), table10, "Given ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();

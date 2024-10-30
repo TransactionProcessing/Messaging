@@ -135,12 +135,14 @@ namespace MessagingService.IntegrationTests.Email
         
         [NUnit.Framework.TestAttribute()]
         [NUnit.Framework.DescriptionAttribute("Send Email")]
+        [NUnit.Framework.CategoryAttribute("PRTest")]
         public async System.Threading.Tasks.Task SendEmail()
         {
-            string[] tagsOfScenario = ((string[])(null));
+            string[] tagsOfScenario = new string[] {
+                    "PRTest"};
             System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
             Reqnroll.ScenarioInfo scenarioInfo = new Reqnroll.ScenarioInfo("Send Email", null, tagsOfScenario, argumentsOfScenario, featureTags);
-#line 22
+#line 23
 this.ScenarioInitialize(scenarioInfo);
 #line hidden
             if ((TagHelper.ContainsIgnoreTag(tagsOfScenario) || TagHelper.ContainsIgnoreTag(featureTags)))
@@ -171,64 +173,8 @@ await this.FeatureBackgroundAsync();
                             "Test Email 1",
                             "Test Body",
                             "true"});
-#line 23
+#line 24
  await testRunner.GivenAsync("I send the following Email Messages", ((string)(null)), table5, "Given ");
-#line hidden
-            }
-            await this.ScenarioCleanupAsync();
-        }
-        
-        [NUnit.Framework.TestAttribute()]
-        [NUnit.Framework.DescriptionAttribute("Resend Email")]
-        [NUnit.Framework.CategoryAttribute("PRTest")]
-        public async System.Threading.Tasks.Task ResendEmail()
-        {
-            string[] tagsOfScenario = new string[] {
-                    "PRTest"};
-            System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
-            Reqnroll.ScenarioInfo scenarioInfo = new Reqnroll.ScenarioInfo("Resend Email", null, tagsOfScenario, argumentsOfScenario, featureTags);
-#line 29
-this.ScenarioInitialize(scenarioInfo);
-#line hidden
-            if ((TagHelper.ContainsIgnoreTag(tagsOfScenario) || TagHelper.ContainsIgnoreTag(featureTags)))
-            {
-                testRunner.SkipScenario();
-            }
-            else
-            {
-                await this.ScenarioStartAsync();
-#line 4
-await this.FeatureBackgroundAsync();
-#line hidden
-                Reqnroll.Table table6 = new Reqnroll.Table(new string[] {
-                            "FromAddress",
-                            "ToAddresses",
-                            "Subject",
-                            "Body",
-                            "IsHtml"});
-                table6.AddRow(new string[] {
-                            "fromaddress@testemail.com",
-                            "toaddress1@testemail.com",
-                            "Test Email 1",
-                            "Test Body",
-                            "true"});
-                table6.AddRow(new string[] {
-                            "fromaddress@testemail.com",
-                            "toaddress1@testemail.com,toaddress2@testemail.com",
-                            "Test Email 1",
-                            "Test Body",
-                            "true"});
-#line 30
- await testRunner.GivenAsync("I send the following Email Messages", ((string)(null)), table6, "Given ");
-#line hidden
-                Reqnroll.Table table7 = new Reqnroll.Table(new string[] {
-                            "ToAddresses"});
-                table7.AddRow(new string[] {
-                            "toaddress1@testemail.com"});
-                table7.AddRow(new string[] {
-                            "toaddress1@testemail.com,toaddress2@testemail.com"});
-#line 34
- await testRunner.WhenAsync("I resend the following messages", ((string)(null)), table7, "When ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();

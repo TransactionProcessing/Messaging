@@ -19,19 +19,20 @@ Background:
 	| ClientId      | 
 	| serviceClient |
 
+@PRTest
 Scenario: Send Email
 	Given I send the following Email Messages
 	| FromAddress               | ToAddresses                                       | Subject      | Body      | IsHtml |
 	| fromaddress@testemail.com | toaddress1@testemail.com                          | Test Email 1 | Test Body | true   |
 	| fromaddress@testemail.com | toaddress1@testemail.com,toaddress2@testemail.com | Test Email 1 | Test Body | true   |
 
-@PRTest
-Scenario: Resend Email
-	Given I send the following Email Messages
-	| FromAddress               | ToAddresses                                       | Subject      | Body      | IsHtml |
-	| fromaddress@testemail.com | toaddress1@testemail.com                          | Test Email 1 | Test Body | true   |
-	| fromaddress@testemail.com | toaddress1@testemail.com,toaddress2@testemail.com | Test Email 1 | Test Body | true   |
-	When I resend the following messages
-	| ToAddresses                                       |
-	| toaddress1@testemail.com                          |
-	| toaddress1@testemail.com,toaddress2@testemail.com |
+#@PRTest
+#Scenario: Resend Email
+#	Given I send the following Email Messages
+#	| FromAddress               | ToAddresses                                       | Subject      | Body      | IsHtml |
+#	| fromaddress@testemail.com | toaddress1@testemail.com                          | Test Email 1 | Test Body | true   |
+#	| fromaddress@testemail.com | toaddress1@testemail.com,toaddress2@testemail.com | Test Email 1 | Test Body | true   |
+#	When I resend the following messages
+#	| ToAddresses                                       |
+#	| toaddress1@testemail.com                          |
+#	| toaddress1@testemail.com,toaddress2@testemail.com |

@@ -1,4 +1,6 @@
-﻿namespace MessagingService.Client
+﻿using Shared.EventStore.Aggregate;
+
+namespace MessagingService.Client
 {
     using System;
     using System.Net.Http;
@@ -9,6 +11,7 @@
     using ClientProxyBase;
     using DataTransferObjects;
     using Newtonsoft.Json;
+    using SimpleResults;
 
     /// <summary>
     /// 
@@ -55,7 +58,7 @@
         /// <param name="sendEmailRequest">The send email request.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns></returns>
-        public async Task<SendEmailResponse> SendEmail(String accessToken,
+        public async Task<Result> SendEmail(String accessToken,
                                                        SendEmailRequest sendEmailRequest,
                                                        CancellationToken cancellationToken)
         {
@@ -76,10 +79,12 @@
                 HttpResponseMessage httpResponse = await this.HttpClient.PostAsync(requestUri, httpContent, cancellationToken);
 
                 // Process the response
-                String content = await this.HandleResponse(httpResponse, cancellationToken);
+                Result<String> result = await this.HandleResponseX(httpResponse, cancellationToken);
 
-                // call was successful so now deserialise the body to the response object
-                response = JsonConvert.DeserializeObject<SendEmailResponse>(content);
+                if (result.IsFailed)
+                    return ResultHelpers.CreateFailure(result);
+
+                return Result.Success();
             }
             catch(Exception ex)
             {
@@ -88,13 +93,11 @@
 
                 throw exception;
             }
-
-            return response;
         }
 
-        public async Task ResendEmail(String accessToken,
-                                ResendEmailRequest resendEmailRequest,
-                                CancellationToken cancellationToken) {
+        public async Task<Result> ResendEmail(String accessToken,
+                                              ResendEmailRequest resendEmailRequest,
+                                              CancellationToken cancellationToken) {
             String requestUri = this.BuildRequestUrl("/api/email/resend");
 
             try {
@@ -108,7 +111,13 @@
                 // Make the Http Call here
                 HttpResponseMessage httpResponse = await this.HttpClient.PostAsync(requestUri, httpContent, cancellationToken);
 
-                httpResponse.EnsureSuccessStatusCode();
+                // Process the response
+                Result<String> result = await this.HandleResponseX(httpResponse, cancellationToken);
+
+                if (result.IsFailed)
+                    return ResultHelpers.CreateFailure(result);
+
+                return Result.Success();
             }
             catch(Exception ex) {
                 // An exception has occurred, add some additional information to the message
@@ -125,9 +134,9 @@
         /// <param name="sendSMSRequest">The send SMS request.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns></returns>
-        public async Task<SendSMSResponse> SendSMS(String accessToken,
-                                                   SendSMSRequest sendSMSRequest,
-                                                   CancellationToken cancellationToken)
+        public async Task<Result> SendSMS(String accessToken,
+                                          SendSMSRequest sendSMSRequest,
+                                          CancellationToken cancellationToken)
         {
             SendSMSResponse response = null;
 
@@ -146,10 +155,12 @@
                 HttpResponseMessage httpResponse = await this.HttpClient.PostAsync(requestUri, httpContent, cancellationToken);
 
                 // Process the response
-                String content = await this.HandleResponse(httpResponse, cancellationToken);
+                Result<String> result = await this.HandleResponseX(httpResponse, cancellationToken);
 
-                // call was successful so now deserialise the body to the response object
-                response = JsonConvert.DeserializeObject<SendSMSResponse>(content);
+                if (result.IsFailed)
+                    return ResultHelpers.CreateFailure(result);
+
+                return Result.Success();
             }
             catch (Exception ex)
             {
@@ -158,8 +169,6 @@
 
                 throw exception;
             }
-
-            return response;
         }
 
         /// <summary>
