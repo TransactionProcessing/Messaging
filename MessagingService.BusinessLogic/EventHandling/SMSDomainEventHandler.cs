@@ -1,7 +1,11 @@
-﻿namespace MessagingService.BusinessLogic.EventHandling
+﻿using SimpleResults;
+
+namespace MessagingService.BusinessLogic.EventHandling
 {
     using System.Threading;
     using System.Threading.Tasks;
+    using MediatR;
+    using MessagingService.BusinessLogic.Requests;
     using Services.SMSServices;
     using Shared.DomainDrivenDesign.EventSourcing;
     using Shared.EventStore.Aggregate;
@@ -14,10 +18,7 @@
     {
         #region Fields
 
-        /// <summary>
-        /// The aggregate repository
-        /// </summary>
-        private readonly IAggregateRepository<SMSAggregate, DomainEvent> AggregateRepository;
+        private readonly IMediator Mediator;
 
         /// <summary>
         /// The email service proxy
@@ -33,10 +34,9 @@
         /// </summary>
         /// <param name="aggregateRepository">The aggregate repository.</param>
         /// <param name="smsServiceProxy">The SMS service proxy.</param>
-        public SMSDomainEventHandler(IAggregateRepository<SMSAggregate, DomainEvent> aggregateRepository,
-                                     ISMSServiceProxy smsServiceProxy)
-        {
-            this.AggregateRepository = aggregateRepository;
+        public SMSDomainEventHandler(IMediator mediator,
+                                     ISMSServiceProxy smsServiceProxy) {
+            this.Mediator = mediator;
             this.SMSServiceProxy = smsServiceProxy;
         }
 
@@ -49,10 +49,10 @@
         /// </summary>
         /// <param name="domainEvent">The domain event.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
-        public async Task Handle(IDomainEvent domainEvent,
-                                 CancellationToken cancellationToken)
+        public async Task<Result> Handle(IDomainEvent domainEvent,
+                                         CancellationToken cancellationToken)
         {
-            await this.HandleSpecificDomainEvent((dynamic)domainEvent, cancellationToken);
+            return await this.HandleSpecificDomainEvent((dynamic)domainEvent, cancellationToken);
         }
 
         /// <summary>
@@ -60,36 +60,18 @@
         /// </summary>
         /// <param name="domainEvent">The domain event.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
-        private async Task HandleSpecificDomainEvent(ResponseReceivedFromSMSProviderEvent domainEvent,
+        private async Task<Result> HandleSpecificDomainEvent(ResponseReceivedFromSMSProviderEvent domainEvent,
                                                      CancellationToken cancellationToken)
         {
-            SMSAggregate smsAggregate = await this.AggregateRepository.GetLatestVersion(domainEvent.MessageId, cancellationToken);
-
-            // Update the aggregate with the status request information
-
             // Get the message status from the provider
             MessageStatusResponse messageStatus = await this.SMSServiceProxy.GetMessageStatus(domainEvent.ProviderSMSReference,
                                                                                                 cancellationToken);
 
-            // Update the aggregate with the response
-            switch (messageStatus.MessageStatus)
-            {
-                case MessageStatus.Expired:
-                    smsAggregate.MarkMessageAsExpired(messageStatus.ProviderStatusDescription, messageStatus.Timestamp);
-                    break;
-                case MessageStatus.Rejected:
-                    smsAggregate.MarkMessageAsRejected(messageStatus.ProviderStatusDescription, messageStatus.Timestamp);
-                    break;
-                case MessageStatus.Undeliverable:
-                    smsAggregate.MarkMessageAsUndeliverable(messageStatus.ProviderStatusDescription, messageStatus.Timestamp);
-                    break;
-                case MessageStatus.Delivered:
-                    smsAggregate.MarkMessageAsDelivered(messageStatus.ProviderStatusDescription, messageStatus.Timestamp);
-                    break;
-            }
+            // Now update the aggregate
+            SMSCommands.UpdateMessageStatusCommand command = new(domainEvent.MessageId, messageStatus.MessageStatus,
+                messageStatus.ProviderStatusDescription, messageStatus.Timestamp);
 
-            // Save the changes
-            await this.AggregateRepository.SaveChanges(smsAggregate, cancellationToken);
+            return await this.Mediator.Send(command, cancellationToken);
         }
 
         #endregion

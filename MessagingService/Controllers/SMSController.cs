@@ -1,4 +1,7 @@
-﻿namespace MessagingService.Controllers
+﻿using MessagingService.BusinessLogic.Requests;
+using SimpleResults;
+
+namespace MessagingService.Controllers
 {
     using System;
     using System.Diagnostics.CodeAnalysis;
@@ -53,57 +56,51 @@
         [Route("")]
         [SwaggerResponse(201, "Created", typeof(SendSMSResponse))]
         [SwaggerResponseExample(201, typeof(SendSMSResponseExample))]
-        public async Task<IActionResult> SendSMS([FromBody] SendSMSRequest sendSMSRequest,
+        public async Task<ActionResult<Result>> SendSMS([FromBody] SendSMSRequest sendSMSRequest,
                                                    CancellationToken cancellationToken)
         {
             // Reject password tokens
-            if (ClaimsHelper.IsPasswordToken(this.User))
-            {
-                return this.Forbid();
+            if (ClaimsHelper.IsPasswordToken(this.User)) {
+                return Result.Forbidden().ToActionResult();
             }
 
             Guid messageId = sendSMSRequest.MessageId.HasValue ? sendSMSRequest.MessageId.Value : Guid.NewGuid();
 
             // Create the command
-            BusinessLogic.Requests.SendSMSRequest request = BusinessLogic.Requests.SendSMSRequest.Create(sendSMSRequest.ConnectionIdentifier,
+            SMSCommands.SendSMSCommand command  = new(sendSMSRequest.ConnectionIdentifier,
                                                                                                          messageId,
                                                                                                          sendSMSRequest.Sender,
                                                                                                          sendSMSRequest.Destination,
                                                                                                          sendSMSRequest.Message);
 
             // Route the command
-            await this.Mediator.Send(request, cancellationToken);
+            Result result = await this.Mediator.Send(command, cancellationToken);
 
             // return the result
-            return this.Created($"{SMSController.ControllerRoute}/{messageId}",
-                                new SendSMSResponse()
-                                {
-                                    MessageId = messageId
-                                });
+            return result.ToActionResult();
         }
 
         [HttpPost]
         [Route("resend")]
         [SwaggerResponse(202, "Accepted", typeof(SendSMSResponse))]
         [SwaggerResponseExample(202, typeof(SendSMSResponseExample))]
-        public async Task<IActionResult> ResendSMS([FromBody] ResendSMSRequest resendSMSRequest,
-                                                     CancellationToken cancellationToken)
+        public async Task<ActionResult<Result>> ResendSMS([FromBody] ResendSMSRequest resendSMSRequest,
+                                                          CancellationToken cancellationToken)
         {
             // Reject password tokens
             if (ClaimsHelper.IsPasswordToken(this.User))
             {
-                return this.Forbid();
+                return Result.Forbidden().ToActionResult();
             }
 
             // Create the command
-            BusinessLogic.Requests.ResendSMSRequest request = BusinessLogic.Requests.ResendSMSRequest.Create(resendSMSRequest.ConnectionIdentifier,
-                                                                                                             resendSMSRequest.MessageId);
+            SMSCommands.ResendSMSCommand command = new(resendSMSRequest.ConnectionIdentifier, resendSMSRequest.MessageId);
 
             // Route the command
-            await this.Mediator.Send(request, cancellationToken);
+            Result result = await this.Mediator.Send(command, cancellationToken);
 
             // return the result
-            return this.Accepted($"{SMSController.ControllerRoute}/{resendSMSRequest.MessageId}");
+            return result.ToActionResult();
         }
 
         #endregion

@@ -1,4 +1,6 @@
-﻿namespace MessagingService.Client
+﻿using SimpleResults;
+
+namespace MessagingService.Client
 {
     using System;
     using System.Threading;
@@ -19,13 +21,13 @@
         /// <param name="request">The request.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns></returns>
-        Task<SendEmailResponse> SendEmail(String accessToken,
+        Task<Result> SendEmail(String accessToken,
                                           SendEmailRequest request,
                                           CancellationToken cancellationToken);
 
-        Task ResendEmail(String accessToken,
-                         ResendEmailRequest request,
-                         CancellationToken cancellationToken);
+        Task<Result> ResendEmail(String accessToken,
+                                 ResendEmailRequest request,
+                                 CancellationToken cancellationToken);
 
         /// <summary>
         /// Sends the SMS.
@@ -34,9 +36,9 @@
         /// <param name="request">The request.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns></returns>
-        Task<SendSMSResponse> SendSMS(String accessToken,
-                                          SendSMSRequest request,
-                                          CancellationToken cancellationToken);
+        Task<Result> SendSMS(String accessToken,
+                             SendSMSRequest request,
+                             CancellationToken cancellationToken);
 
         #endregion
     }

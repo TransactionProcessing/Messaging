@@ -1,4 +1,7 @@
-﻿namespace MessagingService.Bootstrapper;
+﻿using MessagingService.DataTransferObjects;
+using SimpleResults;
+
+namespace MessagingService.Bootstrapper;
 
 using System;
 using System.Diagnostics.CodeAnalysis;
@@ -15,10 +18,10 @@ public class MediatorRegistry : ServiceRegistry
     public MediatorRegistry()
     {
         this.AddTransient<IMediator, Mediator>();
-        this.AddSingleton<IRequestHandler<SendEmailRequest>, MessagingRequestHandler>();
-        this.AddSingleton<IRequestHandler<SendSMSRequest>, MessagingRequestHandler>();
-        this.AddSingleton<IRequestHandler<ResendEmailRequest>, MessagingRequestHandler>();
-        this.AddSingleton<IRequestHandler<ResendSMSRequest>, MessagingRequestHandler>();
+        this.AddSingleton<IRequestHandler<EmailCommands.SendEmailCommand, Result>, MessagingRequestHandler>();
+        this.AddSingleton<IRequestHandler<SMSCommands.SendSMSCommand, Result>, MessagingRequestHandler>();
+        this.AddSingleton<IRequestHandler<EmailCommands.ResendEmailCommand,Result>, MessagingRequestHandler>();
+        this.AddSingleton<IRequestHandler<SMSCommands.ResendSMSCommand,Result>, MessagingRequestHandler>();
 
         this.AddSingleton<Func<String, String>>(container => (serviceName) =>
                                                              {

@@ -17,6 +17,7 @@
     using EmailMessageStatusResponse = BusinessLogic.Services.EmailServices.MessageStatusResponse;
     using SMSMessageStatusResponse = BusinessLogic.Services.SMSServices.MessageStatusResponse;
     using Microsoft.Extensions.Configuration;
+    using static MessagingService.BusinessLogic.Requests.EmailCommands;
 
     public class TestData
     {
@@ -91,7 +92,7 @@
 
         public static DateTime ExpiredDateTime = DateTime.Now;
 
-        public static SendSMSRequest SendSMSRequest = SendSMSRequest.Create(TestData.ConnectionIdentifier,
+        public static SMSCommands.SendSMSCommand SendSMSCommand = new(TestData.ConnectionIdentifier,
                                                                             TestData.MessageId,
                                                                             TestData.Sender,
                                                                             TestData.Destination,
@@ -242,13 +243,11 @@
         public static String EmailErrorCode = "404";
         public static String EmailError = "NotFound";
 
-        public static ResendEmailRequest ResendEmailRequest => ResendEmailRequest.Create(TestData.ConnectionIdentifier,
-                                                                                         TestData.MessageId);
+        public static EmailCommands.ResendEmailCommand ResendEmailCommand => new EmailCommands.ResendEmailCommand(TestData.ConnectionIdentifier, TestData.MessageId);
 
-        public static ResendSMSRequest ResendSMSRequest => ResendSMSRequest.Create(TestData.ConnectionIdentifier,
-                                                                                   TestData.MessageId);
+        public static SMSCommands.ResendSMSCommand ResendSMSCommand => new(TestData.ConnectionIdentifier, TestData.MessageId);
 
-        public static SendEmailRequest SendEmailRequestNoAttachments => SendEmailRequest.Create(TestData.ConnectionIdentifier,
+        public static EmailCommands.SendEmailCommand SendEmailCommand => new SendEmailCommand(TestData.ConnectionIdentifier,
                                                                                                 TestData.MessageId,
                                                                                                 TestData.FromAddress,
                                                                                                 TestData.ToAddresses,
@@ -257,7 +256,7 @@
                                                                                                 TestData.IsHtmlTrue,
                                                                                                 TestData.EmptyEmailAttachments);
 
-        public static SendEmailRequest SendEmailRequestWithAttachments => SendEmailRequest.Create(TestData.ConnectionIdentifier,
+        public static EmailCommands.SendEmailCommand SendEmailCommandWithAttachments => new SendEmailCommand(TestData.ConnectionIdentifier,
                                                                                    TestData.MessageId,
                                                                                    TestData.FromAddress,
                                                                                    TestData.ToAddresses,

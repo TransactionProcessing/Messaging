@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text;
+using MediatR;
 
 namespace MessagingService.BusinessLogic.Tests.DomainEventHanders
 {
@@ -14,96 +15,69 @@ namespace MessagingService.BusinessLogic.Tests.DomainEventHanders
     using Testing;
     using Xunit;
 
-    public class EmailDomainEventHandlerTests
-    {
+    public class EmailDomainEventHandlerTests {
+        private Mock<IMediator> Mediator;
+        private Mock<IEmailServiceProxy> EmailServiceProxy;
+        private EmailDomainEventHandler EmailDomainEventHandler;
+        public EmailDomainEventHandlerTests() {
+            this.Mediator = new Mock<IMediator>();
+            this.EmailServiceProxy = new Mock<IEmailServiceProxy>();
+            this.EmailDomainEventHandler =
+                new EmailDomainEventHandler(this.Mediator.Object, this.EmailServiceProxy.Object);
+        }
+
         [Fact]
         public async Task EmailDomainEventHandler_Handle_ResponseReceivedFromProviderEvent_Delivered_EventIsHandled()
         {
-            Mock<IAggregateRepository<EmailAggregate, DomainEvent>> aggregateRepository = new Mock<IAggregateRepository<EmailAggregate, DomainEvent>>();
-            aggregateRepository.Setup(a => a.GetLatestVersion(It.IsAny<Guid>(), It.IsAny<CancellationToken>())).ReturnsAsync(TestData.GetSentEmailAggregate);
-            Mock<IEmailServiceProxy> emailServiceProxy = new Mock<IEmailServiceProxy>();
-            emailServiceProxy.Setup(e => e.GetMessageStatus(It.IsAny<String>(), It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<CancellationToken>()))
+            this.EmailServiceProxy.Setup(e => e.GetMessageStatus(It.IsAny<String>(), It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<CancellationToken>()))
                              .ReturnsAsync(TestData.MessageStatusResponseDelivered);
-
-            EmailDomainEventHandler emailDomainEventHandler = new EmailDomainEventHandler(aggregateRepository.Object,
-                                                                                          emailServiceProxy.Object);
-
-            await emailDomainEventHandler.Handle(TestData.ResponseReceivedFromEmailProviderEvent, CancellationToken.None);
+            
+            await this.EmailDomainEventHandler.Handle(TestData.ResponseReceivedFromEmailProviderEvent, CancellationToken.None);
         }
 
         [Fact]
         public async Task EmailDomainEventHandler_Handle_ResponseReceivedFromProviderEvent_Failed_EventIsHandled()
         {
-            Mock<IAggregateRepository<EmailAggregate, DomainEvent>> aggregateRepository = new Mock<IAggregateRepository<EmailAggregate, DomainEvent>>();
-            aggregateRepository.Setup(a => a.GetLatestVersion(It.IsAny<Guid>(), It.IsAny<CancellationToken>())).ReturnsAsync(TestData.GetSentEmailAggregate);
-            Mock<IEmailServiceProxy> emailServiceProxy = new Mock<IEmailServiceProxy>();
-            emailServiceProxy.Setup(e => e.GetMessageStatus(It.IsAny<String>(), It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<CancellationToken>()))
+            this.EmailServiceProxy.Setup(e => e.GetMessageStatus(It.IsAny<String>(), It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<CancellationToken>()))
                              .ReturnsAsync(TestData.MessageStatusResponseFailed);
-
-            EmailDomainEventHandler emailDomainEventHandler = new EmailDomainEventHandler(aggregateRepository.Object,
-                                                                                          emailServiceProxy.Object);
-
-            await emailDomainEventHandler.Handle(TestData.ResponseReceivedFromEmailProviderEvent, CancellationToken.None);
+            
+            await this.EmailDomainEventHandler.Handle(TestData.ResponseReceivedFromEmailProviderEvent, CancellationToken.None);
         }
 
         [Fact]
         public async Task EmailDomainEventHandler_Handle_ResponseReceivedFromProviderEvent_Rejected_EventIsHandled()
         {
-            Mock<IAggregateRepository<EmailAggregate, DomainEvent>> aggregateRepository = new Mock<IAggregateRepository<EmailAggregate, DomainEvent>>();
-            aggregateRepository.Setup(a => a.GetLatestVersion(It.IsAny<Guid>(), It.IsAny<CancellationToken>())).ReturnsAsync(TestData.GetSentEmailAggregate);
-            Mock<IEmailServiceProxy> emailServiceProxy = new Mock<IEmailServiceProxy>();
-            emailServiceProxy.Setup(e => e.GetMessageStatus(It.IsAny<String>(), It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<CancellationToken>()))
+            this.EmailServiceProxy.Setup(e => e.GetMessageStatus(It.IsAny<String>(), It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<CancellationToken>()))
                              .ReturnsAsync(TestData.MessageStatusResponseRejected);
 
-            EmailDomainEventHandler emailDomainEventHandler = new EmailDomainEventHandler(aggregateRepository.Object,
-                                                                                          emailServiceProxy.Object);
-
-            await emailDomainEventHandler.Handle(TestData.ResponseReceivedFromEmailProviderEvent, CancellationToken.None);
+            await this.EmailDomainEventHandler.Handle(TestData.ResponseReceivedFromEmailProviderEvent, CancellationToken.None);
         }
 
         [Fact]
         public async Task EmailDomainEventHandler_Handle_ResponseReceivedFromProviderEvent_Bounced_EventIsHandled()
         {
-            Mock<IAggregateRepository<EmailAggregate, DomainEvent>> aggregateRepository = new Mock<IAggregateRepository<EmailAggregate, DomainEvent>>();
-            aggregateRepository.Setup(a => a.GetLatestVersion(It.IsAny<Guid>(), It.IsAny<CancellationToken>())).ReturnsAsync(TestData.GetSentEmailAggregate);
-            Mock<IEmailServiceProxy> emailServiceProxy = new Mock<IEmailServiceProxy>();
-            emailServiceProxy.Setup(e => e.GetMessageStatus(It.IsAny<String>(), It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<CancellationToken>()))
+            this.EmailServiceProxy.Setup(e => e.GetMessageStatus(It.IsAny<String>(), It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<CancellationToken>()))
                              .ReturnsAsync(TestData.MessageStatusResponseBounced);
 
-            EmailDomainEventHandler emailDomainEventHandler = new EmailDomainEventHandler(aggregateRepository.Object,
-                                                                                          emailServiceProxy.Object);
-
-            await emailDomainEventHandler.Handle(TestData.ResponseReceivedFromEmailProviderEvent, CancellationToken.None);
+            await this.EmailDomainEventHandler.Handle(TestData.ResponseReceivedFromEmailProviderEvent, CancellationToken.None);
         }
 
         [Fact]
         public async Task EmailDomainEventHandler_Handle_ResponseReceivedFromProviderEvent_Spam_EventIsHandled()
         {
-            Mock<IAggregateRepository<EmailAggregate, DomainEvent>> aggregateRepository = new Mock<IAggregateRepository<EmailAggregate, DomainEvent>>();
-            aggregateRepository.Setup(a => a.GetLatestVersion(It.IsAny<Guid>(), It.IsAny<CancellationToken>())).ReturnsAsync(TestData.GetSentEmailAggregate);
-            Mock<IEmailServiceProxy> emailServiceProxy = new Mock<IEmailServiceProxy>();
-            emailServiceProxy.Setup(e => e.GetMessageStatus(It.IsAny<String>(), It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<CancellationToken>()))
+            this.EmailServiceProxy.Setup(e => e.GetMessageStatus(It.IsAny<String>(), It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<CancellationToken>()))
                              .ReturnsAsync(TestData.MessageStatusResponseSpam);
 
-            EmailDomainEventHandler emailDomainEventHandler = new EmailDomainEventHandler(aggregateRepository.Object,
-                                                                                          emailServiceProxy.Object);
-
-            await emailDomainEventHandler.Handle(TestData.ResponseReceivedFromEmailProviderEvent, CancellationToken.None);
+            await this.EmailDomainEventHandler.Handle(TestData.ResponseReceivedFromEmailProviderEvent, CancellationToken.None);
         }
 
         [Fact]
         public async Task EmailDomainEventHandler_Handle_ResponseReceivedFromProviderEvent_Unknown_EventIsHandled()
         {
-            Mock<IAggregateRepository<EmailAggregate, DomainEvent>> aggregateRepository = new Mock<IAggregateRepository<EmailAggregate, DomainEvent>>();
-            aggregateRepository.Setup(a => a.GetLatestVersion(It.IsAny<Guid>(), It.IsAny<CancellationToken>())).ReturnsAsync(TestData.GetSentEmailAggregate);
-            Mock<IEmailServiceProxy> emailServiceProxy = new Mock<IEmailServiceProxy>();
-            emailServiceProxy.Setup(e => e.GetMessageStatus(It.IsAny<String>(), It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<CancellationToken>()))
+            this.EmailServiceProxy.Setup(e => e.GetMessageStatus(It.IsAny<String>(), It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<CancellationToken>()))
                              .ReturnsAsync(TestData.MessageStatusResponseUnknown);
-
-            EmailDomainEventHandler emailDomainEventHandler = new EmailDomainEventHandler(aggregateRepository.Object,
-                                                                                          emailServiceProxy.Object);
-
-            await emailDomainEventHandler.Handle(TestData.ResponseReceivedFromEmailProviderEvent, CancellationToken.None);
+            
+            await this.EmailDomainEventHandler.Handle(TestData.ResponseReceivedFromEmailProviderEvent, CancellationToken.None);
         }
     }
 }

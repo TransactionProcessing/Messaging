@@ -23,9 +23,10 @@ namespace MessagingService.BusinessLogic.Tests.Mediator
         private List<IBaseRequest> Requests = new List<IBaseRequest>();
 
         public MediatorTests() {
-            this.Requests.Add(TestData.ResendEmailRequest);
-            this.Requests.Add(TestData.SendEmailRequestNoAttachments);
-            this.Requests.Add(TestData.SendSMSRequest);
+            this.Requests.Add(TestData.ResendEmailCommand);
+            this.Requests.Add(TestData.SendEmailCommand);
+            this.Requests.Add(TestData.SendSMSCommand);
+            this.Requests.Add(TestData.ResendSMSCommand);
         }
 
         [Fact]

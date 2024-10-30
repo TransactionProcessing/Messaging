@@ -15,67 +15,55 @@ namespace MessagingService.BusinessLogic.Tests.DomainEventHanders
     using SMSMessageAggregate;
     using Testing;
     using Xunit;
+    using MediatR;
 
     public class SMSDomainEventHandlerTests
     {
+        private Mock<IMediator> Mediator;
+        private Mock<ISMSServiceProxy> SMSServiceProxy;
+        private SMSDomainEventHandler SMSDomainEventHandler;
+        public SMSDomainEventHandlerTests()
+        {
+            this.Mediator = new Mock<IMediator>();
+            this.SMSServiceProxy = new Mock<ISMSServiceProxy>();
+            this.SMSDomainEventHandler =
+                new SMSDomainEventHandler(this.Mediator.Object, this.SMSServiceProxy.Object);
+        }
+
         [Fact]
         public async Task SMSDomainEventHandler_Handle_ResponseReceivedFromProviderEvent_Delivered_EventIsHandled()
         {
-            Mock<IAggregateRepository<SMSAggregate, DomainEvent>> aggregateRepository = new Mock<IAggregateRepository<SMSAggregate, DomainEvent>>();
-            aggregateRepository.Setup(a => a.GetLatestVersion(It.IsAny<Guid>(), It.IsAny<CancellationToken>())).ReturnsAsync(TestData.GetSentSMSAggregate);
-            Mock<ISMSServiceProxy> smsServiceProxy = new Mock<ISMSServiceProxy>();
-            smsServiceProxy.Setup(e => e.GetMessageStatus(It.IsAny<String>(), It.IsAny<CancellationToken>()))
+            this.SMSServiceProxy.Setup(e => e.GetMessageStatus(It.IsAny<String>(), It.IsAny<CancellationToken>()))
                              .ReturnsAsync(TestData.SMSMessageStatusResponseDelivered);
-
-            SMSDomainEventHandler smsDomainEventHandler = new SMSDomainEventHandler(aggregateRepository.Object,
-                                                                                          smsServiceProxy.Object);
-
-            await smsDomainEventHandler.Handle(TestData.ResponseReceivedFromSMSProviderEvent, CancellationToken.None);
+            
+            await SMSDomainEventHandler.Handle(TestData.ResponseReceivedFromSMSProviderEvent, CancellationToken.None);
         }
 
         [Fact]
         public async Task SMSDomainEventHandler_Handle_ResponseReceivedFromProviderEvent_Expired_EventIsHandled()
         {
-            Mock<IAggregateRepository<SMSAggregate, DomainEvent>> aggregateRepository = new Mock<IAggregateRepository<SMSAggregate, DomainEvent>>();
-            aggregateRepository.Setup(a => a.GetLatestVersion(It.IsAny<Guid>(), It.IsAny<CancellationToken>())).ReturnsAsync(TestData.GetSentSMSAggregate);
-            Mock<ISMSServiceProxy> smsServiceProxy = new Mock<ISMSServiceProxy>();
-            smsServiceProxy.Setup(e => e.GetMessageStatus(It.IsAny<String>(), It.IsAny<CancellationToken>()))
+            this.SMSServiceProxy.Setup(e => e.GetMessageStatus(It.IsAny<String>(), It.IsAny<CancellationToken>()))
                            .ReturnsAsync(TestData.SMSMessageStatusResponseExpired);
-
-            SMSDomainEventHandler smsDomainEventHandler = new SMSDomainEventHandler(aggregateRepository.Object,
-                                                                                    smsServiceProxy.Object);
-
-            await smsDomainEventHandler.Handle(TestData.ResponseReceivedFromSMSProviderEvent, CancellationToken.None);
+            
+            await SMSDomainEventHandler.Handle(TestData.ResponseReceivedFromSMSProviderEvent, CancellationToken.None);
         }
 
         [Fact]
         public async Task SMSDomainEventHandler_Handle_ResponseReceivedFromProviderEvent_Rejected_EventIsHandled()
         {
-            Mock<IAggregateRepository<SMSAggregate, DomainEvent>> aggregateRepository = new Mock<IAggregateRepository<SMSAggregate, DomainEvent>>();
-            aggregateRepository.Setup(a => a.GetLatestVersion(It.IsAny<Guid>(), It.IsAny<CancellationToken>())).ReturnsAsync(TestData.GetSentSMSAggregate);
-            Mock<ISMSServiceProxy> smsServiceProxy = new Mock<ISMSServiceProxy>();
-            smsServiceProxy.Setup(e => e.GetMessageStatus(It.IsAny<String>(), It.IsAny<CancellationToken>()))
+            this.SMSServiceProxy.Setup(e => e.GetMessageStatus(It.IsAny<String>(), It.IsAny<CancellationToken>()))
                            .ReturnsAsync(TestData.SMSMessageStatusResponseRejected);
 
-            SMSDomainEventHandler smsDomainEventHandler = new SMSDomainEventHandler(aggregateRepository.Object,
-                                                                                    smsServiceProxy.Object);
-
-            await smsDomainEventHandler.Handle(TestData.ResponseReceivedFromSMSProviderEvent, CancellationToken.None);
+            await SMSDomainEventHandler.Handle(TestData.ResponseReceivedFromSMSProviderEvent, CancellationToken.None);
         }
 
         [Fact]
         public async Task SMSDomainEventHandler_Handle_ResponseReceivedFromProviderEvent_Undelivered_EventIsHandled()
         {
-            Mock<IAggregateRepository<SMSAggregate, DomainEvent>> aggregateRepository = new Mock<IAggregateRepository<SMSAggregate, DomainEvent>>();
-            aggregateRepository.Setup(a => a.GetLatestVersion(It.IsAny<Guid>(), It.IsAny<CancellationToken>())).ReturnsAsync(TestData.GetSentSMSAggregate);
-            Mock<ISMSServiceProxy> smsServiceProxy = new Mock<ISMSServiceProxy>();
-            smsServiceProxy.Setup(e => e.GetMessageStatus(It.IsAny<String>(), It.IsAny<CancellationToken>()))
+            this.SMSServiceProxy.Setup(e => e.GetMessageStatus(It.IsAny<String>(), It.IsAny<CancellationToken>()))
                            .ReturnsAsync(TestData.SMSMessageStatusResponseUndelivered);
 
-            SMSDomainEventHandler smsDomainEventHandler = new SMSDomainEventHandler(aggregateRepository.Object,
-                                                                                    smsServiceProxy.Object);
-
-            await smsDomainEventHandler.Handle(TestData.ResponseReceivedFromSMSProviderEvent, CancellationToken.None);
+            await this.SMSDomainEventHandler.Handle(TestData.ResponseReceivedFromSMSProviderEvent, CancellationToken.None);
         }
     }
 }
