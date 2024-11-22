@@ -1,4 +1,5 @@
 ﻿using Shared.EventStore.Aggregate;
+using Shared.Results;
 
 namespace MessagingService.Client
 {
@@ -16,7 +17,7 @@ namespace MessagingService.Client
     /// <summary>
     /// 
     /// </summary>
-    /// <seealso cref="ClientProxyBase.ClientProxyBase" />
+    /// <seealso cref="ClientProxyBase" />
     /// <seealso cref="MessagingService.Client.IMessagingServiceClient" />
     public class MessagingServiceClient : ClientProxyBase, IMessagingServiceClient
     {
