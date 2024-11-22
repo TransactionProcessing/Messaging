@@ -5,8 +5,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-	<PackageReference Include="Shared" Version="2024.10.4" />
-	<PackageReference Include="Shared.DomainDrivenDesign" Version="2024.10.4" />
+	<PackageReference Include="Shared" Version="2024.11.4" />
+	<PackageReference Include="Shared.DomainDrivenDesign" Version="2024.11.4" />
   </ItemGroup>
 
 </Project>
