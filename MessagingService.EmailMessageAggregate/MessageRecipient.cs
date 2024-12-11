@@ -5,7 +5,7 @@
     /// <summary>
     /// 
     /// </summary>
-    internal class MessageRecipient
+    public class MessageRecipient
     {
         #region Constructors
 
@@ -19,7 +19,7 @@
         /// <value>
         /// To address.
         /// </value>
-        internal String ToAddress { get; private set; }
+        public String ToAddress { get; private set; }
 
         #endregion
 
@@ -29,7 +29,7 @@
         /// Creates the specified to address.
         /// </summary>
         /// <param name="toAddress">To address.</param>
-        internal void Create(String toAddress)
+        public void Create(String toAddress)
         {
             this.ToAddress = toAddress;
         }

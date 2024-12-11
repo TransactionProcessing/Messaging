@@ -252,6 +252,11 @@
             return aggregate.Attachments;
         }
 
+        public static List<MessageRecipient> GetRecipients(this EmailAggregate aggregate)
+        {
+            return aggregate.Recipients;
+        }
+
     }
 
     public record EmailAggregate : Aggregate

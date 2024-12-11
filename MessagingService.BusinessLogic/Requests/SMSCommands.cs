@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using MediatR;
 using MessagingService.BusinessLogic.Services.SMSServices;
 using SimpleResults;
 
 namespace MessagingService.BusinessLogic.Requests;
 
+[ExcludeFromCodeCoverage]
 public record SMSCommands {
     public record SendSMSCommand(Guid ConnectionIdentifier,
                                  Guid MessageId,
