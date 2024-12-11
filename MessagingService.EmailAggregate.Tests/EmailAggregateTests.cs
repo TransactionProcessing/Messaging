@@ -1,3 +1,4 @@
+using System.Linq;
 using Xunit;
 
 namespace MessagingService.EmailAggregate.Tests
@@ -35,6 +36,12 @@ namespace MessagingService.EmailAggregate.Tests
             toAddresses.Count.ShouldBe(TestData.ToAddresses.Count);
             List<EmailAttachment> attachments = emailAggregate.GetAttachments();
             attachments.Count.ShouldBe(TestData.EmailAttachmentModels.Count);
+            var recipients = emailAggregate.GetRecipients();
+            recipients.Count.ShouldBe(TestData.ToAddresses.Count);
+            foreach (var toAddress in TestData.ToAddresses) {
+                var r = recipients.SingleOrDefault(r => r.ToAddress == toAddress);
+                r.ShouldNotBeNull();
+            }
         }
 
         [Fact]

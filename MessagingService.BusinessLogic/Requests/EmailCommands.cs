@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using MediatR;
 using MessagingService.BusinessLogic.Services.EmailServices;
 using SimpleResults;
 
 namespace MessagingService.BusinessLogic.Requests;
 
+[ExcludeFromCodeCoverage]
 public record EmailCommands {
     public record SendEmailCommand(Guid ConnectionIdentifier,
                                    Guid MessageId,

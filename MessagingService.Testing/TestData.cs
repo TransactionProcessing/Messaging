@@ -255,7 +255,7 @@
                                                                                                 TestData.Body,
                                                                                                 TestData.IsHtmlTrue,
                                                                                                 TestData.EmptyEmailAttachments);
-
+        
         public static EmailCommands.SendEmailCommand SendEmailCommandWithAttachments => new SendEmailCommand(TestData.ConnectionIdentifier,
                                                                                    TestData.MessageId,
                                                                                    TestData.FromAddress,

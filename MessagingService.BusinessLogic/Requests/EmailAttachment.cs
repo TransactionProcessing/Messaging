@@ -1,7 +1,10 @@
-﻿namespace MessagingService.BusinessLogic.Requests;
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace MessagingService.BusinessLogic.Requests;
 
 using System;
 
+[ExcludeFromCodeCoverage]
 public class EmailAttachment
 {
     public String Filename { get; set; }
