@@ -1,4 +1,5 @@
 ﻿using MessagingService.BusinessLogic.Requests;
+using Shared.Results;
 using SimpleResults;
 
 namespace MessagingService.Controllers
@@ -56,12 +57,12 @@ namespace MessagingService.Controllers
         [Route("")]
         [SwaggerResponse(201, "Created", typeof(SendSMSResponse))]
         [SwaggerResponseExample(201, typeof(SendSMSResponseExample))]
-        public async Task<ActionResult<Result>> SendSMS([FromBody] SendSMSRequest sendSMSRequest,
+        public async Task<IActionResult> SendSMS([FromBody] SendSMSRequest sendSMSRequest,
                                                    CancellationToken cancellationToken)
         {
             // Reject password tokens
             if (ClaimsHelper.IsPasswordToken(this.User)) {
-                return Result.Forbidden().ToActionResult();
+                return Result.Forbidden().ToActionResultX();
             }
 
             Guid messageId = sendSMSRequest.MessageId.HasValue ? sendSMSRequest.MessageId.Value : Guid.NewGuid();
@@ -74,23 +75,23 @@ namespace MessagingService.Controllers
                                                                                                          sendSMSRequest.Message);
 
             // Route the command
-            Result result = await this.Mediator.Send(command, cancellationToken);
+            Result<Guid> result = await this.Mediator.Send(command, cancellationToken);
 
             // return the result
-            return result.ToActionResult();
+            return result.ToActionResultX();
         }
 
         [HttpPost]
         [Route("resend")]
         [SwaggerResponse(202, "Accepted", typeof(SendSMSResponse))]
         [SwaggerResponseExample(202, typeof(SendSMSResponseExample))]
-        public async Task<ActionResult<Result>> ResendSMS([FromBody] ResendSMSRequest resendSMSRequest,
+        public async Task<IActionResult> ResendSMS([FromBody] ResendSMSRequest resendSMSRequest,
                                                           CancellationToken cancellationToken)
         {
             // Reject password tokens
             if (ClaimsHelper.IsPasswordToken(this.User))
             {
-                return Result.Forbidden().ToActionResult();
+                return Result.Forbidden().ToActionResultX();
             }
 
             // Create the command
@@ -100,7 +101,7 @@ namespace MessagingService.Controllers
             Result result = await this.Mediator.Send(command, cancellationToken);
 
             // return the result
-            return result.ToActionResult();
+            return result.ToActionResultX();
         }
 
         #endregion

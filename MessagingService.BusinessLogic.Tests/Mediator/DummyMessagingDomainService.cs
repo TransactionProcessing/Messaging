@@ -13,22 +13,22 @@ namespace MessagingService.BusinessLogic.Tests.Mediator
 
     public class DummyMessagingDomainService : IMessagingDomainService
     {
-        public async Task<Result> SendEmailMessage(Guid connectionIdentifier,
-                                                   Guid messageId,
-                                                   String fromAddress,
-                                                   List<String> toAddresses,
-                                                   String subject,
-                                                   String body,
-                                                   Boolean isHtml,
-                                                   List<EmailAttachment> attachments,
-                                                   CancellationToken cancellationToken) => Result.Success();
+        public async Task<Result<Guid>> SendEmailMessage(Guid connectionIdentifier,
+                                                         Guid messageId,
+                                                         String fromAddress,
+                                                         List<String> toAddresses,
+                                                         String subject,
+                                                         String body,
+                                                         Boolean isHtml,
+                                                         List<EmailAttachment> attachments,
+                                                         CancellationToken cancellationToken) => Result.Success(Guid.NewGuid());
         
-        public async Task<Result> SendSMSMessage(Guid connectionIdentifier,
-                                                 Guid messageId,
-                                                 String sender,
-                                                 String destination,
-                                                 String message,
-                                                 CancellationToken cancellationToken) => Result.Success();
+        public async Task<Result<Guid>> SendSMSMessage(Guid connectionIdentifier,
+                                                       Guid messageId,
+                                                       String sender,
+                                                       String destination,
+                                                       String message,
+                                                       CancellationToken cancellationToken) => Result.Success(Guid.NewGuid());
 
         public async Task<Result> ResendEmailMessage(Guid connectionIdentifier,
                                                      Guid messageId,

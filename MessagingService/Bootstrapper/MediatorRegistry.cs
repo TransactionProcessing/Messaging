@@ -18,8 +18,8 @@ public class MediatorRegistry : ServiceRegistry
     public MediatorRegistry()
     {
         this.AddTransient<IMediator, Mediator>();
-        this.AddSingleton<IRequestHandler<EmailCommands.SendEmailCommand, Result>, MessagingRequestHandler>();
-        this.AddSingleton<IRequestHandler<SMSCommands.SendSMSCommand, Result>, MessagingRequestHandler>();
+        this.AddSingleton<IRequestHandler<EmailCommands.SendEmailCommand, Result<Guid>>, MessagingRequestHandler>();
+        this.AddSingleton<IRequestHandler<SMSCommands.SendSMSCommand, Result<Guid>>, MessagingRequestHandler>();
         this.AddSingleton<IRequestHandler<EmailCommands.ResendEmailCommand,Result>, MessagingRequestHandler>();
         this.AddSingleton<IRequestHandler<SMSCommands.ResendSMSCommand,Result>, MessagingRequestHandler>();
 
