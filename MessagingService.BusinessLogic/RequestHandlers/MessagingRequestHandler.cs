@@ -1,4 +1,5 @@
-﻿using SimpleResults;
+﻿using System;
+using SimpleResults;
 
 namespace MessagingService.BusinessLogic.RequestHandlers{
     using System.Collections.Generic;
@@ -14,8 +15,8 @@ namespace MessagingService.BusinessLogic.RequestHandlers{
     /// 
     /// </summary>
     /// <seealso cref="MediatR.IRequestHandler{MessagingService.BusinessLogic.Requests.SendEmailRequest, System.String}" />
-    public class MessagingRequestHandler : IRequestHandler<EmailCommands.SendEmailCommand, Result>,
-                                           IRequestHandler<SMSCommands.SendSMSCommand, Result>,
+    public class MessagingRequestHandler : IRequestHandler<EmailCommands.SendEmailCommand, Result<Guid>>,
+                                           IRequestHandler<SMSCommands.SendSMSCommand, Result<Guid>>,
                                            IRequestHandler<EmailCommands.ResendEmailCommand,Result>,
                                            IRequestHandler<SMSCommands.ResendSMSCommand, Result>{
         #region Fields
@@ -49,7 +50,7 @@ namespace MessagingService.BusinessLogic.RequestHandlers{
         /// <returns>
         /// Response from the request
         /// </returns>
-        public async Task<Result> Handle(EmailCommands.SendEmailCommand command,
+        public async Task<Result<Guid>> Handle(EmailCommands.SendEmailCommand command,
                                  CancellationToken cancellationToken){
             List<EmailAttachment> attachments = new List<EmailAttachment>();
 
@@ -72,8 +73,8 @@ namespace MessagingService.BusinessLogic.RequestHandlers{
                                                                cancellationToken);
         }
 
-        public async Task<Result> Handle(SMSCommands.SendSMSCommand command,
-                                         CancellationToken cancellationToken){
+        public async Task<Result<Guid>> Handle(SMSCommands.SendSMSCommand command,
+                                               CancellationToken cancellationToken){
             return await this.MessagingDomainService.SendSMSMessage(command.ConnectionIdentifier,
                                                              command.MessageId,
                                                              command.Sender,

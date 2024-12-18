@@ -1,4 +1,5 @@
-﻿using SimpleResults;
+﻿using Shared.Results;
+using SimpleResults;
 using SendEmailRequestDTO = MessagingService.DataTransferObjects.SendEmailRequest;
 using SendEmailResponseDTO = MessagingService.DataTransferObjects.SendEmailResponse;
 using ResendEmailRequestDTO = MessagingService.DataTransferObjects.ResendEmailRequest;
@@ -96,14 +97,10 @@ namespace MessagingService.Controllers
                                                                emailAttachments);
 
             // Route the command
-            var result = await this.Mediator.Send(command, cancellationToken);
+            Result<Guid> result = await this.Mediator.Send(command, cancellationToken);
 
             // return the result
-            return this.Created($"{EmailController.ControllerRoute}/{messageId}",
-                                new SendEmailResponseDTO
-                                {
-                                    MessageId = messageId
-                                });
+            return result.ToActionResultX();
         }
 
         [HttpPost]
@@ -126,7 +123,7 @@ namespace MessagingService.Controllers
             Result result = await this.Mediator.Send(command, cancellationToken);
 
             // return the result
-            return this.Accepted($"{EmailController.ControllerRoute}/{resendEmailRequest.MessageId}");
+            return result.ToActionResultX();
         }
 
         private FileType ConvertFileType(DataTransferObjects.FileType emailAttachmentFileType)

@@ -16,7 +16,7 @@ public record EmailCommands {
                                    String Subject,
                                    String Body,
                                    Boolean IsHtml,
-                                   List<EmailAttachment> EmailAttachments) : IRequest<Result>;
+                                   List<EmailAttachment> EmailAttachments) : IRequest<Result<Guid>>;
 
     public record ResendEmailCommand(Guid ConnectionIdentifier,
                                      Guid MessageId) : IRequest<Result>;

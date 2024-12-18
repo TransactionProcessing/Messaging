@@ -12,7 +12,7 @@ public record SMSCommands {
                                  Guid MessageId,
                                  String Sender,
                                  String Destination,
-                                 String Message) : IRequest<Result>;
+                                 String Message) : IRequest<Result<Guid>>;
 
     public record ResendSMSCommand(Guid ConnectionIdentifier,
                                    Guid MessageId) : IRequest<Result>;

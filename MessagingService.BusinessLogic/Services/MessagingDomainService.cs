@@ -110,15 +110,15 @@ namespace MessagingService.BusinessLogic.Services
             }
         }
 
-        public async Task<Result> SendEmailMessage(Guid connectionIdentifier,
-                                                   Guid messageId,
-                                                   String fromAddress,
-                                                   List<String> toAddresses,
-                                                   String subject,
-                                                   String body,
-                                                   Boolean isHtml,
-                                                   List<EmailAttachment> attachments,
-                                                   CancellationToken cancellationToken) {
+        public async Task<Result<Guid>> SendEmailMessage(Guid connectionIdentifier,
+                                                         Guid messageId,
+                                                         String fromAddress,
+                                                         List<String> toAddresses,
+                                                         String subject,
+                                                         String body,
+                                                         Boolean isHtml,
+                                                         List<EmailAttachment> attachments,
+                                                         CancellationToken cancellationToken) {
             Result result = await ApplyEmailUpdates(async (EmailAggregate emailAggregate) => {
                 // send message to provider (record event)
                 emailAggregate.SendRequestToProvider(fromAddress, toAddresses, subject, body, isHtml, attachments);
@@ -138,15 +138,18 @@ namespace MessagingService.BusinessLogic.Services
 
                 return Result.Success();
             }, messageId, cancellationToken,false);
-            return result;
+
+            if (result.IsFailed)
+                return result;
+            return Result.Success(messageId);
         }
 
-        public async Task<Result> SendSMSMessage(Guid connectionIdentifier,
-                                                 Guid messageId,
-                                                 String sender,
-                                                 String destination,
-                                                 String message,
-                                                 CancellationToken cancellationToken)
+        public async Task<Result<Guid>> SendSMSMessage(Guid connectionIdentifier,
+                                                       Guid messageId,
+                                                       String sender,
+                                                       String destination,
+                                                       String message,
+                                                       CancellationToken cancellationToken)
         {
             Result result = await ApplySMSUpdates(async (SMSAggregate smsAggregate) => {
                 // send message to provider (record event)
@@ -161,7 +164,11 @@ namespace MessagingService.BusinessLogic.Services
 
                 return Result.Success();
             }, messageId, cancellationToken, false);
-            return result;
+
+            if (result.IsFailed)
+                return result;
+            return Result.Success(messageId);
+
         }
 
         public async Task<Result> ResendEmailMessage(Guid connectionIdentifier,

@@ -44,7 +44,7 @@ namespace MessagingService.BusinessLogic.Tests.Services
             MessagingDomainService messagingDomainService =
                 new MessagingDomainService(emailAggregateRepository.Object, smsAggregateRepository.Object, emailServiceProxy.Object, smsServiceProxy.Object);
 
-            await messagingDomainService.SendEmailMessage(TestData.ConnectionIdentifier,
+            var result  = await messagingDomainService.SendEmailMessage(TestData.ConnectionIdentifier,
                                                           TestData.MessageId,
                                                           TestData.FromAddress,
                                                           TestData.ToAddresses,
@@ -53,6 +53,8 @@ namespace MessagingService.BusinessLogic.Tests.Services
                                                           TestData.IsHtmlTrue,
                                                           TestData.EmailAttachmentModels,
                                                           CancellationToken.None);
+            result.IsSuccess.ShouldBeTrue();
+            result.Data.ShouldBe(TestData.MessageId);
         }
 
         [Fact] public async Task MessagingDomainService_SendEmailMessage_SaveFailed_MessageSent()
@@ -247,12 +249,15 @@ namespace MessagingService.BusinessLogic.Tests.Services
             MessagingDomainService messagingDomainService =
                 new MessagingDomainService(emailAggregateRepository.Object, smsAggregateRepository.Object, emailServiceProxy.Object, smsServiceProxy.Object);
 
-            await messagingDomainService.SendSMSMessage(TestData.ConnectionIdentifier,
+            var result = await messagingDomainService.SendSMSMessage(TestData.ConnectionIdentifier,
                                                         TestData.MessageId,
                                                         TestData.Sender,
                                                         TestData.Destination,
                                                         TestData.Message,
                                                         CancellationToken.None);
+            result.IsSuccess.ShouldBeTrue();
+            result.Data.ShouldBe(TestData.MessageId);
+
         }
 
         [Fact]
