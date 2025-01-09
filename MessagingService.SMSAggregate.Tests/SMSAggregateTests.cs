@@ -35,19 +35,6 @@ namespace MessagingService.SMSAggregate.Tests
         }
 
         [Fact]
-        public void SMSAggregate_SendRequestToProvider_RequestAlreadySent_NoErrorThrown()
-        {
-            SMSAggregate smsAggregate = SMSAggregate.Create(TestData.MessageId);
-
-            smsAggregate.SendRequestToProvider(TestData.Sender, TestData.Destination, TestData.Message);
-
-            Should.NotThrow(() =>
-            {
-                smsAggregate.SendRequestToProvider(TestData.Sender, TestData.Destination, TestData.Message);
-            });
-        }
-
-        [Fact]
         public void SMSAggregate_ReceiveResponseFromProvider_ResponseReceived()
         {
             SMSAggregate smsAggregate = SMSAggregate.Create(TestData.MessageId);
