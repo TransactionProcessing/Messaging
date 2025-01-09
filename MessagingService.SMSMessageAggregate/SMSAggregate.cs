@@ -114,7 +114,7 @@
                                                  String destination,
                                                  String message){
             if (aggregate.DeliveryStatusList[aggregate.ResendCount] != MessageStatus.NotSet){
-                throw new InvalidOperationException("Cannot send a message to provider that has already been sent");
+                return;
             }
 
             RequestSentToSMSProviderEvent requestSentToProviderEvent = new RequestSentToSMSProviderEvent(aggregate.AggregateId, sender, destination, message);

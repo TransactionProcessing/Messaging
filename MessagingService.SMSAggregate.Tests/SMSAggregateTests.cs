@@ -35,13 +35,13 @@ namespace MessagingService.SMSAggregate.Tests
         }
 
         [Fact]
-        public void SMSAggregate_SendRequestToProvider_RequestAlreadySent_ErrorThrown()
+        public void SMSAggregate_SendRequestToProvider_RequestAlreadySent_NoErrorThrown()
         {
             SMSAggregate smsAggregate = SMSAggregate.Create(TestData.MessageId);
 
             smsAggregate.SendRequestToProvider(TestData.Sender, TestData.Destination, TestData.Message);
 
-            Should.Throw<InvalidOperationException>(() =>
+            Should.NotThrow(() =>
             {
                 smsAggregate.SendRequestToProvider(TestData.Sender, TestData.Destination, TestData.Message);
             });
