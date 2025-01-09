@@ -86,9 +86,8 @@
                                           Boolean isHtml,
                                           List<EmailAttachment> attachments)
         {
-            if (aggregate.DeliveryStatusList[aggregate.ResendCount] != MessageStatus.NotSet)
-            {
-                throw new InvalidOperationException("Cannot send a message to provider that has already been sent");
+            if (aggregate.DeliveryStatusList[aggregate.ResendCount] != MessageStatus.NotSet) {
+                return;
             }
 
             RequestSentToEmailProviderEvent requestSentToProviderEvent = new RequestSentToEmailProviderEvent(aggregate.AggregateId, fromAddress, toAddresses, subject, body, isHtml);
