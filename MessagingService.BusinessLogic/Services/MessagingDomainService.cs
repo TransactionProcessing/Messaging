@@ -120,8 +120,13 @@ namespace MessagingService.BusinessLogic.Services
                                                          List<EmailAttachment> attachments,
                                                          CancellationToken cancellationToken) {
             Result result = await ApplyEmailUpdates(async (EmailAggregate emailAggregate) => {
+                // Check if this message has been sent before
+                if (emailAggregate.GetMessageStatus() != EmailMessageAggregate.MessageStatus.NotSet) {
+                    return Result.Success();
+                }
+
                 // send message to provider (record event)
-                emailAggregate.SendRequestToProvider(fromAddress, toAddresses, subject, body, isHtml, attachments);
+                    emailAggregate.SendRequestToProvider(fromAddress, toAddresses, subject, body, isHtml, attachments);
 
                 // Make call to Email provider here
                 EmailServiceProxyResponse emailResponse = await this.EmailServiceProxy.SendEmail(messageId, fromAddress,
@@ -152,6 +157,12 @@ namespace MessagingService.BusinessLogic.Services
                                                        CancellationToken cancellationToken)
         {
             Result result = await ApplySMSUpdates(async (SMSAggregate smsAggregate) => {
+                // Check if this message has been sent before
+                if (smsAggregate.GetMessageStatus() != SMSMessageAggregate.MessageStatus.NotSet)
+                {
+                    return Result.Success();
+                }
+
                 // send message to provider (record event)
                 smsAggregate.SendRequestToProvider(sender, destination, message);
 

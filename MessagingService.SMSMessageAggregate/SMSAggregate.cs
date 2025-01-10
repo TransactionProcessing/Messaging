@@ -113,9 +113,7 @@
                                                  String sender,
                                                  String destination,
                                                  String message){
-            if (aggregate.DeliveryStatusList[aggregate.ResendCount] != MessageStatus.NotSet){
-                return;
-            }
+            
 
             RequestSentToSMSProviderEvent requestSentToProviderEvent = new RequestSentToSMSProviderEvent(aggregate.AggregateId, sender, destination, message);
 
@@ -144,6 +142,10 @@
             if (aggregate.DeliveryStatusList[aggregate.ResendCount] != MessageStatus.Sent){
                 throw new InvalidOperationException($"Message at status {aggregate.DeliveryStatusList[aggregate.ResendCount]} cannot be set to undeliverable");
             }
+        }
+
+        public static MessageStatus GetMessageStatus(this SMSAggregate aggregate) {
+            return aggregate.DeliveryStatusList[aggregate.ResendCount];
         }
 
         #endregion

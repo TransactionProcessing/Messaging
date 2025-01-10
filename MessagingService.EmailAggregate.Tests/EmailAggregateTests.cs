@@ -45,21 +45,6 @@ namespace MessagingService.EmailAggregate.Tests
         }
 
         [Fact]
-        public void EmailAggregate_SendRequestToProvider_RequestAlreadySent_NoErrorThrown() {
-            EmailAggregate emailAggregate = EmailAggregate.Create(TestData.MessageId);
-
-            emailAggregate.SendRequestToProvider(TestData.FromAddress, TestData.ToAddresses, TestData.Subject, TestData.Body, TestData.IsHtmlTrue, TestData.EmailAttachmentModels);
-
-            Should.NotThrow(() => {
-                                                        emailAggregate.SendRequestToProvider(TestData.FromAddress,
-                                                                                             TestData.ToAddresses,
-                                                                                             TestData.Subject,
-                                                                                             TestData.Body,
-                                                                                             TestData.IsHtmlTrue, TestData.EmailAttachmentModels);
-                                                    });
-        }
-
-        [Fact]
         public void EmailAggregate_ReceiveResponseFromProvider_ResponseReceived() {
             EmailAggregate emailAggregate = EmailAggregate.Create(TestData.MessageId);
 

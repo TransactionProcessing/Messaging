@@ -79,6 +79,11 @@
             aggregate.ApplyAndAppend(badResponseReceivedFromProviderEvent);
         }
 
+        public static MessageStatus GetMessageStatus(this EmailAggregate aggregate)
+        {
+            return aggregate.DeliveryStatusList[aggregate.ResendCount];
+        }
+
         public static void SendRequestToProvider(this EmailAggregate aggregate, String fromAddress,
                                           List<String> toAddresses,
                                           String subject,
@@ -86,10 +91,6 @@
                                           Boolean isHtml,
                                           List<EmailAttachment> attachments)
         {
-            if (aggregate.DeliveryStatusList[aggregate.ResendCount] != MessageStatus.NotSet) {
-                return;
-            }
-
             RequestSentToEmailProviderEvent requestSentToProviderEvent = new RequestSentToEmailProviderEvent(aggregate.AggregateId, fromAddress, toAddresses, subject, body, isHtml);
 
             aggregate.ApplyAndAppend(requestSentToProviderEvent);
