@@ -85,7 +85,6 @@ namespace MessagingService.EmailAggregate.Tests
 
         [Theory]
         [InlineData(MessageStatus.NotSet)]
-        [InlineData(MessageStatus.Delivered)]
         [InlineData(MessageStatus.Rejected)]
         [InlineData(MessageStatus.Failed)]
         [InlineData(MessageStatus.Spam)]
@@ -139,7 +138,6 @@ namespace MessagingService.EmailAggregate.Tests
         [Theory]
         [InlineData(MessageStatus.NotSet)]
         [InlineData(MessageStatus.Delivered)]
-        [InlineData(MessageStatus.Rejected)]
         [InlineData(MessageStatus.Failed)]
         [InlineData(MessageStatus.Spam)]
         [InlineData(MessageStatus.Bounced)]
@@ -192,7 +190,6 @@ namespace MessagingService.EmailAggregate.Tests
         [InlineData(MessageStatus.NotSet)]
         [InlineData(MessageStatus.Delivered)]
         [InlineData(MessageStatus.Rejected)]
-        [InlineData(MessageStatus.Failed)]
         [InlineData(MessageStatus.Spam)]
         [InlineData(MessageStatus.Bounced)]
         public void EmailAggregate_MarkMessageAsFailed_IncorrectState_ErrorThrown(MessageStatus messageStatus) {
@@ -246,7 +243,6 @@ namespace MessagingService.EmailAggregate.Tests
         [InlineData(MessageStatus.Rejected)]
         [InlineData(MessageStatus.Failed)]
         [InlineData(MessageStatus.Spam)]
-        [InlineData(MessageStatus.Bounced)]
         public void EmailAggregate_MarkMessageAsBounced_IncorrectState_ErrorThrown(MessageStatus messageStatus) {
             EmailAggregate emailAggregate = EmailAggregate.Create(TestData.MessageId);
 
@@ -297,7 +293,6 @@ namespace MessagingService.EmailAggregate.Tests
         [InlineData(MessageStatus.Delivered)]
         [InlineData(MessageStatus.Rejected)]
         [InlineData(MessageStatus.Failed)]
-        [InlineData(MessageStatus.Spam)]
         [InlineData(MessageStatus.Bounced)]
         public void EmailAggregate_MarkMessageAsSpam_IncorrectState_ErrorThrown(MessageStatus messageStatus) {
             EmailAggregate emailAggregate = EmailAggregate.Create(TestData.MessageId);

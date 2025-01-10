@@ -62,7 +62,6 @@ namespace MessagingService.SMSAggregate.Tests
         [Theory]
         [InlineData(MessageStatus.NotSet)]
         [InlineData(MessageStatus.Expired)]
-        [InlineData(MessageStatus.Delivered)]
         [InlineData(MessageStatus.Undeliverable)]
         [InlineData(MessageStatus.InProgress)]
         [InlineData(MessageStatus.Rejected)]
@@ -117,7 +116,6 @@ namespace MessagingService.SMSAggregate.Tests
 
         [Theory]
         [InlineData(MessageStatus.NotSet)]
-        [InlineData(MessageStatus.Expired)]
         [InlineData(MessageStatus.Delivered)]
         [InlineData(MessageStatus.Undeliverable)]
         [InlineData(MessageStatus.InProgress)]
@@ -175,7 +173,6 @@ namespace MessagingService.SMSAggregate.Tests
         [InlineData(MessageStatus.NotSet)]
         [InlineData(MessageStatus.Expired)]
         [InlineData(MessageStatus.Delivered)]
-        [InlineData(MessageStatus.Undeliverable)]
         [InlineData(MessageStatus.InProgress)]
         [InlineData(MessageStatus.Rejected)]
         public void SMSAggregate_MarkMessageAsUndeliverable_IncorrectState_ErrorThrown(MessageStatus messageStatus)
@@ -233,7 +230,6 @@ namespace MessagingService.SMSAggregate.Tests
         [InlineData(MessageStatus.Delivered)]
         [InlineData(MessageStatus.Undeliverable)]
         [InlineData(MessageStatus.InProgress)]
-        [InlineData(MessageStatus.Rejected)]
         public void SMSAggregate_MarkMessageAsRejected_IncorrectState_ErrorThrown(MessageStatus messageStatus)
         {
             SMSAggregate smsAggregate = SMSAggregate.Create(TestData.MessageId);
