@@ -21,6 +21,9 @@
         public static void MarkMessageAsDelivered(this SMSAggregate aggregate,
                                                   String providerStatus,
                                                   DateTime failedDateTime){
+            if (aggregate.DeliveryStatusList[aggregate.ResendCount] == MessageStatus.Delivered)
+                return;
+
             aggregate.CheckMessageCanBeSetToDelivered();
 
             SMSMessageDeliveredEvent messageDeliveredEvent = new SMSMessageDeliveredEvent(aggregate.AggregateId, providerStatus, failedDateTime);
@@ -31,6 +34,8 @@
         public static void MarkMessageAsExpired(this SMSAggregate aggregate,
                                                 String providerStatus,
                                                 DateTime failedDateTime){
+            if (aggregate.DeliveryStatusList[aggregate.ResendCount] == MessageStatus.Expired)
+                return;
             aggregate.CheckMessageCanBeSetToExpired();
 
             SMSMessageExpiredEvent messageExpiredEvent = new SMSMessageExpiredEvent(aggregate.AggregateId, providerStatus, failedDateTime);
@@ -41,6 +46,8 @@
         public static void MarkMessageAsRejected(this SMSAggregate aggregate,
                                                  String providerStatus,
                                                  DateTime failedDateTime){
+            if (aggregate.DeliveryStatusList[aggregate.ResendCount] == MessageStatus.Rejected)
+                return;
             aggregate.CheckMessageCanBeSetToRejected();
 
             SMSMessageRejectedEvent messageRejectedEvent = new SMSMessageRejectedEvent(aggregate.AggregateId, providerStatus, failedDateTime);
@@ -51,6 +58,8 @@
         public static void MarkMessageAsUndeliverable(this SMSAggregate aggregate,
                                                       String providerStatus,
                                                       DateTime failedDateTime){
+            if (aggregate.DeliveryStatusList[aggregate.ResendCount] == MessageStatus.Undeliverable)
+                return;
             aggregate.CheckMessageCanBeSetToUndeliverable();
 
             SMSMessageUndeliveredEvent messageUndeliveredEvent = new SMSMessageUndeliveredEvent(aggregate.AggregateId, providerStatus, failedDateTime);
@@ -120,7 +129,7 @@
             aggregate.ApplyAndAppend(requestSentToProviderEvent);
         }
 
-        private static void CheckMessageCanBeSetToDelivered(this SMSAggregate aggregate){
+        private static void CheckMessageCanBeSetToDelivered(this SMSAggregate aggregate) {
             if (aggregate.DeliveryStatusList[aggregate.ResendCount] != MessageStatus.Sent){
                 throw new InvalidOperationException($"Message at status {aggregate.DeliveryStatusList[aggregate.ResendCount]} cannot be set to delivered");
             }

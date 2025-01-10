@@ -15,6 +15,8 @@
         public static void MarkMessageAsBounced(this EmailAggregate aggregate, String providerStatus,
                                          DateTime bouncedDateTime)
         {
+            if (aggregate.DeliveryStatusList[aggregate.ResendCount] == MessageStatus.Bounced)
+                return;
             aggregate.CheckMessageCanBeSetToBounced();
 
             EmailMessageBouncedEvent messageBouncedEvent = new EmailMessageBouncedEvent(aggregate.AggregateId, providerStatus, bouncedDateTime);
@@ -25,6 +27,8 @@
         public static void MarkMessageAsDelivered(this EmailAggregate aggregate, String providerStatus,
                                                   DateTime deliveredDateTime)
         {
+            if (aggregate.DeliveryStatusList[aggregate.ResendCount] == MessageStatus.Delivered)
+                return;
             aggregate.CheckMessageCanBeSetToDelivered();
 
             EmailMessageDeliveredEvent messageDeliveredEvent = new EmailMessageDeliveredEvent(aggregate.AggregateId, providerStatus, deliveredDateTime);
@@ -35,6 +39,8 @@
         public static void MarkMessageAsFailed(this EmailAggregate aggregate, String providerStatus,
                                         DateTime failedDateTime)
         {
+            if (aggregate.DeliveryStatusList[aggregate.ResendCount] == MessageStatus.Failed)
+                return;
             aggregate.CheckMessageCanBeSetToFailed();
 
             EmailMessageFailedEvent messageFailedEvent = new EmailMessageFailedEvent(aggregate.AggregateId, providerStatus, failedDateTime);
@@ -45,6 +51,8 @@
         public static void MarkMessageAsRejected(this EmailAggregate aggregate, String providerStatus,
                                           DateTime rejectedDateTime)
         {
+            if (aggregate.DeliveryStatusList[aggregate.ResendCount] == MessageStatus.Rejected)
+                return;
             aggregate.CheckMessageCanBeSetToRejected();
 
             EmailMessageRejectedEvent messageRejectedEvent = new EmailMessageRejectedEvent(aggregate.AggregateId, providerStatus, rejectedDateTime);
@@ -55,6 +63,8 @@
         public static void MarkMessageAsSpam(this EmailAggregate aggregate, String providerStatus,
                                       DateTime spamDateTime)
         {
+            if (aggregate.DeliveryStatusList[aggregate.ResendCount] == MessageStatus.Spam)
+                return;
             aggregate.CheckMessageCanBeSetToSpam();
 
             EmailMessageMarkedAsSpamEvent messageMarkedAsSpamEvent = new EmailMessageMarkedAsSpamEvent(aggregate.AggregateId, providerStatus, spamDateTime);
