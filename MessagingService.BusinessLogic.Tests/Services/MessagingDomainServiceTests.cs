@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using MessagingService.BusinessLogic.Requests;
 
 namespace MessagingService.BusinessLogic.Tests.Services
 {
@@ -416,6 +417,52 @@ namespace MessagingService.BusinessLogic.Tests.Services
                                                           CancellationToken.None);
         }
 
+        [Theory]
+        [InlineData(BusinessLogic.Services.SMSServices.MessageStatus.Delivered)]
+        [InlineData(BusinessLogic.Services.SMSServices.MessageStatus.InProgress)]
+        [InlineData(BusinessLogic.Services.SMSServices.MessageStatus.Expired)]
+        [InlineData(BusinessLogic.Services.SMSServices.MessageStatus.Rejected)]
+        [InlineData(BusinessLogic.Services.SMSServices.MessageStatus.Sent)]
+        [InlineData(BusinessLogic.Services.SMSServices.MessageStatus.Undeliverable)]
+        [InlineData(BusinessLogic.Services.SMSServices.MessageStatus.Incoming)]
+        public async Task MessagingDomainService_UpdateSMSMessageStatus_MessageUpdated(BusinessLogic.Services.SMSServices.MessageStatus status)
+        {
+            Mock<IAggregateRepository<EmailAggregate, DomainEvent>> emailAggregateRepository = new Mock<IAggregateRepository<EmailAggregate, DomainEvent>>();
+            Mock<IAggregateRepository<SMSAggregate, DomainEvent>> smsAggregateRepository = new Mock<IAggregateRepository<SMSAggregate, DomainEvent>>();
+            smsAggregateRepository.Setup(a => a.GetLatestVersion(It.IsAny<Guid>(), It.IsAny<CancellationToken>())).ReturnsAsync(TestData.GetSentSMSAggregate());
+            Mock<IEmailServiceProxy> emailServiceProxy = new Mock<IEmailServiceProxy>();
+            Mock<ISMSServiceProxy> smsServiceProxy = new Mock<ISMSServiceProxy>();
+            MessagingDomainService messagingDomainService =
+                new MessagingDomainService(emailAggregateRepository.Object, smsAggregateRepository.Object, emailServiceProxy.Object, smsServiceProxy.Object);
+
+            SMSCommands.UpdateMessageStatusCommand command = new(TestData.MessageId, status, TestData.ProviderStatusDescription, TestData.BouncedDateTime);
+            Should.NotThrow(async () => {
+                await messagingDomainService.UpdateMessageStatus(command, CancellationToken.None);
+            });
+        }
+
+        [Theory]
+        [InlineData(BusinessLogic.Services.EmailServices.MessageStatus.Delivered)]
+        [InlineData(BusinessLogic.Services.EmailServices.MessageStatus.Rejected)]
+        [InlineData(BusinessLogic.Services.EmailServices.MessageStatus.Bounced)]
+        [InlineData(BusinessLogic.Services.EmailServices.MessageStatus.Failed)]
+        [InlineData(BusinessLogic.Services.EmailServices.MessageStatus.Spam)]
+
+        public async Task MessagingDomainService_UpdateEmailMessageStatus_MessageUpdated(BusinessLogic.Services.EmailServices.MessageStatus status)
+        {
+            Mock<IAggregateRepository<EmailAggregate, DomainEvent>> emailAggregateRepository = new Mock<IAggregateRepository<EmailAggregate, DomainEvent>>();
+            emailAggregateRepository.Setup(a => a.GetLatestVersion(It.IsAny<Guid>(), It.IsAny<CancellationToken>())).ReturnsAsync(TestData.GetSentEmailAggregate());
+            Mock<IAggregateRepository<SMSAggregate, DomainEvent>> smsAggregateRepository = new Mock<IAggregateRepository<SMSAggregate, DomainEvent>>();
+            Mock<IEmailServiceProxy> emailServiceProxy = new Mock<IEmailServiceProxy>();
+            Mock<ISMSServiceProxy> smsServiceProxy = new Mock<ISMSServiceProxy>();
+            MessagingDomainService messagingDomainService =
+                new MessagingDomainService(emailAggregateRepository.Object, smsAggregateRepository.Object, emailServiceProxy.Object, smsServiceProxy.Object);
+
+            EmailCommands.UpdateMessageStatusCommand command = new(TestData.MessageId, status, TestData.ProviderStatusDescription, TestData.BouncedDateTime);
+            Should.NotThrow(async () => {
+                await messagingDomainService.UpdateMessageStatus(command, CancellationToken.None);
+            });
+        }
     }
 
     public class DomainServiceHelperTests

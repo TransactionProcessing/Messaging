@@ -8,6 +8,7 @@ namespace MessagingService.BusinessLogic.RequestHandlers{
     using MediatR;
     using Requests;
     using Services;
+    using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
     using EmailAttachment = Models.EmailAttachment;
     using FileType = Models.FileType;
 
@@ -18,7 +19,10 @@ namespace MessagingService.BusinessLogic.RequestHandlers{
     public class MessagingRequestHandler : IRequestHandler<EmailCommands.SendEmailCommand, Result<Guid>>,
                                            IRequestHandler<SMSCommands.SendSMSCommand, Result<Guid>>,
                                            IRequestHandler<EmailCommands.ResendEmailCommand,Result>,
-                                           IRequestHandler<SMSCommands.ResendSMSCommand, Result>{
+                                           IRequestHandler<SMSCommands.ResendSMSCommand, Result>,
+                                           IRequestHandler<SMSCommands.UpdateMessageStatusCommand, Result>,
+                                           IRequestHandler<EmailCommands.UpdateMessageStatusCommand, Result>
+    {
         #region Fields
 
         /// <summary>
@@ -102,5 +106,16 @@ namespace MessagingService.BusinessLogic.RequestHandlers{
         }
 
         #endregion
+
+        public async Task<Result> Handle(SMSCommands.UpdateMessageStatusCommand command,
+                                         CancellationToken cancellationToken) {
+            
+            return await this.MessagingDomainService.UpdateMessageStatus(command,cancellationToken);
+        }
+
+        public async Task<Result> Handle(EmailCommands.UpdateMessageStatusCommand command,
+                                         CancellationToken cancellationToken) {
+            return await this.MessagingDomainService.UpdateMessageStatus(command, cancellationToken);
+        }
     }
 }

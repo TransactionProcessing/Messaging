@@ -1,4 +1,5 @@
-﻿using SimpleResults;
+﻿using MessagingService.BusinessLogic.Requests;
+using SimpleResults;
 
 namespace MessagingService.BusinessLogic.Services
 {
@@ -39,6 +40,9 @@ namespace MessagingService.BusinessLogic.Services
         Task<Result> ResendSMSMessage(Guid connectionIdentifier,
                                 Guid messageId,
                                 CancellationToken cancellationToken);
+
+        Task<Result> UpdateMessageStatus(EmailCommands.UpdateMessageStatusCommand command, CancellationToken cancellationToken);
+        Task<Result> UpdateMessageStatus(SMSCommands.UpdateMessageStatusCommand command, CancellationToken cancellationToken);
 
         #endregion
     }

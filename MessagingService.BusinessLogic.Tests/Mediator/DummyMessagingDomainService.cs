@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MessagingService.BusinessLogic.Requests;
 using SimpleResults;
 
 namespace MessagingService.BusinessLogic.Tests.Mediator
@@ -34,5 +35,11 @@ namespace MessagingService.BusinessLogic.Tests.Mediator
                                                      Guid messageId,
                                                      CancellationToken cancellationToken) => Result.Success();
         public async Task<Result> ResendSMSMessage(Guid connectionIdentifier, Guid messageId, CancellationToken cancellationToken) => Result.Success();
+
+        public async Task<Result> UpdateMessageStatus(EmailCommands.UpdateMessageStatusCommand command,
+                                                      CancellationToken cancellationToken) => Result.Success();
+
+        public async Task<Result> UpdateMessageStatus(SMSCommands.UpdateMessageStatusCommand command,
+                                                      CancellationToken cancellationToken) => Result.Success();
     }
 }

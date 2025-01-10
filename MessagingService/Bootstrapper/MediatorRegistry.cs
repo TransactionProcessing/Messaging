@@ -22,6 +22,8 @@ public class MediatorRegistry : ServiceRegistry
         this.AddSingleton<IRequestHandler<SMSCommands.SendSMSCommand, Result<Guid>>, MessagingRequestHandler>();
         this.AddSingleton<IRequestHandler<EmailCommands.ResendEmailCommand,Result>, MessagingRequestHandler>();
         this.AddSingleton<IRequestHandler<SMSCommands.ResendSMSCommand,Result>, MessagingRequestHandler>();
+        this.AddSingleton<IRequestHandler<SMSCommands.UpdateMessageStatusCommand, Result>, MessagingRequestHandler>();
+        this.AddSingleton<IRequestHandler<EmailCommands.UpdateMessageStatusCommand, Result>, MessagingRequestHandler>();
 
         this.AddSingleton<Func<String, String>>(container => (serviceName) =>
                                                              {
