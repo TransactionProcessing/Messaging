@@ -28,6 +28,8 @@ namespace MessagingService.BusinessLogic.Tests.Mediator
             this.Requests.Add(TestData.SendSMSCommand);
             this.Requests.Add(TestData.ResendSMSCommand);
             this.Requests.Add(TestData.SendEmailCommandWithAttachments);
+            this.Requests.Add(TestData.UpdateEmailMessageStatusCommand);
+            this.Requests.Add(TestData.UpdateSMSMessageStatusCommand);
         }
 
         [Fact]

@@ -1,4 +1,5 @@
-﻿using Shared.Results;
+﻿using MessagingService.BusinessLogic.Requests;
+using Shared.Results;
 using SimpleResults;
 
 namespace MessagingService.BusinessLogic.Services
@@ -229,6 +230,59 @@ namespace MessagingService.BusinessLogic.Services
 
                 return Result.Success();
             }, messageId, cancellationToken);
+            return result;
+        }
+
+        public async Task<Result> UpdateMessageStatus(EmailCommands.UpdateMessageStatusCommand command,
+                                                      CancellationToken cancellationToken) {
+            Result result = await ApplyEmailUpdates(async (EmailAggregate emailAggregate) => {
+                switch (command.Status) {
+                    case EmailServices.MessageStatus.Bounced:
+                        emailAggregate.MarkMessageAsBounced(command.Description, command.Timestamp);
+                        break;
+                    case EmailServices.MessageStatus.Delivered:
+                        emailAggregate.MarkMessageAsDelivered(command.Description, command.Timestamp);
+                        break;
+                    case EmailServices.MessageStatus.Failed:
+                    case EmailServices.MessageStatus.Unknown:
+                        emailAggregate.MarkMessageAsFailed(command.Description, command.Timestamp);
+                        break;
+                    case EmailServices.MessageStatus.Rejected:
+                        emailAggregate.MarkMessageAsRejected(command.Description, command.Timestamp);
+                        break;
+                    case EmailServices.MessageStatus.Spam:
+                        emailAggregate.MarkMessageAsSpam(command.Description, command.Timestamp);
+                        break;
+                }
+
+                return Result.Success();
+            }, command.MessageId, cancellationToken);
+            return result;
+        }
+
+        public async Task<Result> UpdateMessageStatus(SMSCommands.UpdateMessageStatusCommand command,
+                                                      CancellationToken cancellationToken) {
+            Result result = await ApplySMSUpdates(async (SMSAggregate smsAggregate) => {
+
+                switch (command.Status) {
+                    case SMSServices.MessageStatus.Delivered:
+                    case SMSServices.MessageStatus.Sent:
+                    case SMSServices.MessageStatus.InProgress:
+                        smsAggregate.MarkMessageAsDelivered(command.Description, command.Timestamp);
+                        break;
+                    case SMSServices.MessageStatus.Expired:
+                        smsAggregate.MarkMessageAsExpired(command.Description, command.Timestamp);
+                        break;
+                    case SMSServices.MessageStatus.Rejected:
+                        smsAggregate.MarkMessageAsRejected(command.Description, command.Timestamp);
+                        break;
+                    case SMSServices.MessageStatus.Undeliverable:
+                        smsAggregate.MarkMessageAsUndeliverable(command.Description, command.Timestamp);
+                        break;
+                }
+                
+                return Result.Success();
+            }, command.MessageId, cancellationToken);
             return result;
         }
     }

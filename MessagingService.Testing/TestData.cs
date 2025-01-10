@@ -243,6 +243,11 @@
         public static String EmailErrorCode = "404";
         public static String EmailError = "NotFound";
 
+        public static SMSCommands.UpdateMessageStatusCommand UpdateSMSMessageStatusCommand =>
+            new (TestData.MessageId, SMSMessageStatusDelivered, TestData.ProviderStatusDescription, TestData.DeliveredDateTime);
+        public static EmailCommands.UpdateMessageStatusCommand UpdateEmailMessageStatusCommand=>
+            new (TestData.MessageId, TestData.EmailMessageStatusDelivered, TestData.ProviderStatusDescription, TestData.DeliveredDateTime);
+
         public static EmailCommands.ResendEmailCommand ResendEmailCommand => new EmailCommands.ResendEmailCommand(TestData.ConnectionIdentifier, TestData.MessageId);
 
         public static SMSCommands.ResendSMSCommand ResendSMSCommand => new(TestData.ConnectionIdentifier, TestData.MessageId);
