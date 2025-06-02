@@ -1,5 +1,4 @@
-﻿using Shared.EventStore.Aggregate;
-using Shared.Results;
+﻿using Shared.Results;
 
 namespace MessagingService.Client
 {
