@@ -1,5 +1,6 @@
 ﻿using MessagingService.BusinessLogic.Requests;
 using Shared.Results;
+using Shared.Results.Web;
 using SimpleResults;
 
 namespace MessagingService.Controllers

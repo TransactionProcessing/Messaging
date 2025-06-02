@@ -1,4 +1,5 @@
 ﻿using Shared.Results;
+using Shared.Results.Web;
 using SimpleResults;
 using SendEmailRequestDTO = MessagingService.DataTransferObjects.SendEmailRequest;
 using SendEmailResponseDTO = MessagingService.DataTransferObjects.SendEmailResponse;
