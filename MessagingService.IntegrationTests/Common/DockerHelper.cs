@@ -50,7 +50,8 @@
         /// <param name="testingContext">The testing context.</param>
         public DockerHelper()
         {
-            this.TestingContext = new TestingContext();            
+            this.TestingContext = new TestingContext();     
+            this.TestId = Guid.NewGuid();
         }
 
         #endregion
@@ -70,15 +71,6 @@
         /// </summary>
         /// <param name="scenarioName">Name of the scenario.</param>
         public override async Task StartContainersForScenarioRun(String scenarioName, DockerServices dockerServices){
-
-            List<String> additionalVariables = new List<String>
-            {
-                this.SetConnectionString("ConnectionStrings:PersistedGrantDbContext", $"PersistedGrantStore-{this.TestId}", this.UseSecureSqlServerDatabase),
-                this.SetConnectionString("ConnectionStrings:ConfigurationDbContext", $"Configuration-{this.TestId}", this.UseSecureSqlServerDatabase),
-                this.SetConnectionString("ConnectionStrings:AuthenticationDbContext", $"Authentication-{this.TestId}", this.UseSecureSqlServerDatabase)
-            };
-            this.AdditionalVariables.Add(ContainerType.SecurityService, additionalVariables);
-
             await base.StartContainersForScenarioRun(scenarioName, dockerServices);
 
             // Setup the base address resolvers

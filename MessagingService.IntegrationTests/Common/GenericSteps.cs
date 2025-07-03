@@ -28,6 +28,7 @@ namespace MessagingService.IntegrationTests.Common
         [BeforeScenario]
         public async Task StartSystem()
         {
+            
             // Initialise a logger
             String scenarioName = this.ScenarioContext.ScenarioInfo.Title.Replace(" ", "");
             NlogLogger logger = new NlogLogger();
