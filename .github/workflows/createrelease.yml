@@ -88,12 +88,12 @@ jobs:
       - name: Download the artifact
         uses: actions/download-artifact@v4.1.8
         with:
-          name: securityservice
-          path: /tmp/securityservice # Download to a temporary directory
+          name: messagingservice
+          path: /tmp/messagingservice # Download to a temporary directory
   
       - name: Remove existing service (if applicable)
         run: |
-          SERVICE_NAME="securityservice"
+          SERVICE_NAME="messagingservice"
           if systemctl is-active --quiet "$SERVICE_NAME"; then
             echo "Stopping existing service..."
             sudo systemctl stop "$SERVICE_NAME"
@@ -110,8 +110,8 @@ jobs:
   
       - name: Unzip the files
         run: |
-          sudo mkdir -p /opt/txnproc/transactionprocessing/securityservice
-          sudo unzip -o /tmp/securityservice/securityservice.zip -d /opt/txnproc/transactionprocessing/securityservice
+          sudo mkdir -p /opt/txnproc/transactionprocessing/messagingservice
+          sudo unzip -o /tmp/messagingservice/messagingservice.zip -d /opt/txnproc/transactionprocessing/messagingservice
   
       # IMPORTANT: Add a step to ensure the .NET runtime is installed on the server
       # This assumes it's not already there. If your base image already has it, you can skip this.
@@ -128,11 +128,11 @@ jobs:
   
       - name: Install and Start as a Linux service
         run: |
-          SERVICE_NAME="securityservice"
+          SERVICE_NAME="messagingservice"
           # The WorkingDirectory is crucial for .NET apps to find appsettings.json and other files
-          WORKING_DIRECTORY="/opt/txnproc/transactionprocessing/securityservice"
-          DLL_NAME="SecurityService.dll" # Your application's DLL
-          SERVICE_DESCRIPTION="Transaction Processing - Security Service"
+          WORKING_DIRECTORY="/opt/txnproc/transactionprocessing/messagingservice"
+          DLL_NAME="MessagingService.dll" # Your application's DLL
+          SERVICE_DESCRIPTION="Transaction Processing - Messaging Service"
   
           # Create a systemd service file
           echo "[Unit]" | sudo tee /etc/systemd/system/${SERVICE_NAME}.service
@@ -167,12 +167,12 @@ jobs:
       - name: Download the artifact
         uses: actions/download-artifact@v4.1.8
         with:
-          name: securityservice
-          path: /tmp/securityservice # Download to a temporary directory
+          name: messagingservice
+          path: /tmp/messagingservice # Download to a temporary directory
   
       - name: Remove existing service (if applicable)
         run: |
-          SERVICE_NAME="securityservice"
+          SERVICE_NAME="messagingservice"
           if systemctl is-active --quiet "$SERVICE_NAME"; then
             echo "Stopping existing service..."
             sudo systemctl stop "$SERVICE_NAME"
@@ -189,8 +189,8 @@ jobs:
   
       - name: Unzip the files
         run: |
-          sudo mkdir -p /opt/txnproc/transactionprocessing/securityservice
-          sudo unzip -o /tmp/securityservice/securityservice.zip -d /opt/txnproc/transactionprocessing/securityservice
+          sudo mkdir -p /opt/txnproc/transactionprocessing/messagingservice
+          sudo unzip -o /tmp/messagingservice/messagingservice.zip -d /opt/txnproc/transactionprocessing/messagingservice
   
       # IMPORTANT: Add a step to ensure the .NET runtime is installed on the server
       # This assumes it's not already there. If your base image already has it, you can skip this.
@@ -207,11 +207,11 @@ jobs:
   
       - name: Install and Start as a Linux service
         run: |
-          SERVICE_NAME="securityservice"
+          SERVICE_NAME="messagingservice"
           # The WorkingDirectory is crucial for .NET apps to find appsettings.json and other files
-          WORKING_DIRECTORY="/opt/txnproc/transactionprocessing/securityservice"
-          DLL_NAME="SecurityService.dll" # Your application's DLL
-          SERVICE_DESCRIPTION="Transaction Processing - Security Service"
+          WORKING_DIRECTORY="/opt/txnproc/transactionprocessing/messagingservice"
+          DLL_NAME="MessagingService.dll" # Your application's DLL
+          SERVICE_DESCRIPTION="Transaction Processing - Messaging Service"
   
           # Create a systemd service file
           echo "[Unit]" | sudo tee /etc/systemd/system/${SERVICE_NAME}.service
@@ -234,4 +234,4 @@ jobs:
           sudo systemctl daemon-reload
           sudo systemctl enable "$SERVICE_NAME"
           sudo systemctl start "$SERVICE_NAME"
-          sudo systemctl status "$SERVICE_NAME" --no-pager # For debugging/verification          
+          sudo systemctl status "$SERVICE_NAME" --no-pager # For debugging/verification         
