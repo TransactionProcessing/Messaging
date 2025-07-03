@@ -50,7 +50,8 @@
         /// <param name="testingContext">The testing context.</param>
         public DockerHelper()
         {
-            this.TestingContext = new TestingContext();            
+            this.TestingContext = new TestingContext();     
+            this.TestId = Guid.NewGuid();
         }
 
         #endregion
