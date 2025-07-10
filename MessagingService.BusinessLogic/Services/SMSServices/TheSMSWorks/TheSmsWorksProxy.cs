@@ -18,6 +18,12 @@ namespace MessagingService.BusinessLogic.Services.SMSServices.TheSMSWorks
     [ExcludeFromCodeCoverage]
     public class TheSmsWorksProxy : ISMSServiceProxy
     {
+        private readonly HttpClient HttpClient;
+
+        public TheSmsWorksProxy(HttpClient httpClient) {
+            this.HttpClient = httpClient;
+        }
+
         /// <summary>
         /// Sends the SMS.
         /// </summary>
@@ -31,129 +37,85 @@ namespace MessagingService.BusinessLogic.Services.SMSServices.TheSMSWorks
                                                            String sender,
                                                            String destination,
                                                            String message,
-                                                           CancellationToken cancellationToken)
-        {
+                                                           CancellationToken cancellationToken) {
             SMSServiceProxyResponse response = null;
 
-            using(HttpClient client = new HttpClient())
-            {
-                // Create the Auth Request                
-                TheSmsWorksTokenRequest apiTokenRequest = new TheSmsWorksTokenRequest
-                                                          {
-                                                              CustomerId = ConfigurationReader.GetValue("TheSMSWorksCustomerId"),
-                                                              Key = ConfigurationReader.GetValue("TheSMSWorksKey"),
-                                                              Secret = ConfigurationReader.GetValue("TheSMSWorksSecret")
-                                                          };
+            // Create the Auth Request                
+            TheSmsWorksTokenRequest apiTokenRequest = new TheSmsWorksTokenRequest { CustomerId = ConfigurationReader.GetValue("TheSMSWorksCustomerId"), Key = ConfigurationReader.GetValue("TheSMSWorksKey"), Secret = ConfigurationReader.GetValue("TheSMSWorksSecret") };
 
-                String apiTokenRequestSerialised = JsonConvert.SerializeObject(apiTokenRequest).ToLower();
-                StringContent content = new StringContent(apiTokenRequestSerialised, Encoding.UTF8, "application/json");
+            String apiTokenRequestSerialised = JsonConvert.SerializeObject(apiTokenRequest).ToLower();
+            StringContent content = new StringContent(apiTokenRequestSerialised, Encoding.UTF8, "application/json");
 
-                // First do the authentication
-                HttpResponseMessage apiTokenHttpResponse = await client.PostAsync($"{ConfigurationReader.GetValue("TheSMSWorksBaseAddress")}auth/token", content, cancellationToken);
+            // First do the authentication
+            HttpResponseMessage apiTokenHttpResponse = await this.HttpClient.PostAsync($"{ConfigurationReader.GetValue("TheSMSWorksBaseAddress")}auth/token", content, cancellationToken);
 
-                if (apiTokenHttpResponse.IsSuccessStatusCode)
-                {
-                    TheSmsWorksTokenResponse apiTokenResponse =
-                        JsonConvert.DeserializeObject<TheSmsWorksTokenResponse>(await apiTokenHttpResponse.Content.ReadAsStringAsync());
+            if (apiTokenHttpResponse.IsSuccessStatusCode) {
+                TheSmsWorksTokenResponse apiTokenResponse = JsonConvert.DeserializeObject<TheSmsWorksTokenResponse>(await apiTokenHttpResponse.Content.ReadAsStringAsync());
 
-                    // Now do the actual send
-                    TheSmsWorksSendSMSRequest apiSendSmsRequest = new TheSmsWorksSendSMSRequest
-                                                                  {
-                                                                      Content = message,
-                                                                      Sender = sender,
-                                                                      Destination = destination,
-                                                                      Schedule = string.Empty,
-                                                                      Tag = messageId.ToString(),
-                                                                      Ttl = 0
-                                                                  };
+                // Now do the actual send
+                TheSmsWorksSendSMSRequest apiSendSmsRequest = new TheSmsWorksSendSMSRequest {
+                    Content = message,
+                    Sender = sender,
+                    Destination = destination,
+                    Schedule = string.Empty,
+                    Tag = messageId.ToString(),
+                    Ttl = 0
+                };
 
-                    String apiSendSMSMessageRequestSerialised = JsonConvert.SerializeObject(apiSendSmsRequest).ToLower();
-                    content = new StringContent(apiSendSMSMessageRequestSerialised, Encoding.UTF8, "application/json");
+                String apiSendSMSMessageRequestSerialised = JsonConvert.SerializeObject(apiSendSmsRequest).ToLower();
+                content = new StringContent(apiSendSMSMessageRequestSerialised, Encoding.UTF8, "application/json");
 
-                    client.DefaultRequestHeaders.Add("Authorization", apiTokenResponse.Token);
-                    HttpResponseMessage apiSendSMSMessageHttpResponse =
-                        await client.PostAsync($"{ConfigurationReader.GetValue("TheSMSWorksBaseAddress")}message/send", content, cancellationToken);
+                this.HttpClient.DefaultRequestHeaders.Add("Authorization", apiTokenResponse.Token);
+                HttpResponseMessage apiSendSMSMessageHttpResponse = await this.HttpClient.PostAsync($"{ConfigurationReader.GetValue("TheSMSWorksBaseAddress")}message/send", content, cancellationToken);
 
-                    if (apiSendSMSMessageHttpResponse.IsSuccessStatusCode)
-                    {
-                        // Message has been sent
-                        TheSmsWorksSendSMSResponse apiTheSmsWorksSendSmsResponse =
-                            JsonConvert.DeserializeObject<TheSmsWorksSendSMSResponse>(await apiSendSMSMessageHttpResponse.Content.ReadAsStringAsync());
+                if (apiSendSMSMessageHttpResponse.IsSuccessStatusCode) {
+                    // Message has been sent
+                    TheSmsWorksSendSMSResponse apiTheSmsWorksSendSmsResponse = JsonConvert.DeserializeObject<TheSmsWorksSendSMSResponse>(await apiSendSMSMessageHttpResponse.Content.ReadAsStringAsync());
 
-                        response = new SMSServiceProxyResponse
-                        {
-                                       ApiCallSuccessful = true,
-                                       SMSIdentifier = apiTheSmsWorksSendSmsResponse.MessageId,
-                        };
-                    }
-                    else
-                    {
-                        response = await HandleAPIError(apiSendSMSMessageHttpResponse);
-                    }
+                    response = new SMSServiceProxyResponse { ApiCallSuccessful = true, SMSIdentifier = apiTheSmsWorksSendSmsResponse.MessageId, };
                 }
-                else
-                {
-                    response = await HandleAPIError(apiTokenHttpResponse);
+                else {
+                    response = await HandleAPIError(apiSendSMSMessageHttpResponse);
                 }
-
+            }
+            else {
+                response = await HandleAPIError(apiTokenHttpResponse);
             }
 
             return response;
         }
 
         public async Task<MessageStatusResponse> GetMessageStatus(String providerReference,
-                                                                  CancellationToken cancellationToken)
-        {
+                                                                  CancellationToken cancellationToken) {
             MessageStatusResponse response = new MessageStatusResponse();
 
-            using (HttpClient client = new HttpClient())
-            {
-                // Create the Auth Request                
-                TheSmsWorksTokenRequest apiTokenRequest = new TheSmsWorksTokenRequest
-                {
-                    CustomerId = ConfigurationReader.GetValue("TheSMSWorksCustomerId"),
-                    Key = ConfigurationReader.GetValue("TheSMSWorksKey"),
-                    Secret = ConfigurationReader.GetValue("TheSMSWorksSecret")
-                };
+            // Create the Auth Request                
+            TheSmsWorksTokenRequest apiTokenRequest = new TheSmsWorksTokenRequest { CustomerId = ConfigurationReader.GetValue("TheSMSWorksCustomerId"), Key = ConfigurationReader.GetValue("TheSMSWorksKey"), Secret = ConfigurationReader.GetValue("TheSMSWorksSecret") };
 
-                String apiTokenRequestSerialised = JsonConvert.SerializeObject(apiTokenRequest).ToLower();
-                StringContent content = new StringContent(apiTokenRequestSerialised, Encoding.UTF8, "application/json");
+            String apiTokenRequestSerialised = JsonConvert.SerializeObject(apiTokenRequest).ToLower();
+            StringContent content = new StringContent(apiTokenRequestSerialised, Encoding.UTF8, "application/json");
 
-                // First do the authentication
-                HttpResponseMessage apiTokenHttpResponse = await client.PostAsync($"{ConfigurationReader.GetValue("TheSMSWorksBaseAddress")}auth/token", content, cancellationToken);
+            // First do the authentication
+            HttpResponseMessage apiTokenHttpResponse = await this.HttpClient.PostAsync($"{ConfigurationReader.GetValue("TheSMSWorksBaseAddress")}auth/token", content, cancellationToken);
 
-                if (apiTokenHttpResponse.IsSuccessStatusCode)
-                {
-                    TheSmsWorksTokenResponse apiTokenResponse =
-                        JsonConvert.DeserializeObject<TheSmsWorksTokenResponse>(await apiTokenHttpResponse.Content.ReadAsStringAsync());
-                    
-                    client.DefaultRequestHeaders.Add("Authorization", apiTokenResponse.Token);
-                    HttpResponseMessage apiGetSMSMessageHttpResponse =
-                        await client.GetAsync($"{ConfigurationReader.GetValue("TheSMSWorksBaseAddress")}messages/{providerReference}", cancellationToken);
+            if (apiTokenHttpResponse.IsSuccessStatusCode) {
+                TheSmsWorksTokenResponse apiTokenResponse = JsonConvert.DeserializeObject<TheSmsWorksTokenResponse>(await apiTokenHttpResponse.Content.ReadAsStringAsync());
 
-                    if (apiGetSMSMessageHttpResponse.IsSuccessStatusCode)
-                    {
-                        // Message has been sent
-                        TheSMSWorksGetMessageResponse apiSmsWorksGetMessageResponse =
-                            JsonConvert.DeserializeObject<TheSMSWorksGetMessageResponse>(await apiGetSMSMessageHttpResponse.Content.ReadAsStringAsync());
+                this.HttpClient.DefaultRequestHeaders.Add("Authorization", apiTokenResponse.Token);
+                HttpResponseMessage apiGetSMSMessageHttpResponse = await this.HttpClient.GetAsync($"{ConfigurationReader.GetValue("TheSMSWorksBaseAddress")}messages/{providerReference}", cancellationToken);
 
-                        response = new MessageStatusResponse
-                                   {
-                                       ApiStatusCode = apiGetSMSMessageHttpResponse.StatusCode,
-                                       MessageStatus = this.TranslateMessageStatus(apiSmsWorksGetMessageResponse.Status),
-                            ProviderStatusDescription = apiSmsWorksGetMessageResponse.Status,
-                                       Timestamp = DateTime.Parse(apiSmsWorksGetMessageResponse.Modified)
-                                   };
-                    }
-                    else
-                    {
-                        throw new NotFoundException($"Error getting message Id [{providerReference}]");
-                    }
+                if (apiGetSMSMessageHttpResponse.IsSuccessStatusCode) {
+                    // Message has been sent
+                    TheSMSWorksGetMessageResponse apiSmsWorksGetMessageResponse = JsonConvert.DeserializeObject<TheSMSWorksGetMessageResponse>(await apiGetSMSMessageHttpResponse.Content.ReadAsStringAsync());
+
+                    response = new MessageStatusResponse { ApiStatusCode = apiGetSMSMessageHttpResponse.StatusCode, MessageStatus = this.TranslateMessageStatus(apiSmsWorksGetMessageResponse.Status), ProviderStatusDescription = apiSmsWorksGetMessageResponse.Status, Timestamp = DateTime.Parse(apiSmsWorksGetMessageResponse.Modified) };
                 }
-                else
-                {
-                    throw new Exception("Authentication Error");
+                else {
+                    throw new NotFoundException($"Error getting message Id [{providerReference}]");
                 }
+            }
+            else {
+                throw new Exception("Authentication Error");
             }
 
             return response;

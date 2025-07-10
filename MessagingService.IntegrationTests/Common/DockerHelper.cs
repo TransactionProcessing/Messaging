@@ -1,10 +1,7 @@
-﻿namespace MessagingService.IntegrationTests.Common
+﻿using ClientProxyBase;
+
+namespace MessagingService.IntegrationTests.Common
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Net.Http;
-    using System.Threading.Tasks;
     using Client;
     using Ductus.FluentDocker.Builders;
     using Ductus.FluentDocker.Common;
@@ -14,7 +11,13 @@
     using global::Shared.IntegrationTesting;
     using global::Shared.Logger;
     using IntegrationTesting.Helpers;
+    using Microsoft.AspNetCore.Http;
     using SecurityService.Client;
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Net.Http;
+    using System.Threading.Tasks;
     
     /// <summary>
     /// 
@@ -76,22 +79,40 @@
             // Setup the base address resolvers
             String SecurityServiceBaseAddressResolver(String api) => $"https://127.0.0.1:{this.SecurityServicePort}";
             String MessagingServiceBaseAddressResolver(String api) => $"http://127.0.0.1:{this.MessagingServicePort}";
-
-            HttpClientHandler clientHandler = new HttpClientHandler
-                                              {
-                                                  ServerCertificateCustomValidationCallback = (message,
-                                                                                               certificate2,
-                                                                                               arg3,
-                                                                                               arg4) =>
-                                                                                              {
-                                                                                                  return true;
-                                                                                              }
-
-                                              };
-            HttpClient httpClient = new HttpClient(clientHandler);
+            
+            HttpClient httpClient = CreateHttpClient();
+            
             this.SecurityServiceClient = new SecurityServiceClient(SecurityServiceBaseAddressResolver, httpClient);
             this.MessagingServiceClient = new MessagingServiceClient(MessagingServiceBaseAddressResolver, httpClient);
         }
         #endregion
+
+        private HttpClient CreateHttpClient() {
+            // Set up test HttpContext
+            DefaultHttpContext context = new DefaultHttpContext();
+            context.TraceIdentifier = this.TestId.ToString();
+
+            HttpContextAccessor httpContextAccessor = new HttpContextAccessor
+            {
+                HttpContext = context
+            };
+
+            // Configure inner-most handler with SSL bypass
+            HttpClientHandler clientHandler = new HttpClientHandler
+            {
+                ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true
+            };
+
+            // Wrap with CorrelationIdHandler
+            CorrelationIdHandler correlationHandler = new CorrelationIdHandler(httpContextAccessor)
+            {
+                InnerHandler = clientHandler
+            };
+
+            // Create HttpClient
+            HttpClient client = new HttpClient(correlationHandler);
+
+            return client;
+        }
     }
 }

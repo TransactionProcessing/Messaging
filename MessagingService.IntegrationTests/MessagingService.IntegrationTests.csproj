@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="ClientProxyBase" Version="2025.6.2" />
+    <PackageReference Include="ClientProxyBase" Version="2025.7.9" />
     <PackageReference Include="Ductus.FluentDocker" Version="2.10.59" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.0" />
     <PackageReference Include="Reqnroll.Tools.MsBuild.Generation" Version="2.4.1" />
@@ -14,9 +14,9 @@
     <PackageReference Include="NUnit3TestAdapter" Version="5.0.0" />
     <PackageReference Include="Reqnroll" Version="2.4.1" />
     <PackageReference Include="Reqnroll.NUnit" Version="2.4.1" />
-    <PackageReference Include="SecurityService.Client" Version="2025.5.1" />
-    <PackageReference Include="SecurityService.IntegrationTesting.Helpers" Version="2025.5.1" />
-    <PackageReference Include="Shared.IntegrationTesting" Version="2025.6.2" />
+    <PackageReference Include="SecurityService.Client" Version="2025.7.1" />
+    <PackageReference Include="SecurityService.IntegrationTesting.Helpers" Version="2025.7.1" />
+    <PackageReference Include="Shared.IntegrationTesting" Version="2025.7.9" />
     <PackageReference Include="Shouldly" Version="4.3.0" />
     <PackageReference Include="coverlet.collector" Version="6.0.4">
       <PrivateAssets>all</PrivateAssets>

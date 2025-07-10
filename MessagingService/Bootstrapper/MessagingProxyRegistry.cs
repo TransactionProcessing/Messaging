@@ -1,43 +1,32 @@
 ﻿namespace MessagingService.Bootstrapper;
 
-using System;
-using System.Diagnostics.CodeAnalysis;
-using System.Net.Http;
 using BusinessLogic.Services.EmailServices;
 using BusinessLogic.Services.EmailServices.Smtp2Go;
 using BusinessLogic.Services.SMSServices;
 using BusinessLogic.Services.SMSServices.TheSMSWorks;
+using ClientProxyBase;
 using Lamar;
 using Microsoft.Extensions.DependencyInjection;
 using Service.Services.Email.IntegrationTest;
 using Service.Services.SMSServices.IntegrationTest;
 using Shared.General;
+using System;
+using System.Diagnostics.CodeAnalysis;
+using System.Net.Http;
+using System.Threading;
+using System.Threading.Tasks;
 
 [ExcludeFromCodeCoverage]
 public class MessagingProxyRegistry : ServiceRegistry
 {
     public MessagingProxyRegistry()
     {
-        SocketsHttpHandler httpMessageHandler = new SocketsHttpHandler
-                                                {
-                                                    SslOptions =
-                                                    {
-                                                        RemoteCertificateValidationCallback = (sender,
-                                                                                               certificate,
-                                                                                               chain,
-                                                                                               errors) => true,
-                                                    }
-                                                };
-        HttpClient httpClient = new HttpClient(httpMessageHandler);
-        this.AddSingleton(httpClient);
-
+        this.AddHttpContextAccessor();
+        
         this.RegisterEmailProxy();
         this.RegisterSMSProxy();
     }
-    /// <summary>
-    /// Registers the email proxy.
-    /// </summary>
-    /// <param name="services">The services.</param>
+
     private void RegisterEmailProxy()
     {
         // read the config setting 
@@ -45,7 +34,7 @@ public class MessagingProxyRegistry : ServiceRegistry
 
         if (emailProxy == "Smtp2Go")
         {
-            this.AddSingleton<IEmailServiceProxy, Smtp2GoProxy>();
+            this.RegisterHttpClient<IEmailServiceProxy, Smtp2GoProxy>();
         }
         else
         {
@@ -60,7 +49,7 @@ public class MessagingProxyRegistry : ServiceRegistry
 
         if (emailProxy == "TheSMSWorks")
         {
-            this.AddSingleton<ISMSServiceProxy, TheSmsWorksProxy>();
+            this.RegisterHttpClient<ISMSServiceProxy, TheSmsWorksProxy>();
         }
         else
         {
