@@ -1,18 +1,14 @@
-using System;
-using System.Collections.Generic;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.Generic;
 
 namespace MessagingService
 {
-    using System.Diagnostics;
-    using System.Diagnostics.CodeAnalysis;
-    using System.IO;
-    using System.Threading;
     using Bootstrapper;
     using Common;
     using EmailMessage.DomainEvents;
@@ -20,6 +16,7 @@ namespace MessagingService
     using HealthChecks.UI.Client;
     using Lamar;
     using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+    using NLog;
     using NLog.Extensions.Logging;
     using Shared.EventStore.Aggregate;
     using Shared.EventStore.EventHandling;
@@ -27,7 +24,12 @@ namespace MessagingService
     using Shared.Extensions;
     using Shared.General;
     using Shared.Logger;
+    using Shared.Middleware;
     using SMSMessage.DomainEvents;
+    using System.Diagnostics;
+    using System.Diagnostics.CodeAnalysis;
+    using System.IO;
+    using System.Threading;
 
     [ExcludeFromCodeCoverage]
     public class Startup
@@ -68,34 +70,23 @@ namespace MessagingService
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory)
         {
-            String nlogConfigFilename = "nlog.config";
-
             if (env.IsDevelopment())
             {
-                var developmentNlogConfigFilename = "nlog.development.config";
-                if (File.Exists(Path.Combine(env.ContentRootPath, developmentNlogConfigFilename)))
-                {
-                    nlogConfigFilename = developmentNlogConfigFilename;
-                }
-
                 app.UseDeveloperExceptionPage();
             }
-
-            loggerFactory.ConfigureNLog(Path.Combine(env.ContentRootPath, nlogConfigFilename));
-            loggerFactory.AddNLog();
-
+           
             Microsoft.Extensions.Logging.ILogger logger = loggerFactory.CreateLogger("MessagingService");
 
-            Logger.Initialise(logger);
-            Startup.Configuration.LogConfiguration(Logger.LogWarning);
-            
+            Shared.Logger.Logger.Initialise(logger);
+            Startup.Configuration.LogConfiguration(Shared.Logger.Logger.LogWarning);
+
             foreach (KeyValuePair<Type, String> type in TypeMap.Map)
             {
-                Logger.LogInformation($"Type name {type.Value} mapped to {type.Key.Name}");
+                Shared.Logger.Logger.LogInformation($"Type name {type.Value} mapped to {type.Key.Name}");
             }
 
             ConfigurationReader.Initialise(Startup.Configuration);
-
+            app.UseMiddleware<TenantMiddleware>();
             app.AddRequestLogging();
             app.AddResponseLogging();
             app.AddExceptionHandler();
@@ -109,15 +100,15 @@ namespace MessagingService
                              {
                                  endpoints.MapControllers();
                                  endpoints.MapHealthChecks("health", new HealthCheckOptions()
-                                                                     {
-                                                                         Predicate = _ => true,
-                                                                         ResponseWriter = Shared.HealthChecks.HealthCheckMiddleware.WriteResponse
-                                                                     });
+                                 {
+                                     Predicate = _ => true,
+                                     ResponseWriter = Shared.HealthChecks.HealthCheckMiddleware.WriteResponse
+                                 });
                                  endpoints.MapHealthChecks("healthui", new HealthCheckOptions()
-                                                                     {
-                                                                         Predicate = _ => true,
-                                                                         ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
-                                                                     });
+                                 {
+                                     Predicate = _ => true,
+                                     ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+                                 });
                              });
             app.UseSwagger();
 

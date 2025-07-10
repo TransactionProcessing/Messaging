@@ -24,30 +24,14 @@ public class RepositoryRegistry: ServiceRegistry
 {
     public RepositoryRegistry()
     {
-        Boolean useConnectionStringConfig = Boolean.Parse(ConfigurationReader.GetValue("AppSettings", "UseConnectionStringConfig"));
+        String connectionString = Startup.Configuration.GetValue<String>("EventStoreSettings:ConnectionString");
 
-        if (useConnectionStringConfig)
-        {
-            String connectionStringConfigurationConnString = ConfigurationReader.GetConnectionString("ConnectionStringConfiguration");
-            this.AddSingleton<IConnectionStringConfigurationRepository, ConnectionStringConfigurationRepository>();
-            this.AddTransient<ConnectionStringConfigurationContext>(c =>
-                                                                    {
-                                                                        return new ConnectionStringConfigurationContext(connectionStringConfigurationConnString);
-                                                                    });
+        this.AddEventStoreProjectionManagementClient(connectionString);
+        this.AddEventStorePersistentSubscriptionsClient(connectionString);
 
-            // TODO: Read this from a the database and set
-        }
-        else
-        {
-            String connectionString = Startup.Configuration.GetValue<String>("EventStoreSettings:ConnectionString");
+        this.AddEventStoreClient(connectionString);
 
-            this.AddEventStoreProjectionManagementClient(connectionString);
-            this.AddEventStorePersistentSubscriptionsClient(connectionString);
-
-            this.AddEventStoreClient(connectionString);
-
-            this.AddSingleton<IConnectionStringConfigurationRepository, ConfigurationReaderConnectionStringRepository>();
-        }
+        this.AddSingleton<IConnectionStringConfigurationRepository, ConfigurationReaderConnectionStringRepository>();
 
         this.AddTransient<IEventStoreContext, EventStoreContext>();
 

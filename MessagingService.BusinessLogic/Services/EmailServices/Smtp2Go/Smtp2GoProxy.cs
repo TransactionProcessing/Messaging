@@ -1,18 +1,19 @@
 ﻿namespace MessagingService.BusinessLogic.Services.EmailServices.Smtp2Go
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Diagnostics.CodeAnalysis;
-    using System.Linq;
-    using System.Net.Http;
-    using System.Text;
-    using System.Threading;
-    using System.Threading.Tasks;
     using Models;
     using Newtonsoft.Json;
     using Service.Services.Email.Smtp2Go;
     using Shared.General;
     using Shared.Logger;
+    using System;
+    using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
+    using System.Linq;
+    using System.Net.Http;
+    using System.Reflection;
+    using System.Text;
+    using System.Threading;
+    using System.Threading.Tasks;
 
     /// <summary>
     /// 
@@ -32,10 +33,6 @@
 
         #region Constructors
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Smtp2GoProxy" /> class.
-        /// </summary>
-        /// <param name="httpClient">The HTTP client.</param>
         public Smtp2GoProxy(HttpClient httpClient)
         {
             this.HttpClient = httpClient;
@@ -45,18 +42,6 @@
 
         #region Methods
 
-        /// <summary>
-        /// Sends the email.
-        /// </summary>
-        /// <param name="messageId">The message identifier.</param>
-        /// <param name="fromAddress">From address.</param>
-        /// <param name="toAddresses">To addresses.</param>
-        /// <param name="subject">The subject.</param>
-        /// <param name="body">The body.</param>
-        /// <param name="isHtml">if set to <c>true</c> [is HTML].</param>
-        /// <param name="attachments">The attachments.</param>
-        /// <param name="cancellationToken">The cancellation token.</param>
-        /// <returns></returns>
         public async Task<EmailServiceProxyResponse> SendEmail(Guid messageId,
                                                                String fromAddress,
                                                                List<String> toAddresses,
@@ -64,12 +49,11 @@
                                                                String body,
                                                                Boolean isHtml,
                                                                List<EmailAttachment> attachments,
-                                                               CancellationToken cancellationToken)
-        {
+                                                               CancellationToken cancellationToken) {
             EmailServiceProxyResponse response = null;
 
             // Translate the request message
-            Smtp2GoSendEmailRequest apiRequest = new Smtp2GoSendEmailRequest
+            Smtp2GoSendEmailRequest apiRequest = new()
                                                  {
                                                      ApiKey = ConfigurationReader.GetValue("SMTP2GoAPIKey"),
                                                      HTMLBody = isHtml ? body : string.Empty,
@@ -100,7 +84,7 @@
 
             Logger.LogDebug($"Request Message Sent to Email Provider [SMTP2Go] {requestSerialised}");
 
-            StringContent content = new StringContent(requestSerialised, Encoding.UTF8, "application/json");
+            StringContent content = new(requestSerialised, Encoding.UTF8, "application/json");
 
             String requestUri = $"{ConfigurationReader.GetValue("SMTP2GoBaseAddress")}email/send";
             HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Post, requestUri);
@@ -108,11 +92,9 @@
 
             HttpResponseMessage httpResponse = await this.HttpClient.SendAsync(requestMessage, cancellationToken);
 
-            Smtp2GoSendEmailResponse apiResponse = new Smtp2GoSendEmailResponse(){
-                                                                                     Data = new Smtp2GoSendEmailResponseData()
-                                                                                 };
+            Smtp2GoSendEmailResponse apiResponse = new() { Data = new Smtp2GoSendEmailResponseData() };
             if (httpResponse.IsSuccessStatusCode){
-                apiResponse = JsonConvert.DeserializeObject<Smtp2GoSendEmailResponse>(await httpResponse.Content.ReadAsStringAsync());
+                apiResponse = JsonConvert.DeserializeObject<Smtp2GoSendEmailResponse>(await httpResponse.Content.ReadAsStringAsync(cancellationToken));
             }
             else{
                 apiResponse = new Smtp2GoSendEmailResponse();
@@ -134,12 +116,7 @@
                        };
             return response;
         }
-
-        /// <summary>
-        /// Converts the type of the file.
-        /// </summary>
-        /// <param name="emailAttachmentFileType">Type of the email attachment file.</param>
-        /// <returns></returns>
+        
         private String ConvertFileType(FileType emailAttachmentFileType)
         {
             switch(emailAttachmentFileType)
@@ -151,14 +128,6 @@
             }
         }
 
-        /// <summary>
-        /// Gets the message status.
-        /// </summary>
-        /// <param name="providerReference">The provider reference.</param>
-        /// <param name="startDate">The start date.</param>
-        /// <param name="endDate">The end date.</param>
-        /// <param name="cancellationToken">The cancellation token.</param>
-        /// <returns></returns>
         public async Task<MessageStatusResponse> GetMessageStatus(String providerReference,
                                                                   DateTime startDate,
                                                                   DateTime endDate,
@@ -208,11 +177,6 @@
             return response;
         }
 
-        /// <summary>
-        /// Translates the message status.
-        /// </summary>
-        /// <param name="status">The status.</param>
-        /// <returns></returns>
         private MessageStatus TranslateMessageStatus(String status)
         {
             MessageStatus result;

@@ -120,30 +120,34 @@ namespace MessagingService.BusinessLogic.Services
                                                          Boolean isHtml,
                                                          List<EmailAttachment> attachments,
                                                          CancellationToken cancellationToken) {
-            Result result = await ApplyEmailUpdates(async (EmailAggregate emailAggregate) => {
+            Result result = await ApplyEmailUpdates(async (EmailAggregate emailAggregate) =>
+            {
                 // Check if this message has been sent before
-                if (emailAggregate.GetMessageStatus() != EmailMessageAggregate.MessageStatus.NotSet) {
+                if (emailAggregate.GetMessageStatus() != EmailMessageAggregate.MessageStatus.NotSet)
+                {
                     return Result.Success();
                 }
 
                 // send message to provider (record event)
-                    emailAggregate.SendRequestToProvider(fromAddress, toAddresses, subject, body, isHtml, attachments);
+                emailAggregate.SendRequestToProvider(fromAddress, toAddresses, subject, body, isHtml, attachments);
 
                 // Make call to Email provider here
                 EmailServiceProxyResponse emailResponse = await this.EmailServiceProxy.SendEmail(messageId, fromAddress,
                     toAddresses, subject, body, isHtml, attachments, cancellationToken);
 
-                if (emailResponse.ApiCallSuccessful) {
+                if (emailResponse.ApiCallSuccessful)
+                {
                     // response message from provider (record event)
                     emailAggregate.ReceiveResponseFromProvider(emailResponse.RequestIdentifier,
                         emailResponse.EmailIdentifier);
                 }
-                else {
+                else
+                {
                     emailAggregate.ReceiveBadResponseFromProvider(emailResponse.Error, emailResponse.ErrorCode);
                 }
 
                 return Result.Success();
-            }, messageId, cancellationToken,false);
+            }, messageId, cancellationToken, false);
 
             if (result.IsFailed)
                 return result;
