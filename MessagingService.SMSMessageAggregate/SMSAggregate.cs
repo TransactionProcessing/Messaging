@@ -26,7 +26,7 @@
 
             aggregate.CheckMessageCanBeSetToDelivered();
 
-            SMSMessageDeliveredEvent messageDeliveredEvent = new SMSMessageDeliveredEvent(aggregate.AggregateId, providerStatus, failedDateTime);
+            SMSMessageDeliveredEvent messageDeliveredEvent = new(aggregate.AggregateId, providerStatus, failedDateTime);
 
             aggregate.ApplyAndAppend(messageDeliveredEvent);
         }
@@ -38,7 +38,7 @@
                 return;
             aggregate.CheckMessageCanBeSetToExpired();
 
-            SMSMessageExpiredEvent messageExpiredEvent = new SMSMessageExpiredEvent(aggregate.AggregateId, providerStatus, failedDateTime);
+            SMSMessageExpiredEvent messageExpiredEvent = new(aggregate.AggregateId, providerStatus, failedDateTime);
 
             aggregate.ApplyAndAppend(messageExpiredEvent);
         }
@@ -50,7 +50,7 @@
                 return;
             aggregate.CheckMessageCanBeSetToRejected();
 
-            SMSMessageRejectedEvent messageRejectedEvent = new SMSMessageRejectedEvent(aggregate.AggregateId, providerStatus, failedDateTime);
+            SMSMessageRejectedEvent messageRejectedEvent = new(aggregate.AggregateId, providerStatus, failedDateTime);
 
             aggregate.ApplyAndAppend(messageRejectedEvent);
         }
@@ -62,7 +62,7 @@
                 return;
             aggregate.CheckMessageCanBeSetToUndeliverable();
 
-            SMSMessageUndeliveredEvent messageUndeliveredEvent = new SMSMessageUndeliveredEvent(aggregate.AggregateId, providerStatus, failedDateTime);
+            SMSMessageUndeliveredEvent messageUndeliveredEvent = new(aggregate.AggregateId, providerStatus, failedDateTime);
 
             aggregate.ApplyAndAppend(messageUndeliveredEvent);
         }
@@ -102,7 +102,7 @@
 
         public static void ReceiveResponseFromProvider(this SMSAggregate aggregate, String providerSMSReference){
             ResponseReceivedFromSMSProviderEvent responseReceivedFromProviderEvent =
-                new ResponseReceivedFromSMSProviderEvent(aggregate.AggregateId, providerSMSReference);
+                new(aggregate.AggregateId, providerSMSReference);
 
             aggregate.ApplyAndAppend(responseReceivedFromProviderEvent);
         }
@@ -113,7 +113,7 @@
                 throw new InvalidOperationException($"Cannot re-send a message to provider that has not already been sent. Current Status [{aggregate.DeliveryStatusList[aggregate.ResendCount]}]");
             }
 
-            RequestResentToSMSProviderEvent requestResentToSMSProviderEvent = new RequestResentToSMSProviderEvent(aggregate.AggregateId);
+            RequestResentToSMSProviderEvent requestResentToSMSProviderEvent = new(aggregate.AggregateId);
 
             aggregate.ApplyAndAppend(requestResentToSMSProviderEvent);
         }
@@ -124,7 +124,7 @@
                                                  String message){
             
 
-            RequestSentToSMSProviderEvent requestSentToProviderEvent = new RequestSentToSMSProviderEvent(aggregate.AggregateId, sender, destination, message);
+            RequestSentToSMSProviderEvent requestSentToProviderEvent = new(aggregate.AggregateId, sender, destination, message);
 
             aggregate.ApplyAndAppend(requestSentToProviderEvent);
         }

@@ -49,14 +49,14 @@ public static class Extensions
         TypeProvider.LoadDomainEventsTypeDynamically();
 
         IConfigurationSection subscriptionConfigSection = Startup.Configuration.GetSection("AppSettings:SubscriptionConfiguration");
-        SubscriptionWorkersRoot subscriptionWorkersRoot = new SubscriptionWorkersRoot();
+        SubscriptionWorkersRoot subscriptionWorkersRoot = new();
         subscriptionConfigSection.Bind(subscriptionWorkersRoot);
 
         String eventStoreConnectionString = ConfigurationReader.GetValue("EventStoreSettings", "ConnectionString");
 
         IDomainEventHandlerResolver mainEventHandlerResolver = Startup.Container.GetInstance<IDomainEventHandlerResolver>("Main");
         
-        Dictionary<String, IDomainEventHandlerResolver> eventHandlerResolvers = new Dictionary<String, IDomainEventHandlerResolver> {
+        Dictionary<String, IDomainEventHandlerResolver> eventHandlerResolvers = new() {
                                                                                     {"Main", mainEventHandlerResolver}
                                                                                 };
 

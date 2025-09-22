@@ -349,7 +349,7 @@ namespace MessagingService.SMSAggregate.Tests
         public void SMSAggregate_PlayEvent_UnsupportedEvent_ErrorThrown()
         {
             Logger.Initialise(NullLogger.Instance);
-            SMSAggregate smsAggregate = new SMSAggregate();
+            SMSAggregate smsAggregate = new();
             Should.Throw<Exception>(() => smsAggregate.PlayEvent(new TestEvent(Guid.NewGuid(), Guid.NewGuid())));
         }
     }

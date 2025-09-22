@@ -41,10 +41,10 @@ namespace MessagingService.BusinessLogic.Services.SMSServices.TheSMSWorks
             SMSServiceProxyResponse response = null;
 
             // Create the Auth Request                
-            TheSmsWorksTokenRequest apiTokenRequest = new TheSmsWorksTokenRequest { CustomerId = ConfigurationReader.GetValue("TheSMSWorksCustomerId"), Key = ConfigurationReader.GetValue("TheSMSWorksKey"), Secret = ConfigurationReader.GetValue("TheSMSWorksSecret") };
+            TheSmsWorksTokenRequest apiTokenRequest = new() { CustomerId = ConfigurationReader.GetValue("TheSMSWorksCustomerId"), Key = ConfigurationReader.GetValue("TheSMSWorksKey"), Secret = ConfigurationReader.GetValue("TheSMSWorksSecret") };
 
             String apiTokenRequestSerialised = JsonConvert.SerializeObject(apiTokenRequest).ToLower();
-            StringContent content = new StringContent(apiTokenRequestSerialised, Encoding.UTF8, "application/json");
+            StringContent content = new(apiTokenRequestSerialised, Encoding.UTF8, "application/json");
 
             // First do the authentication
             HttpResponseMessage apiTokenHttpResponse = await this.HttpClient.PostAsync($"{ConfigurationReader.GetValue("TheSMSWorksBaseAddress")}auth/token", content, cancellationToken);
@@ -53,7 +53,7 @@ namespace MessagingService.BusinessLogic.Services.SMSServices.TheSMSWorks
                 TheSmsWorksTokenResponse apiTokenResponse = JsonConvert.DeserializeObject<TheSmsWorksTokenResponse>(await apiTokenHttpResponse.Content.ReadAsStringAsync());
 
                 // Now do the actual send
-                TheSmsWorksSendSMSRequest apiSendSmsRequest = new TheSmsWorksSendSMSRequest {
+                TheSmsWorksSendSMSRequest apiSendSmsRequest = new() {
                     Content = message,
                     Sender = sender,
                     Destination = destination,
@@ -87,13 +87,13 @@ namespace MessagingService.BusinessLogic.Services.SMSServices.TheSMSWorks
 
         public async Task<MessageStatusResponse> GetMessageStatus(String providerReference,
                                                                   CancellationToken cancellationToken) {
-            MessageStatusResponse response = new MessageStatusResponse();
+            MessageStatusResponse response = new();
 
             // Create the Auth Request                
-            TheSmsWorksTokenRequest apiTokenRequest = new TheSmsWorksTokenRequest { CustomerId = ConfigurationReader.GetValue("TheSMSWorksCustomerId"), Key = ConfigurationReader.GetValue("TheSMSWorksKey"), Secret = ConfigurationReader.GetValue("TheSMSWorksSecret") };
+            TheSmsWorksTokenRequest apiTokenRequest = new() { CustomerId = ConfigurationReader.GetValue("TheSMSWorksCustomerId"), Key = ConfigurationReader.GetValue("TheSMSWorksKey"), Secret = ConfigurationReader.GetValue("TheSMSWorksSecret") };
 
             String apiTokenRequestSerialised = JsonConvert.SerializeObject(apiTokenRequest).ToLower();
-            StringContent content = new StringContent(apiTokenRequestSerialised, Encoding.UTF8, "application/json");
+            StringContent content = new(apiTokenRequestSerialised, Encoding.UTF8, "application/json");
 
             // First do the authentication
             HttpResponseMessage apiTokenHttpResponse = await this.HttpClient.PostAsync($"{ConfigurationReader.GetValue("TheSMSWorksBaseAddress")}auth/token", content, cancellationToken);
@@ -159,7 +159,7 @@ namespace MessagingService.BusinessLogic.Services.SMSServices.TheSMSWorks
         /// <returns></returns>
         private async Task<SMSServiceProxyResponse> HandleAPIError(HttpResponseMessage httpResponse)
         {
-            SMSServiceProxyResponse response = new SMSServiceProxyResponse();
+            SMSServiceProxyResponse response = new();
 
             String responseContent = await httpResponse.Content.ReadAsStringAsync();
 

@@ -412,7 +412,7 @@ namespace MessagingService.EmailAggregate.Tests
         [Fact]
         public void EmailAggregate_PlayEvent_UnsupportedEvent_ErrorThrown() {
             Logger.Initialise(NullLogger.Instance);
-            EmailAggregate emailAggregate = new EmailAggregate();
+            EmailAggregate emailAggregate = new();
             Should.Throw<Exception>(() => emailAggregate.PlayEvent(new TestEvent(Guid.NewGuid(), Guid.NewGuid())));
         }
     }
