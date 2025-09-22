@@ -39,9 +39,7 @@ namespace MessagingService.Tests
                                                };
             String json = "{\r\n  \"messageId\": \"811bb215-0d99-4639-ac3a-195ba4a47449\",\r\n  \"providerRequestReference\": \"d8f669fa-675d-11ec-8b59-f23c92160e3c\"\r\n}\t";
             Object request = JsonConvert.DeserializeObject(json);
-            ArgumentException ex = Should.Throw<ArgumentException>(async () => {
-                                                                       await controller.PostEventAsync(request, CancellationToken.None);
-                                                                   });
+            ArgumentException ex = Should.Throw<ArgumentException>(() => controller.PostEventAsync(request, CancellationToken.None));
             ex.Message.ShouldBe("Domain Event must contain an Event Id");
         }
 
@@ -61,9 +59,7 @@ namespace MessagingService.Tests
                                                };
             String json = "{\r\n  \"messageId\": \"811bb215-0d99-4639-ac3a-195ba4a47449\",\r\n  \"providerRequestReference\": \"d8f669fa-675d-11ec-8b59-f23c92160e3c\",\r\n  \"eventId\": \"123bb215-0d99-4639-ac3a-195ba4a47449\"\r\n}\t";
             Object request = JsonConvert.DeserializeObject(json);
-            Should.NotThrow(async () => {
-                                                                       await controller.PostEventAsync(request, CancellationToken.None);
-                                                                   });
+            Should.NotThrow(async () => await controller.PostEventAsync(request, CancellationToken.None));
         }
     }
 }

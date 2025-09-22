@@ -120,7 +120,7 @@ namespace MessagingService.EmailAggregate.Tests
 
             }
 
-            Should.Throw<InvalidOperationException>(() => { emailAggregate.MarkMessageAsDelivered(TestData.ProviderStatusDescription, TestData.DeliveredDateTime); });
+            Should.Throw<InvalidOperationException>(() => emailAggregate.MarkMessageAsDelivered(TestData.ProviderStatusDescription, TestData.DeliveredDateTime));
         }
 
         [Fact]
@@ -171,7 +171,7 @@ namespace MessagingService.EmailAggregate.Tests
                     break;
             }
 
-            Should.Throw<InvalidOperationException>(() => { emailAggregate.MarkMessageAsRejected(TestData.ProviderStatusDescription, TestData.RejectedDateTime); });
+            Should.Throw<InvalidOperationException>(() => emailAggregate.MarkMessageAsRejected(TestData.ProviderStatusDescription, TestData.RejectedDateTime));
         }
 
         [Fact]
@@ -222,7 +222,7 @@ namespace MessagingService.EmailAggregate.Tests
                     break;
             }
 
-            Should.Throw<InvalidOperationException>(() => { emailAggregate.MarkMessageAsFailed(TestData.ProviderStatusDescription, TestData.FailedDateTime); });
+            Should.Throw<InvalidOperationException>(() => emailAggregate.MarkMessageAsFailed(TestData.ProviderStatusDescription, TestData.FailedDateTime));
         }
 
         [Fact]
@@ -273,7 +273,7 @@ namespace MessagingService.EmailAggregate.Tests
                     break;
             }
 
-            Should.Throw<InvalidOperationException>(() => { emailAggregate.MarkMessageAsBounced(TestData.ProviderStatusDescription, TestData.BouncedDateTime); });
+            Should.Throw<InvalidOperationException>(() => emailAggregate.MarkMessageAsBounced(TestData.ProviderStatusDescription, TestData.BouncedDateTime));
         }
 
         [Fact]
@@ -324,7 +324,7 @@ namespace MessagingService.EmailAggregate.Tests
                     break;
             }
 
-            Should.Throw<InvalidOperationException>(() => { emailAggregate.MarkMessageAsSpam(TestData.ProviderStatusDescription, TestData.SpamDateTime); });
+            Should.Throw<InvalidOperationException>(() => emailAggregate.MarkMessageAsSpam(TestData.ProviderStatusDescription, TestData.SpamDateTime));
         }
 
 

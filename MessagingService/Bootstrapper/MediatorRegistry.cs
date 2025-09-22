@@ -25,9 +25,6 @@ public class MediatorRegistry : ServiceRegistry
         this.AddSingleton<IRequestHandler<SMSCommands.UpdateMessageStatusCommand, Result>, MessagingRequestHandler>();
         this.AddSingleton<IRequestHandler<EmailCommands.UpdateMessageStatusCommand, Result>, MessagingRequestHandler>();
 
-        this.AddSingleton<Func<String, String>>(container => (serviceName) =>
-                                                             {
-                                                                 return ConfigurationReader.GetBaseServerUri(serviceName).OriginalString;
-                                                             });
+        this.AddSingleton<Func<String, String>>(container => (serviceName) => ConfigurationReader.GetBaseServerUri(serviceName).OriginalString);
     }
 }

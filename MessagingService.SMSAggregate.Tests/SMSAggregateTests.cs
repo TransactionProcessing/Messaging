@@ -95,10 +95,7 @@ namespace MessagingService.SMSAggregate.Tests
                     break;
             }
 
-            Should.Throw<InvalidOperationException>(() =>
-            {
-                smsAggregate.MarkMessageAsDelivered(TestData.ProviderStatusDescription, TestData.DeliveredDateTime);
-            });
+            Should.Throw<InvalidOperationException>(() => smsAggregate.MarkMessageAsDelivered(TestData.ProviderStatusDescription, TestData.DeliveredDateTime));
         }
 
         [Fact]
@@ -150,10 +147,7 @@ namespace MessagingService.SMSAggregate.Tests
                     break;
             }
 
-            Should.Throw<InvalidOperationException>(() =>
-            {
-                smsAggregate.MarkMessageAsExpired(TestData.ProviderStatusDescription, TestData.DeliveredDateTime);
-            });
+            Should.Throw<InvalidOperationException>(() => smsAggregate.MarkMessageAsExpired(TestData.ProviderStatusDescription, TestData.DeliveredDateTime));
         }
 
         [Fact]
@@ -205,10 +199,7 @@ namespace MessagingService.SMSAggregate.Tests
                     break;
             }
 
-            Should.Throw<InvalidOperationException>(() =>
-            {
-                smsAggregate.MarkMessageAsUndeliverable(TestData.ProviderStatusDescription, TestData.DeliveredDateTime);
-            });
+            Should.Throw<InvalidOperationException>(() => smsAggregate.MarkMessageAsUndeliverable(TestData.ProviderStatusDescription, TestData.DeliveredDateTime));
         }
 
         [Fact]
@@ -260,10 +251,7 @@ namespace MessagingService.SMSAggregate.Tests
                     break;
             }
 
-            Should.Throw<InvalidOperationException>(() =>
-            {
-                smsAggregate.MarkMessageAsRejected(TestData.ProviderStatusDescription, TestData.DeliveredDateTime);
-            });
+            Should.Throw<InvalidOperationException>(() => smsAggregate.MarkMessageAsRejected(TestData.ProviderStatusDescription, TestData.DeliveredDateTime));
         }
 
         [Fact]

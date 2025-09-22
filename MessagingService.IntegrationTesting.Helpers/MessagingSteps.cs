@@ -39,13 +39,9 @@
 
         public async Task WhenIResendTheFollowingMessages(String accessToken, List<ResendEmailRequest> requests){
             foreach (ResendEmailRequest resendEmailRequest in requests){
-                await Retry.For(async () => {
-                                    Should.NotThrow(async () => {
-                                                        await this.MessagingServiceClient.ResendEmail(accessToken,
-                                                                                                      resendEmailRequest,
-                                                                                                      CancellationToken.None);
-                                                    });
-                                });
+                await Retry.For(async () => Should.NotThrow(async () => await this.MessagingServiceClient.ResendEmail(accessToken,
+                                                                                                                      resendEmailRequest,
+                                                                                                                      CancellationToken.None)));
             }
         }
 
