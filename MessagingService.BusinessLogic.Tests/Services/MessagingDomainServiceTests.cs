@@ -434,9 +434,7 @@ namespace MessagingService.BusinessLogic.Tests.Services
                 new(emailAggregateRepository.Object, smsAggregateRepository.Object, emailServiceProxy.Object, smsServiceProxy.Object);
 
             SMSCommands.UpdateMessageStatusCommand command = new(TestData.MessageId, status, TestData.ProviderStatusDescription, TestData.BouncedDateTime);
-            Should.NotThrow(async () => {
-                await messagingDomainService.UpdateMessageStatus(command, CancellationToken.None);
-            });
+            Should.NotThrow(async () => await messagingDomainService.UpdateMessageStatus(command, CancellationToken.None));
         }
 
         [Theory]

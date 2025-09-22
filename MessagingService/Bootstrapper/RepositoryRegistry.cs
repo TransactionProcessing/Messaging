@@ -38,8 +38,6 @@ public class RepositoryRegistry: ServiceRegistry
         this.AddSingleton<IAggregateRepository<EmailAggregate, DomainEvent>, AggregateRepository<EmailAggregate, DomainEvent>>();
         this.AddSingleton<IAggregateRepository<SMSAggregate, DomainEvent>, AggregateRepository<SMSAggregate, DomainEvent>>();
 
-        this.AddSingleton<Func<String, Int32, ISubscriptionRepository>>(cont => (esConnString, cacheDuration) => {
-                                                                                    return SubscriptionRepository.Create(esConnString, cacheDuration);
-                                                                                });
+        this.AddSingleton<Func<String, Int32, ISubscriptionRepository>>(cont => (esConnString, cacheDuration) => SubscriptionRepository.Create(esConnString, cacheDuration));
     }
 }
