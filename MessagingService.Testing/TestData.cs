@@ -272,14 +272,14 @@
 
         public static EmailAggregate GetEmptyEmailAggregate()
         {
-            EmailAggregate emailAggregate = new EmailAggregate();
+            EmailAggregate emailAggregate = new();
 
             return emailAggregate;
         }
 
         public static EmailAggregate GetSentEmailAggregate()
         {
-            EmailAggregate emailAggregate = new EmailAggregate();
+            EmailAggregate emailAggregate = new();
             emailAggregate.SendRequestToProvider(TestData.FromAddress, TestData.ToAddresses, TestData.Subject,
                                                  TestData.Body, TestData.IsHtmlTrue, TestData.EmailAttachmentModels);
             emailAggregate.ReceiveResponseFromProvider(TestData.ProviderRequestReference, TestData.ProviderEmailReference);
@@ -318,14 +318,14 @@
 
         public static SMSAggregate GetEmptySMSAggregate()
         {
-            SMSAggregate smsAggregate = new SMSAggregate();
+            SMSAggregate smsAggregate = new();
 
             return smsAggregate;
         }
 
         public static SMSAggregate GetSentSMSAggregate()
         {
-            SMSAggregate smsAggregate = new SMSAggregate();
+            SMSAggregate smsAggregate = new();
             smsAggregate.SendRequestToProvider(TestData.Sender, TestData.Destination, TestData.Message);
             smsAggregate.ReceiveResponseFromProvider(TestData.ProviderSMSReference);
             return smsAggregate;

@@ -26,11 +26,11 @@ namespace MessagingService.Tests
         }
         [Fact]
         public async Task DomainEventController_EventIdNotPresentInJson_ErrorThrown() {
-            Mock<IDomainEventHandlerResolver> resolver = new Mock<IDomainEventHandlerResolver>();
+            Mock<IDomainEventHandlerResolver> resolver = new();
             TypeMap.AddType<ResponseReceivedFromEmailProviderEvent>("ResponseReceivedFromEmailProviderEvent");
-            DefaultHttpContext httpContext = new DefaultHttpContext();
+            DefaultHttpContext httpContext = new();
             httpContext.Request.Headers["eventType"] = "ResponseReceivedFromEmailProviderEvent";
-            DomainEventController controller = new DomainEventController(resolver.Object)
+            DomainEventController controller = new(resolver.Object)
                                                {
                                                    ControllerContext = new ControllerContext()
                                                                        {
@@ -48,11 +48,11 @@ namespace MessagingService.Tests
         [Fact]
         public async Task DomainEventController_EventIdPresentInJson_NoErrorThrown()
         {
-            Mock<IDomainEventHandlerResolver> resolver = new Mock<IDomainEventHandlerResolver>();
+            Mock<IDomainEventHandlerResolver> resolver = new();
             TypeMap.AddType<ResponseReceivedFromEmailProviderEvent>("ResponseReceivedFromEmailProviderEvent");
-            DefaultHttpContext httpContext = new DefaultHttpContext();
+            DefaultHttpContext httpContext = new();
             httpContext.Request.Headers["eventType"] = "ResponseReceivedFromEmailProviderEvent";
-            DomainEventController controller = new DomainEventController(resolver.Object)
+            DomainEventController controller = new(resolver.Object)
                                                {
                                                    ControllerContext = new ControllerContext()
                                                                        {

@@ -21,7 +21,7 @@
         /// <returns></returns>
         public IEnumerable<SwaggerExample<SendEmailRequest>> GetExamples()
         {
-            SendEmailRequest htmlEmailRequest = new SendEmailRequest
+            SendEmailRequest htmlEmailRequest = new()
                                                 {
                                                     Body = ExampleData.EmailMessageHtmlBody,
                                                     ConnectionIdentifier = ExampleData.ConnectionIdentifier,
@@ -36,7 +36,7 @@
                                                     Subject = ExampleData.EmailMessageSubject
                                                 };
 
-            SendEmailRequest plainTextEmailRequest = new SendEmailRequest
+            SendEmailRequest plainTextEmailRequest = new()
                                                      {
                                                          Body = ExampleData.EmailMessagePlainTextBody,
                                                          ConnectionIdentifier = ExampleData.ConnectionIdentifier,
@@ -50,7 +50,7 @@
                                                          MessageId = ExampleData.EmailMessageId,
                                                          Subject = ExampleData.EmailMessageSubject
                                                      };
-            List<SwaggerExample<SendEmailRequest>> examples = new List<SwaggerExample<SendEmailRequest>>();
+            List<SwaggerExample<SendEmailRequest>> examples = new();
             examples.Add(new SwaggerExample<SendEmailRequest>
                          {
                              Name = "Html Email Request",

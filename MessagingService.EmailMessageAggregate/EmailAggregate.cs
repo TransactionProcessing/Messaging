@@ -19,7 +19,7 @@
                 return;
             aggregate.CheckMessageCanBeSetToBounced();
 
-            EmailMessageBouncedEvent messageBouncedEvent = new EmailMessageBouncedEvent(aggregate.AggregateId, providerStatus, bouncedDateTime);
+            EmailMessageBouncedEvent messageBouncedEvent = new(aggregate.AggregateId, providerStatus, bouncedDateTime);
 
             aggregate.ApplyAndAppend(messageBouncedEvent);
         }
@@ -31,7 +31,7 @@
                 return;
             aggregate.CheckMessageCanBeSetToDelivered();
 
-            EmailMessageDeliveredEvent messageDeliveredEvent = new EmailMessageDeliveredEvent(aggregate.AggregateId, providerStatus, deliveredDateTime);
+            EmailMessageDeliveredEvent messageDeliveredEvent = new(aggregate.AggregateId, providerStatus, deliveredDateTime);
 
             aggregate.ApplyAndAppend(messageDeliveredEvent);
         }
@@ -43,7 +43,7 @@
                 return;
             aggregate.CheckMessageCanBeSetToFailed();
 
-            EmailMessageFailedEvent messageFailedEvent = new EmailMessageFailedEvent(aggregate.AggregateId, providerStatus, failedDateTime);
+            EmailMessageFailedEvent messageFailedEvent = new(aggregate.AggregateId, providerStatus, failedDateTime);
 
             aggregate.ApplyAndAppend(messageFailedEvent);
         }
@@ -55,7 +55,7 @@
                 return;
             aggregate.CheckMessageCanBeSetToRejected();
 
-            EmailMessageRejectedEvent messageRejectedEvent = new EmailMessageRejectedEvent(aggregate.AggregateId, providerStatus, rejectedDateTime);
+            EmailMessageRejectedEvent messageRejectedEvent = new(aggregate.AggregateId, providerStatus, rejectedDateTime);
 
             aggregate.ApplyAndAppend(messageRejectedEvent);
         }
@@ -67,7 +67,7 @@
                 return;
             aggregate.CheckMessageCanBeSetToSpam();
 
-            EmailMessageMarkedAsSpamEvent messageMarkedAsSpamEvent = new EmailMessageMarkedAsSpamEvent(aggregate.AggregateId, providerStatus, spamDateTime);
+            EmailMessageMarkedAsSpamEvent messageMarkedAsSpamEvent = new(aggregate.AggregateId, providerStatus, spamDateTime);
 
             aggregate.ApplyAndAppend(messageMarkedAsSpamEvent);
         }
@@ -76,7 +76,7 @@
                                                 String providerEmailReference)
         {
             ResponseReceivedFromEmailProviderEvent responseReceivedFromProviderEvent =
-                new ResponseReceivedFromEmailProviderEvent(aggregate.AggregateId, providerRequestReference, providerEmailReference);
+                new(aggregate.AggregateId, providerRequestReference, providerEmailReference);
 
             aggregate.ApplyAndAppend(responseReceivedFromProviderEvent);
         }
@@ -84,7 +84,7 @@
         public static void ReceiveBadResponseFromProvider(this EmailAggregate aggregate, String error, String errorCode)
         {
             BadResponseReceivedFromEmailProviderEvent badResponseReceivedFromProviderEvent =
-                new BadResponseReceivedFromEmailProviderEvent(aggregate.AggregateId, errorCode, error);
+                new(aggregate.AggregateId, errorCode, error);
 
             aggregate.ApplyAndAppend(badResponseReceivedFromProviderEvent);
         }
@@ -101,14 +101,14 @@
                                           Boolean isHtml,
                                           List<EmailAttachment> attachments)
         {
-            RequestSentToEmailProviderEvent requestSentToProviderEvent = new RequestSentToEmailProviderEvent(aggregate.AggregateId, fromAddress, toAddresses, subject, body, isHtml);
+            RequestSentToEmailProviderEvent requestSentToProviderEvent = new(aggregate.AggregateId, fromAddress, toAddresses, subject, body, isHtml);
 
             aggregate.ApplyAndAppend(requestSentToProviderEvent);
 
             // Record the attachment data
             foreach (EmailAttachment emailAttachment in attachments)
             {
-                EmailAttachmentRequestSentToProviderEvent emailAttachmentRequestSentToProviderEvent = new EmailAttachmentRequestSentToProviderEvent(aggregate.AggregateId,
+                EmailAttachmentRequestSentToProviderEvent emailAttachmentRequestSentToProviderEvent = new(aggregate.AggregateId,
                                                                                                                                                     emailAttachment.Filename,
                                                                                                                                                     emailAttachment.FileData,
                                                                                                                                                     (Int32)emailAttachment.FileType);
@@ -124,7 +124,7 @@
                 throw new InvalidOperationException($"Cannot re-send a message to provider that has not already been sent. Current Status [{aggregate.DeliveryStatusList[aggregate.ResendCount]}]");
             }
 
-            RequestResentToEmailProviderEvent requestResentToEmailProviderEvent = new RequestResentToEmailProviderEvent(aggregate.AggregateId);
+            RequestResentToEmailProviderEvent requestResentToEmailProviderEvent = new(aggregate.AggregateId);
 
             aggregate.ApplyAndAppend(requestResentToEmailProviderEvent);
         }
@@ -181,7 +181,7 @@
 
             foreach (String domainEventToAddress in domainEvent.ToAddresses)
             {
-                MessageRecipient messageRecipient = new MessageRecipient();
+                MessageRecipient messageRecipient = new();
                 messageRecipient.Create(domainEventToAddress);
                 aggregate.Recipients.Add(messageRecipient);
             }

@@ -31,13 +31,13 @@ namespace MessagingService.IntegrationTests.Common
             
             // Initialise a logger
             String scenarioName = this.ScenarioContext.ScenarioInfo.Title.Replace(" ", "");
-            NlogLogger logger = new NlogLogger();
+            NlogLogger logger = new();
             logger.Initialise(LogManager.GetLogger(scenarioName), scenarioName);
             LogManager.AddHiddenAssembly(typeof(NlogLogger).Assembly);
 
             DockerServices dockerServices = DockerServices.SqlServer | DockerServices.MessagingService | DockerServices.EventStore | DockerServices.SecurityService;
 
-            this.TestingContext.DockerHelper = new DockerHelper();
+            this.TestingContext.DockerHelper = new();
             this.TestingContext.DockerHelper.Logger = logger;
             this.TestingContext.Logger = logger;
             this.TestingContext.DockerHelper.RequiredDockerServices = dockerServices;

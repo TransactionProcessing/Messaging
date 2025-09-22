@@ -87,7 +87,7 @@
             StringContent content = new(requestSerialised, Encoding.UTF8, "application/json");
 
             String requestUri = $"{ConfigurationReader.GetValue("SMTP2GoBaseAddress")}email/send";
-            HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Post, requestUri);
+            HttpRequestMessage requestMessage = new(HttpMethod.Post, requestUri);
             requestMessage.Content = content;
 
             HttpResponseMessage httpResponse = await this.HttpClient.SendAsync(requestMessage, cancellationToken);
@@ -135,7 +135,7 @@
         {
             MessageStatusResponse response = null;
 
-            Smtp2GoEmailSearchRequest apiRequest = new Smtp2GoEmailSearchRequest
+            Smtp2GoEmailSearchRequest apiRequest = new()
                                                    {
                                                        ApiKey = ConfigurationReader.GetValue("SMTP2GoAPIKey"),
                                                        EmailId = new List<String>
@@ -153,10 +153,10 @@
 
             Logger.LogDebug($"Request Message Sent to Email Provider [SMTP2Go] {requestSerialised}");
 
-            StringContent content = new StringContent(requestSerialised, Encoding.UTF8, "application/json");
+            StringContent content = new(requestSerialised, Encoding.UTF8, "application/json");
 
             String requestUri = $"{ConfigurationReader.GetValue("SMTP2GoBaseAddress")}email/search";
-            HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Post, requestUri);
+            HttpRequestMessage requestMessage = new(HttpMethod.Post, requestUri);
             requestMessage.Content = content;
 
             HttpResponseMessage httpResponse = await this.HttpClient.SendAsync(requestMessage, cancellationToken);

@@ -89,16 +89,16 @@ namespace MessagingService.IntegrationTests.Common
 
         private HttpClient CreateHttpClient() {
             // Set up test HttpContext
-            DefaultHttpContext context = new DefaultHttpContext();
+            DefaultHttpContext context = new();
             context.TraceIdentifier = this.TestId.ToString();
 
-            HttpContextAccessor httpContextAccessor = new HttpContextAccessor
+            HttpContextAccessor httpContextAccessor = new()
             {
                 HttpContext = context
             };
 
             // Configure inner-most handler with SSL bypass
-            HttpClientHandler clientHandler = new HttpClientHandler
+            HttpClientHandler clientHandler = new()
             {
                 ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true
             };

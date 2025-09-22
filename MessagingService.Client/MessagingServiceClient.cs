@@ -70,7 +70,7 @@ namespace MessagingService.Client
             {
                 String requestSerialised = JsonConvert.SerializeObject(sendEmailRequest);
 
-                StringContent httpContent = new StringContent(requestSerialised, Encoding.UTF8, "application/json");
+                StringContent httpContent = new(requestSerialised, Encoding.UTF8, "application/json");
 
                 // Add the access token to the client headers
                 this.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
@@ -89,7 +89,7 @@ namespace MessagingService.Client
             catch(Exception ex)
             {
                 // An exception has occurred, add some additional information to the message
-                Exception exception = new Exception("Error sending email message.", ex);
+                Exception exception = new("Error sending email message.", ex);
 
                 throw exception;
             }
@@ -103,7 +103,7 @@ namespace MessagingService.Client
             try {
                 String requestSerialised = JsonConvert.SerializeObject(resendEmailRequest);
 
-                StringContent httpContent = new StringContent(requestSerialised, Encoding.UTF8, "application/json");
+                StringContent httpContent = new(requestSerialised, Encoding.UTF8, "application/json");
 
                 // Add the access token to the client headers
                 this.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
@@ -121,7 +121,7 @@ namespace MessagingService.Client
             }
             catch(Exception ex) {
                 // An exception has occurred, add some additional information to the message
-                Exception exception = new Exception("Error re-sending email message.", ex);
+                Exception exception = new("Error re-sending email message.", ex);
 
                 throw exception;
             }
@@ -146,7 +146,7 @@ namespace MessagingService.Client
             {
                 String requestSerialised = JsonConvert.SerializeObject(sendSMSRequest);
 
-                StringContent httpContent = new StringContent(requestSerialised, Encoding.UTF8, "application/json");
+                StringContent httpContent = new(requestSerialised, Encoding.UTF8, "application/json");
 
                 // Add the access token to the client headers
                 this.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
@@ -165,7 +165,7 @@ namespace MessagingService.Client
             catch (Exception ex)
             {
                 // An exception has occurred, add some additional information to the message
-                Exception exception = new Exception("Error sending sms message.", ex);
+                Exception exception = new("Error sending sms message.", ex);
 
                 throw exception;
             }

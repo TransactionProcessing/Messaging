@@ -109,8 +109,8 @@
             if (type == null)
                 throw new Exception($"Failed to find a domain event with type {eventType}");
 
-            JsonIgnoreAttributeIgnorerContractResolver jsonIgnoreAttributeIgnorerContractResolver = new JsonIgnoreAttributeIgnorerContractResolver();
-            JsonSerializerSettings jsonSerialiserSettings = new JsonSerializerSettings {
+            JsonIgnoreAttributeIgnorerContractResolver jsonIgnoreAttributeIgnorerContractResolver = new();
+            JsonSerializerSettings jsonSerialiserSettings = new() {
                                                                                            ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
                                                                                            TypeNameHandling = TypeNameHandling.All,
                                                                                            Formatting = Formatting.Indented,

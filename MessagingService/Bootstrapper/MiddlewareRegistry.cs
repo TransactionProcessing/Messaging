@@ -112,8 +112,7 @@ namespace MessagingService.Bootstrapper
             bool logResponses = ConfigurationReader.GetValueOrDefault<Boolean>("MiddlewareLogging", "LogResponses", true);
             LogLevel middlewareLogLevel = ConfigurationReader.GetValueOrDefault<LogLevel>("MiddlewareLogging", "MiddlewareLogLevel", LogLevel.Warning);
 
-            RequestResponseMiddlewareLoggingConfig config =
-                new RequestResponseMiddlewareLoggingConfig(middlewareLogLevel, logRequests, logResponses);
+            RequestResponseMiddlewareLoggingConfig config = new(middlewareLogLevel, logRequests, logResponses);
 
             this.AddSingleton(config);
         }
