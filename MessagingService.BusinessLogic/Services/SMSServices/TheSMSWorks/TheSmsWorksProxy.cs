@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Security.Authentication;
 using System.Text;
 
 namespace MessagingService.BusinessLogic.Services.SMSServices.TheSMSWorks
@@ -115,7 +116,7 @@ namespace MessagingService.BusinessLogic.Services.SMSServices.TheSMSWorks
                 }
             }
             else {
-                throw new Exception("Authentication Error");
+                throw new AuthenticationException("Authentication Error");
             }
 
             return response;
