@@ -257,6 +257,10 @@ namespace MessagingService.BusinessLogic.Services
                     case EmailServices.MessageStatus.Spam:
                         emailAggregate.MarkMessageAsSpam(command.Description, command.Timestamp);
                         break;
+                    default:
+                        // Unknown status - treat as failed
+                        emailAggregate.MarkMessageAsFailed(command.Description, command.Timestamp);
+                        break;
                 }
 
                 return Result.Success();

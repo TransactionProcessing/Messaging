@@ -1,4 +1,6 @@
-﻿namespace MessagingService.Controllers
+﻿using Shared.Exceptions;
+
+namespace MessagingService.Controllers
 {
     using System;
     using System.Collections.Generic;
@@ -107,7 +109,7 @@
             Type type = TypeMap.GetType(eventType);
 
             if (type == null)
-                throw new Exception($"Failed to find a domain event with type {eventType}");
+                throw new NotFoundException($"Failed to find a domain event with type {eventType}");
 
             JsonIgnoreAttributeIgnorerContractResolver jsonIgnoreAttributeIgnorerContractResolver = new();
             JsonSerializerSettings jsonSerialiserSettings = new() {
