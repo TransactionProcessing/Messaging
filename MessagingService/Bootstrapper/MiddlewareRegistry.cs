@@ -30,8 +30,10 @@ namespace MessagingService.Bootstrapper
     [ExcludeFromCodeCoverage]
     public class MiddlewareRegistry : ServiceRegistry
     {
-        public MiddlewareRegistry() {
+        internal String GetSecurityConfigSetting(String settingName) => ConfigurationReader.GetValue("SecurityConfiguration", settingName);
 
+        public MiddlewareRegistry() {
+            
             String connectionString = Startup.Configuration.GetValue<String>("EventStoreSettings:ConnectionString");
             EventStoreClientSettings eventStoreConnectionSettings = EventStoreClientSettings.Create(connectionString);
 
@@ -84,14 +86,14 @@ namespace MessagingService.Bootstrapper
                                                                        ServerCertificateCustomValidationCallback =
                                                                            (message, certificate, chain, sslPolicyErrors) => true
                                                                    };
-                                  options.Authority = ConfigurationReader.GetValue("SecurityConfiguration", "Authority");
-                                  options.Audience = ConfigurationReader.GetValue("SecurityConfiguration", "ApiName");
+                                  options.Authority = GetSecurityConfigSetting("Authority");
+                                  options.Audience = GetSecurityConfigSetting("ApiName");
 
                                   options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters()
                                                                       {
                                                                           ValidateAudience = false,
-                                                                          ValidAudience = ConfigurationReader.GetValue("SecurityConfiguration", "ApiName"),
-                                                                          ValidIssuer = ConfigurationReader.GetValue("SecurityConfiguration", "Authority"),
+                                                                          ValidAudience = GetSecurityConfigSetting("ApiName"),
+                                                                          ValidIssuer = GetSecurityConfigSetting("Authority"),
                                                                       };
                                   options.IncludeErrorDetails = true;
                               });
