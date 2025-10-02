@@ -50,8 +50,6 @@
                                                                Boolean isHtml,
                                                                List<EmailAttachment> attachments,
                                                                CancellationToken cancellationToken) {
-            EmailServiceProxyResponse response = null;
-
             // Translate the request message
             Smtp2GoSendEmailRequest apiRequest = new()
                                                  {
@@ -96,17 +94,14 @@
             if (httpResponse.IsSuccessStatusCode){
                 apiResponse = JsonConvert.DeserializeObject<Smtp2GoSendEmailResponse>(await httpResponse.Content.ReadAsStringAsync(cancellationToken));
             }
-            else{
-                apiResponse = new Smtp2GoSendEmailResponse();
-                apiResponse.Data = new Smtp2GoSendEmailResponseData();
-                apiResponse.Data.Error = httpResponse.StatusCode.ToString();
-                apiResponse.Data.ErrorCode = ((Int32)httpResponse.StatusCode).ToString();
+            else {
+                apiResponse = new Smtp2GoSendEmailResponse { Data = new Smtp2GoSendEmailResponseData { Error = httpResponse.StatusCode.ToString(), ErrorCode = ((Int32)httpResponse.StatusCode).ToString() } };
             }
 
             Logger.LogDebug($"Response Message Received from Email Provider [SMTP2Go] {JsonConvert.SerializeObject(apiResponse)}");
 
             // Translate the Response
-            response = new EmailServiceProxyResponse
+            return new EmailServiceProxyResponse
                        {
                            ApiCallSuccessful = httpResponse.IsSuccessStatusCode && String.IsNullOrEmpty(apiResponse.Data.ErrorCode),
                            EmailIdentifier = apiResponse.Data.EmailId,
@@ -114,7 +109,6 @@
                            ErrorCode = apiResponse.Data.ErrorCode,
                            RequestIdentifier = apiResponse.RequestId
                        };
-            return response;
         }
         
         private String ConvertFileType(FileType emailAttachmentFileType)
@@ -133,8 +127,6 @@
                                                                   DateTime endDate,
                                                                   CancellationToken cancellationToken)
         {
-            MessageStatusResponse response = null;
-
             Smtp2GoEmailSearchRequest apiRequest = new()
                                                    {
                                                        ApiKey = ConfigurationReader.GetValue("SMTP2GoAPIKey"),
@@ -166,50 +158,31 @@
             Logger.LogDebug($"Response Message Received from Email Provider [SMTP2Go] {JsonConvert.SerializeObject(apiResponse)}");
 
             // Translate the Response
-            response = new MessageStatusResponse
+            return new MessageStatusResponse
                        {
                            ApiStatusCode = httpResponse.StatusCode,
                            MessageStatus = this.TranslateMessageStatus(apiResponse.Data.EmailDetails.Single().Status),
                            ProviderStatusDescription = apiResponse.Data.EmailDetails.Single().Status,
                            Timestamp = apiResponse.Data.EmailDetails.Single().EmailStatusDate
                        };
-
-            return response;
         }
 
-        private MessageStatus TranslateMessageStatus(String status)
-        {
-            MessageStatus result;
-            switch (status)
-            {
-                case "failed":
-                case "deferred":
-                    result = MessageStatus.Failed;
-                    break;
-                case "hardbounce":
-                case "refused":
-                case "softbounce":
-                case "returned":
-                    result = MessageStatus.Bounced;
-                    break;
-                case "delivered":
-                case "ok":
-                case "sent":
-                    result = MessageStatus.Delivered;
-                    break;
-                case "rejected":
-                    result = MessageStatus.Rejected;
-                    break;
-                case "complained":
-                case "spam":
-                    result = MessageStatus.Spam;
-                    break;
-                default:
-                    result = MessageStatus.Unknown;
-                    break;
-            }
-
-            return result;
+        private MessageStatus TranslateMessageStatus(String status) {
+            return status switch {
+                "failed" => MessageStatus.Failed,
+                "deferred" => MessageStatus.Failed,
+                "hardbounce" => MessageStatus.Bounced,
+                "refused" => MessageStatus.Bounced,
+                "softbounce" => MessageStatus.Bounced,
+                "returned" => MessageStatus.Bounced,
+                "delivered" => MessageStatus.Delivered,
+                "ok" => MessageStatus.Delivered,
+                "sent" => MessageStatus.Delivered,
+                "rejected" => MessageStatus.Rejected,
+                "complained" => MessageStatus.Spam,
+                "spam" => MessageStatus.Spam,
+                _ => MessageStatus.Unknown,
+            };
         }
 
         #endregion
