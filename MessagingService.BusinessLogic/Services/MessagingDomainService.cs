@@ -287,6 +287,9 @@ namespace MessagingService.BusinessLogic.Services
                     case SMSServices.MessageStatus.Undeliverable:
                         smsAggregate.MarkMessageAsUndeliverable(command.Description, command.Timestamp);
                         break;
+                    default:
+                        smsAggregate.MarkMessageAsRejected(command.Description, command.Timestamp);
+                        break;
                 }
                 
                 return Result.Success();

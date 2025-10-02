@@ -62,8 +62,6 @@ namespace MessagingService.Client
                                                        SendEmailRequest sendEmailRequest,
                                                        CancellationToken cancellationToken)
         {
-            SendEmailResponse response = null;
-
             String requestUri = this.BuildRequestUrl("/api/email/");
 
             try
@@ -138,8 +136,6 @@ namespace MessagingService.Client
                                           SendSMSRequest sendSMSRequest,
                                           CancellationToken cancellationToken)
         {
-            SendSMSResponse response = null;
-
             String requestUri = this.BuildRequestUrl("/api/sms/");
 
             try

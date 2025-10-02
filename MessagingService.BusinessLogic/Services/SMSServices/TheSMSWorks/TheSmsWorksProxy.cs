@@ -148,6 +148,9 @@ namespace MessagingService.BusinessLogic.Services.SMSServices.TheSMSWorks
                 case "INCOMING":
                     result = MessageStatus.Incoming;
                     break;
+                default:
+                    result = MessageStatus.Rejected;
+                    break;
             }
 
             return result;
