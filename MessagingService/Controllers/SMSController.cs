@@ -1,4 +1,5 @@
 ﻿using MessagingService.BusinessLogic.Requests;
+using Shared.General;
 using Shared.Results;
 using Shared.Results.Web;
 using SimpleResults;

@@ -129,31 +129,15 @@ namespace MessagingService.BusinessLogic.Services.SMSServices.TheSMSWorks
         /// <returns></returns>
         private MessageStatus TranslateMessageStatus(String status)
         {
-            MessageStatus result = MessageStatus.NotSet;
-            switch (status)
-            {
-                case "UNDELIVERABLE":
-                    result = MessageStatus.Undeliverable;
-                    break;
-                case "DELIVERED":
-                case "SENT":
-                    result = MessageStatus.Delivered;
-                    break;
-                case "REJECTED":
-                    result = MessageStatus.Rejected;
-                    break;
-                case "EXPIRED":
-                    result = MessageStatus.Expired;
-                    break;
-                case "INCOMING":
-                    result = MessageStatus.Incoming;
-                    break;
-                default:
-                    result = MessageStatus.Rejected;
-                    break;
-            }
-
-            return result;
+            return status switch {
+                "UNDELIVERABLE" => MessageStatus.Undeliverable,
+                "DELIVERED"=> MessageStatus.Delivered,
+                "SENT" => MessageStatus.Delivered,
+                "REJECTED" => MessageStatus.Rejected,
+                "EXPIRED" => MessageStatus.Expired,
+                "INCOMING" => MessageStatus.Incoming,
+                _ => MessageStatus.Rejected
+            };
         }
 
         /// <summary>

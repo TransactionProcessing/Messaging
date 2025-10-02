@@ -51,9 +51,7 @@ public static class Extensions
         IConfigurationSection subscriptionConfigSection = Startup.Configuration.GetSection("AppSettings:SubscriptionConfiguration");
         SubscriptionWorkersRoot subscriptionWorkersRoot = new();
         subscriptionConfigSection.Bind(subscriptionWorkersRoot);
-
-        String eventStoreConnectionString = ConfigurationReader.GetValue("EventStoreSettings", "ConnectionString");
-
+        
         IDomainEventHandlerResolver mainEventHandlerResolver = Startup.Container.GetInstance<IDomainEventHandlerResolver>("Main");
         
         Dictionary<String, IDomainEventHandlerResolver> eventHandlerResolvers = new() {
@@ -66,7 +64,7 @@ public static class Extensions
         String connectionString = Startup.Configuration.GetValue<String>("EventStoreSettings:ConnectionString");
         EventStoreClientSettings eventStoreConnectionSettings = EventStoreClientSettings.Create(connectionString);
         applicationBuilder.ConfigureSubscriptionService(subscriptionWorkersRoot,
-                                                        eventStoreConnectionString,
+            connectionString,
                                                         eventHandlerResolvers,
                                                         Extensions.log,
                                                         subscriptionRepositoryResolver).Wait(CancellationToken.None);
