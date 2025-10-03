@@ -113,7 +113,7 @@ namespace MessagingService.Controllers
         /// <summary>
         /// The controller name
         /// </summary>
-        public const String ControllerName = "sms";
+        private const String ControllerName = "sms";
 
         /// <summary>
         /// The controller route

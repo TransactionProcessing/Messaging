@@ -146,7 +146,7 @@ namespace MessagingService.Controllers
         /// <summary>
         /// The controller name
         /// </summary>
-        public const String ControllerName = "email";
+        private const String ControllerName = "email";
 
         /// <summary>
         /// The controller route
