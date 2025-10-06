@@ -48,7 +48,7 @@ namespace MessagingService.Controllers
         #endregion
 
         #region Methods
-        
+
         /// <summary>
         /// Sends the SMS.
         /// </summary>
@@ -83,6 +83,7 @@ namespace MessagingService.Controllers
             return result.ToActionResultX();
         }
 
+        [ValidateAntiForgeryToken]
         [HttpPost]
         [Route("resend")]
         [SwaggerResponse(202, "Accepted", typeof(SendSMSResponse))]
