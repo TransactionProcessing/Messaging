@@ -62,7 +62,6 @@ namespace MessagingService.Controllers
         /// <param name="sendEmailRequest">The send email request.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns></returns>
-        [ValidateAntiForgeryToken]
         [HttpPost]
         [Route("")]
         [SwaggerResponse(201, "Created", typeof(SendEmailResponseDTO))]

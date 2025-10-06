@@ -55,7 +55,6 @@ namespace MessagingService.Controllers
         /// <param name="sendSMSRequest">The send SMS request.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns></returns>
-        [ValidateAntiForgeryToken]
         [HttpPost]
         [Route("")]
         [SwaggerResponse(201, "Created", typeof(SendSMSResponse))]

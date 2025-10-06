@@ -57,7 +57,6 @@ namespace MessagingService.Controllers
         /// <param name="domainEvent">The domain event.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns></returns>
-        [ValidateAntiForgeryToken]
         [HttpPost]
         public async Task<IActionResult> PostEventAsync([FromBody] Object request,
                                                         CancellationToken cancellationToken) {
