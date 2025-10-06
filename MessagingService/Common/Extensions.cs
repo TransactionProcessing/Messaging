@@ -41,6 +41,9 @@ public static class Extensions
                                                                      case TraceEventType.Verbose:
                                                                          Logger.LogDebug(logMessage);
                                                                          break;
+                                                                     default:
+                                                                         Logger.LogInformation(logMessage);
+                                                                         break;
                                                                  }
                                                              };
     
@@ -62,7 +65,7 @@ public static class Extensions
 
 
         String connectionString = Startup.Configuration.GetValue<String>("EventStoreSettings:ConnectionString");
-        EventStoreClientSettings eventStoreConnectionSettings = EventStoreClientSettings.Create(connectionString);
+
         applicationBuilder.ConfigureSubscriptionService(subscriptionWorkersRoot,
             connectionString,
                                                         eventHandlerResolvers,

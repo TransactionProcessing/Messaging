@@ -55,13 +55,14 @@ namespace MessagingService.Controllers
         #endregion
 
         #region Methods
-        
+
         /// <summary>
         /// Sends the email.
         /// </summary>
         /// <param name="sendEmailRequest">The send email request.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns></returns>
+        [ValidateAntiForgeryToken]
         [HttpPost]
         [Route("")]
         [SwaggerResponse(201, "Created", typeof(SendEmailResponseDTO))]
@@ -105,6 +106,7 @@ namespace MessagingService.Controllers
             return result.ToActionResultX();
         }
 
+        [ValidateAntiForgeryToken]
         [HttpPost]
         [Route("resend")]
         [SwaggerResponse(202, "Accepted", typeof(SendEmailResponseDTO))]
