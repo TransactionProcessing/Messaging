@@ -45,13 +45,7 @@ namespace MessagingService.BusinessLogic.Tests.Services
             MessagingDomainService messagingDomainService =
                 new(emailAggregateRepository.Object, smsAggregateRepository.Object, emailServiceProxy.Object, smsServiceProxy.Object);
 
-            var result  = await messagingDomainService.SendEmailMessage(TestData.ConnectionIdentifier,
-                                                          TestData.MessageId,
-                                                          TestData.FromAddress,
-                                                          TestData.ToAddresses,
-                                                          TestData.Subject,
-                                                          TestData.Body,
-                                                          TestData.IsHtmlTrue,
+            var result  = await messagingDomainService.SendEmailMessage(TestData.SendEmailCommand,
                                                           TestData.EmailAttachmentModels,
                                                           CancellationToken.None);
             result.IsSuccess.ShouldBeTrue();
@@ -79,13 +73,7 @@ namespace MessagingService.BusinessLogic.Tests.Services
 
             MessagingDomainService messagingDomainService = new(emailAggregateRepository.Object, smsAggregateRepository.Object, emailServiceProxy.Object, smsServiceProxy.Object);
 
-            var result = await messagingDomainService.SendEmailMessage(TestData.ConnectionIdentifier,
-                TestData.MessageId,
-                TestData.FromAddress,
-                TestData.ToAddresses,
-                TestData.Subject,
-                TestData.Body,
-                TestData.IsHtmlTrue,
+            var result = await messagingDomainService.SendEmailMessage(TestData.SendEmailCommand,
                 TestData.EmailAttachmentModels,
                 CancellationToken.None);
             result.IsSuccess.ShouldBeTrue();
@@ -113,13 +101,7 @@ namespace MessagingService.BusinessLogic.Tests.Services
             MessagingDomainService messagingDomainService =
                 new(emailAggregateRepository.Object, smsAggregateRepository.Object, emailServiceProxy.Object, smsServiceProxy.Object);
 
-            await messagingDomainService.SendEmailMessage(TestData.ConnectionIdentifier,
-                                                          TestData.MessageId,
-                                                          TestData.FromAddress,
-                                                          TestData.ToAddresses,
-                                                          TestData.Subject,
-                                                          TestData.Body,
-                                                          TestData.IsHtmlTrue,
+            await messagingDomainService.SendEmailMessage(TestData.SendEmailCommand,
                                                           TestData.EmailAttachmentModels,
                                                           CancellationToken.None);
         }
@@ -145,13 +127,7 @@ namespace MessagingService.BusinessLogic.Tests.Services
             MessagingDomainService messagingDomainService =
                 new(emailAggregateRepository.Object, smsAggregateRepository.Object, emailServiceProxy.Object, smsServiceProxy.Object);
 
-            await messagingDomainService.SendEmailMessage(TestData.ConnectionIdentifier,
-                                                          TestData.MessageId,
-                                                          TestData.FromAddress,
-                                                          TestData.ToAddresses,
-                                                          TestData.Subject,
-                                                          TestData.Body,
-                                                          TestData.IsHtmlTrue,
+            await messagingDomainService.SendEmailMessage(TestData.SendEmailCommand,
                                                           TestData.EmailAttachmentModels,
                                                           CancellationToken.None);
         }
@@ -177,13 +153,7 @@ namespace MessagingService.BusinessLogic.Tests.Services
             MessagingDomainService messagingDomainService =
                 new(emailAggregateRepository.Object, smsAggregateRepository.Object, emailServiceProxy.Object, smsServiceProxy.Object);
 
-            await messagingDomainService.SendEmailMessage(TestData.ConnectionIdentifier,
-                                                          TestData.MessageId,
-                                                          TestData.FromAddress,
-                                                          TestData.ToAddresses,
-                                                          TestData.Subject,
-                                                          TestData.Body,
-                                                          TestData.IsHtmlTrue,
+            await messagingDomainService.SendEmailMessage(TestData.SendEmailCommand,
                                                           TestData.EmailAttachmentModels,
                                                           CancellationToken.None);
         }
