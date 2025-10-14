@@ -51,34 +51,22 @@
                                                                List<EmailAttachment> attachments,
                                                                CancellationToken cancellationToken) {
             // Translate the request message
-            Smtp2GoSendEmailRequest apiRequest = new()
-                                                 {
-                                                     ApiKey = ConfigurationReader.GetValue("SMTP2GoAPIKey"),
-                                                     HTMLBody = isHtml ? body : string.Empty,
-                                                     TextBody = isHtml ? string.Empty : body,
-                                                     Sender = fromAddress,
-                                                     Subject = subject,
-                                                     TestMode = false,
-                                                     To = toAddresses.ToArray()
-                                                 };
-            if (attachments != null && attachments.Any())
-            {
+            Smtp2GoSendEmailRequest apiRequest = new() {
+                ApiKey = ConfigurationReader.GetValue("SMTP2GoAPIKey"),
+                HTMLBody = isHtml ? body : string.Empty,
+                TextBody = isHtml ? string.Empty : body,
+                Sender = fromAddress,
+                Subject = subject,
+                TestMode = false,
+                To = toAddresses.ToArray()
+            };
+
+            if (attachments != null && attachments.Any()) {
                 apiRequest.Attachments = new List<Smtp2GoAttachment>();
-                foreach (EmailAttachment emailAttachment in attachments)
-                {
-                    apiRequest.Attachments.Add(new Smtp2GoAttachment
-                    {
-                        FileBlob = emailAttachment.FileData,
-                        FileName = emailAttachment.Filename,
-                        MimeType = this.ConvertFileType(emailAttachment.FileType)
-                    });
-                }
+                attachments.ForEach(a => apiRequest.Attachments.Add(new Smtp2GoAttachment { FileBlob = a.FileData, FileName = a.Filename, MimeType = this.ConvertFileType(a.FileType) }));
             }
 
-            String requestSerialised = JsonConvert.SerializeObject(apiRequest, Formatting.Indented, new JsonSerializerSettings
-                                                                                                {
-                                                                                                    TypeNameHandling = TypeNameHandling.None
-                                                                                                });
+            String requestSerialised = JsonConvert.SerializeObject(apiRequest, Formatting.Indented, new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.None });
 
             Logger.LogDebug($"Request Message Sent to Email Provider [SMTP2Go] {requestSerialised}");
 
@@ -90,31 +78,25 @@
 
             HttpResponseMessage httpResponse = await this.HttpClient.SendAsync(requestMessage, cancellationToken);
 
-            Smtp2GoSendEmailResponse apiResponse = new() { Data = new Smtp2GoSendEmailResponseData() };
-            if (httpResponse.IsSuccessStatusCode){
-                apiResponse = JsonConvert.DeserializeObject<Smtp2GoSendEmailResponse>(await httpResponse.Content.ReadAsStringAsync(cancellationToken));
-            }
-            else {
-                apiResponse = new Smtp2GoSendEmailResponse { Data = new Smtp2GoSendEmailResponseData { Error = httpResponse.StatusCode.ToString(), ErrorCode = ((Int32)httpResponse.StatusCode).ToString() } };
-            }
+            Smtp2GoSendEmailResponse apiResponse = httpResponse.IsSuccessStatusCode switch {
+                true => JsonConvert.DeserializeObject<Smtp2GoSendEmailResponse>(await httpResponse.Content.ReadAsStringAsync(cancellationToken)),
+                _ => new Smtp2GoSendEmailResponse { Data = new Smtp2GoSendEmailResponseData { Error = httpResponse.StatusCode.ToString(), ErrorCode = ((Int32)httpResponse.StatusCode).ToString() } }
+            };
 
             Logger.LogDebug($"Response Message Received from Email Provider [SMTP2Go] {JsonConvert.SerializeObject(apiResponse)}");
 
             // Translate the Response
-            return new EmailServiceProxyResponse
-                       {
-                           ApiCallSuccessful = httpResponse.IsSuccessStatusCode && String.IsNullOrEmpty(apiResponse.Data.ErrorCode),
-                           EmailIdentifier = apiResponse.Data.EmailId,
-                           Error = apiResponse.Data.Error,
-                           ErrorCode = apiResponse.Data.ErrorCode,
-                           RequestIdentifier = apiResponse.RequestId
-                       };
+            return new EmailServiceProxyResponse {
+                ApiCallSuccessful = httpResponse.IsSuccessStatusCode && String.IsNullOrEmpty(apiResponse.Data.ErrorCode),
+                EmailIdentifier = apiResponse.Data.EmailId,
+                Error = apiResponse.Data.Error,
+                ErrorCode = apiResponse.Data.ErrorCode,
+                RequestIdentifier = apiResponse.RequestId
+            };
         }
-        
-        private String ConvertFileType(FileType emailAttachmentFileType)
-        {
-            switch(emailAttachmentFileType)
-            {
+
+        private String ConvertFileType(FileType emailAttachmentFileType) {
+            switch (emailAttachmentFileType) {
                 case FileType.PDF:
                     return "application/pdf";
                 default:
@@ -125,23 +107,12 @@
         public async Task<MessageStatusResponse> GetMessageStatus(String providerReference,
                                                                   DateTime startDate,
                                                                   DateTime endDate,
-                                                                  CancellationToken cancellationToken)
-        {
-            Smtp2GoEmailSearchRequest apiRequest = new()
-                                                   {
-                                                       ApiKey = ConfigurationReader.GetValue("SMTP2GoAPIKey"),
-                                                       EmailId = new List<String>
-                                                                 {
-                                                                     providerReference
-                                                                 },
-                                                       StartDate = startDate.ToString("yyyy-MM-dd"),
-                                                       EndDate = endDate.ToString("yyyy-MM-dd"),
-                                                   };
+                                                                  CancellationToken cancellationToken) {
+            Smtp2GoEmailSearchRequest apiRequest = new() {
+                ApiKey = ConfigurationReader.GetValue("SMTP2GoAPIKey"), EmailId = new List<String> { providerReference }, StartDate = startDate.ToString("yyyy-MM-dd"), EndDate = endDate.ToString("yyyy-MM-dd"),
+            };
 
-            String requestSerialised = JsonConvert.SerializeObject(apiRequest, new JsonSerializerSettings
-                                                                               {
-                                                                                   TypeNameHandling = TypeNameHandling.None
-                                                                               });
+            String requestSerialised = JsonConvert.SerializeObject(apiRequest, new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.None });
 
             Logger.LogDebug($"Request Message Sent to Email Provider [SMTP2Go] {requestSerialised}");
 
@@ -158,13 +129,7 @@
             Logger.LogDebug($"Response Message Received from Email Provider [SMTP2Go] {JsonConvert.SerializeObject(apiResponse)}");
 
             // Translate the Response
-            return new MessageStatusResponse
-                       {
-                           ApiStatusCode = httpResponse.StatusCode,
-                           MessageStatus = this.TranslateMessageStatus(apiResponse.Data.EmailDetails.Single().Status),
-                           ProviderStatusDescription = apiResponse.Data.EmailDetails.Single().Status,
-                           Timestamp = apiResponse.Data.EmailDetails.Single().EmailStatusDate
-                       };
+            return new MessageStatusResponse { ApiStatusCode = httpResponse.StatusCode, MessageStatus = this.TranslateMessageStatus(apiResponse.Data.EmailDetails.Single().Status), ProviderStatusDescription = apiResponse.Data.EmailDetails.Single().Status, Timestamp = apiResponse.Data.EmailDetails.Single().EmailStatusDate };
         }
 
         private MessageStatus TranslateMessageStatus(String status) {
