@@ -66,13 +66,7 @@ namespace MessagingService.BusinessLogic.RequestHandlers{
                                                    });
             }
 
-            return await this.MessagingDomainService.SendEmailMessage(command.ConnectionIdentifier,
-                                                               command.MessageId,
-                                                               command.FromAddress,
-                                                               command.ToAddresses,
-                                                               command.Subject,
-                                                               command.Body,
-                                                               command.IsHtml,
+            return await this.MessagingDomainService.SendEmailMessage(command,
                                                                attachments,
                                                                cancellationToken);
         }

@@ -16,15 +16,9 @@ namespace MessagingService.BusinessLogic.Services
     {
         #region Methods
 
-        Task<Result<Guid>> SendEmailMessage(Guid connectionIdentifier,
-                                      Guid messageId,
-                                      String fromAddress,
-                                      List<String> toAddresses,
-                                      String subject,
-                                      String body,
-                                      Boolean isHtml,
-                                      List<EmailAttachment> attachments,
-                                      CancellationToken cancellationToken);
+        Task<Result<Guid>> SendEmailMessage(EmailCommands.SendEmailCommand command,
+                                            List<EmailAttachment> attachments,
+                                            CancellationToken cancellationToken);
 
         Task<Result<Guid>> SendSMSMessage(Guid connectionIdentifier,
                                     Guid messageId,

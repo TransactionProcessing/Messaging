@@ -111,13 +111,7 @@ namespace MessagingService.BusinessLogic.Services
             }
         }
 
-        public async Task<Result<Guid>> SendEmailMessage(Guid connectionIdentifier,
-                                                         Guid messageId,
-                                                         String fromAddress,
-                                                         List<String> toAddresses,
-                                                         String subject,
-                                                         String body,
-                                                         Boolean isHtml,
+        public async Task<Result<Guid>> SendEmailMessage(EmailCommands.SendEmailCommand command,
                                                          List<EmailAttachment> attachments,
                                                          CancellationToken cancellationToken) {
             Result result = await ApplyEmailUpdates(async (EmailAggregate emailAggregate) =>
@@ -129,11 +123,11 @@ namespace MessagingService.BusinessLogic.Services
                 }
 
                 // send message to provider (record event)
-                emailAggregate.SendRequestToProvider(fromAddress, toAddresses, subject, body, isHtml, attachments);
+                emailAggregate.SendRequestToProvider(command.FromAddress, command.ToAddresses, command.Subject, command.Body, command.IsHtml, attachments);
 
                 // Make call to Email provider here
-                EmailServiceProxyResponse emailResponse = await this.EmailServiceProxy.SendEmail(messageId, fromAddress,
-                    toAddresses, subject, body, isHtml, attachments, cancellationToken);
+                EmailServiceProxyResponse emailResponse = await this.EmailServiceProxy.SendEmail(command.MessageId, command.FromAddress,
+                    command.ToAddresses,command.Subject, command.Body, command.IsHtml, attachments, cancellationToken);
 
                 if (emailResponse.ApiCallSuccessful)
                 {
@@ -147,11 +141,11 @@ namespace MessagingService.BusinessLogic.Services
                 }
 
                 return Result.Success();
-            }, messageId, cancellationToken, false);
+            }, command.MessageId, cancellationToken, false);
 
             if (result.IsFailed)
                 return result;
-            return Result.Success(messageId);
+            return Result.Success(command.MessageId);
         }
 
         public async Task<Result<Guid>> SendSMSMessage(Guid connectionIdentifier,
@@ -194,7 +188,7 @@ namespace MessagingService.BusinessLogic.Services
             Result result = await ApplyEmailUpdates(async (EmailAggregate emailAggregate) => {
                 // re-send message to provider (record event)
                 emailAggregate.ResendRequestToProvider();
-
+                
                 // Make call to Email provider here
                 EmailServiceProxyResponse emailResponse =
                     await this.EmailServiceProxy.SendEmail(messageId, emailAggregate.FromAddress,

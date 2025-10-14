@@ -14,13 +14,7 @@ namespace MessagingService.BusinessLogic.Tests.Mediator
 
     public class DummyMessagingDomainService : IMessagingDomainService
     {
-        public async Task<Result<Guid>> SendEmailMessage(Guid connectionIdentifier,
-                                                         Guid messageId,
-                                                         String fromAddress,
-                                                         List<String> toAddresses,
-                                                         String subject,
-                                                         String body,
-                                                         Boolean isHtml,
+        public async Task<Result<Guid>> SendEmailMessage(EmailCommands.SendEmailCommand command,
                                                          List<EmailAttachment> attachments,
                                                          CancellationToken cancellationToken) => Result.Success(Guid.NewGuid());
         
