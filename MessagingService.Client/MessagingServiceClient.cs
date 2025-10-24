@@ -43,7 +43,7 @@ namespace MessagingService.Client
 
             try
             {
-                Result<String> result = await this.SendPostRequest<SendEmailRequest, String>(requestUri, accessToken, sendEmailRequest, cancellationToken);
+                Result<ResponseData<String>> result = await this.SendPostRequest<SendEmailRequest, ResponseData<String>>(requestUri, accessToken, sendEmailRequest, cancellationToken);
                 
                 if (result.IsFailed)
                     return ResultHelpers.CreateFailure(result);
@@ -65,7 +65,7 @@ namespace MessagingService.Client
             String requestUri = this.BuildRequestUrl("/api/email/resend");
 
             try {
-                Result<String> result = await this.SendPostRequest<ResendEmailRequest, String>(requestUri, accessToken, resendEmailRequest, cancellationToken);
+                Result<ResponseData<String>> result = await this.SendPostRequest<ResendEmailRequest, ResponseData<String>>(requestUri, accessToken, resendEmailRequest, cancellationToken);
 
                 if (result.IsFailed)
                     return ResultHelpers.CreateFailure(result);
@@ -88,7 +88,7 @@ namespace MessagingService.Client
 
             try
             {
-                Result<String> result = await this.SendPostRequest<SendSMSRequest, String>(requestUri, accessToken, sendSMSRequest, cancellationToken);
+                Result<ResponseData<String>> result = await this.SendPostRequest<SendSMSRequest, ResponseData<String>>(requestUri, accessToken, sendSMSRequest, cancellationToken);
 
                 if (result.IsFailed)
                     return ResultHelpers.CreateFailure(result);
