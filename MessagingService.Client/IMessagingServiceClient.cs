@@ -13,14 +13,6 @@ namespace MessagingService.Client
     public interface IMessagingServiceClient
     {
         #region Methods
-
-        /// <summary>
-        /// Sends the email.
-        /// </summary>
-        /// <param name="accessToken">The access token.</param>
-        /// <param name="request">The request.</param>
-        /// <param name="cancellationToken">The cancellation token.</param>
-        /// <returns></returns>
         Task<Result> SendEmail(String accessToken,
                                           SendEmailRequest request,
                                           CancellationToken cancellationToken);
@@ -29,13 +21,6 @@ namespace MessagingService.Client
                                  ResendEmailRequest request,
                                  CancellationToken cancellationToken);
 
-        /// <summary>
-        /// Sends the SMS.
-        /// </summary>
-        /// <param name="accessToken">The access token.</param>
-        /// <param name="request">The request.</param>
-        /// <param name="cancellationToken">The cancellation token.</param>
-        /// <returns></returns>
         Task<Result> SendSMS(String accessToken,
                              SendSMSRequest request,
                              CancellationToken cancellationToken);

@@ -26,7 +26,7 @@ namespace MessagingService.IntegrationTests.Common
             dockerHelper.SqlCredentials = Setup.SqlCredentials;
             dockerHelper.DockerCredentials = Setup.DockerCredentials;
             dockerHelper.SqlServerContainerName = "sharedsqlserver";
-
+            
             // Only one thread can execute this block at a time
             lock (Setup.padLock)
             {

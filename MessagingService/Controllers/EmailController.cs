@@ -29,7 +29,7 @@ namespace MessagingService.Controllers
     [ExcludeFromCodeCoverage]
     [Route(EmailController.ControllerRoute)]
     [ApiController]
-    //[Authorize]
+    [Authorize]
     public class EmailController : ControllerBase
     {
         #region Fields
