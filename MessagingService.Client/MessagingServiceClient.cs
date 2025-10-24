@@ -13,34 +13,18 @@ namespace MessagingService.Client
     using Newtonsoft.Json;
     using SimpleResults;
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <seealso cref="ClientProxyBase" />
-    /// <seealso cref="MessagingService.Client.IMessagingServiceClient" />
     public class MessagingServiceClient : ClientProxyBase, IMessagingServiceClient
     {
         #region Fields
 
-        /// <summary>
-        /// The base address
-        /// </summary>
         private readonly String BaseAddress;
 
-        /// <summary>
-        /// The base address resolver
-        /// </summary>
         private readonly Func<String, String> BaseAddressResolver;
 
         #endregion
 
         #region Constructors
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="MessagingServiceClient"/> class.
-        /// </summary>
-        /// <param name="baseAddressResolver">The base address resolver.</param>
-        /// <param name="httpClient">The HTTP client.</param>
         public MessagingServiceClient(Func<String, String> baseAddressResolver,
                                       HttpClient httpClient) : base(httpClient)
         {
@@ -51,13 +35,6 @@ namespace MessagingService.Client
 
         #region Methods
 
-        /// <summary>
-        /// Sends the email.
-        /// </summary>
-        /// <param name="accessToken">The access token.</param>
-        /// <param name="sendEmailRequest">The send email request.</param>
-        /// <param name="cancellationToken">The cancellation token.</param>
-        /// <returns></returns>
         public async Task<Result> SendEmail(String accessToken,
                                                        SendEmailRequest sendEmailRequest,
                                                        CancellationToken cancellationToken)
@@ -66,19 +43,8 @@ namespace MessagingService.Client
 
             try
             {
-                String requestSerialised = JsonConvert.SerializeObject(sendEmailRequest);
-
-                StringContent httpContent = new(requestSerialised, Encoding.UTF8, "application/json");
-
-                // Add the access token to the client headers
-                this.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-
-                // Make the Http Call here
-                HttpResponseMessage httpResponse = await this.HttpClient.PostAsync(requestUri, httpContent, cancellationToken);
-
-                // Process the response
-                Result<String> result = await this.HandleResponseX(httpResponse, cancellationToken);
-
+                Result<ResponseData<String>> result = await this.SendPostRequest<SendEmailRequest, ResponseData<String>>(requestUri, accessToken, sendEmailRequest, cancellationToken);
+                
                 if (result.IsFailed)
                     return ResultHelpers.CreateFailure(result);
 
@@ -99,18 +65,7 @@ namespace MessagingService.Client
             String requestUri = this.BuildRequestUrl("/api/email/resend");
 
             try {
-                String requestSerialised = JsonConvert.SerializeObject(resendEmailRequest);
-
-                StringContent httpContent = new(requestSerialised, Encoding.UTF8, "application/json");
-
-                // Add the access token to the client headers
-                this.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-
-                // Make the Http Call here
-                HttpResponseMessage httpResponse = await this.HttpClient.PostAsync(requestUri, httpContent, cancellationToken);
-
-                // Process the response
-                Result<String> result = await this.HandleResponseX(httpResponse, cancellationToken);
+                Result<ResponseData<String>> result = await this.SendPostRequest<ResendEmailRequest, ResponseData<String>>(requestUri, accessToken, resendEmailRequest, cancellationToken);
 
                 if (result.IsFailed)
                     return ResultHelpers.CreateFailure(result);
@@ -125,13 +80,6 @@ namespace MessagingService.Client
             }
         }
 
-        /// <summary>
-        /// Sends the SMS.
-        /// </summary>
-        /// <param name="accessToken">The access token.</param>
-        /// <param name="sendSMSRequest">The send SMS request.</param>
-        /// <param name="cancellationToken">The cancellation token.</param>
-        /// <returns></returns>
         public async Task<Result> SendSMS(String accessToken,
                                           SendSMSRequest sendSMSRequest,
                                           CancellationToken cancellationToken)
@@ -140,18 +88,7 @@ namespace MessagingService.Client
 
             try
             {
-                String requestSerialised = JsonConvert.SerializeObject(sendSMSRequest);
-
-                StringContent httpContent = new(requestSerialised, Encoding.UTF8, "application/json");
-
-                // Add the access token to the client headers
-                this.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-
-                // Make the Http Call here
-                HttpResponseMessage httpResponse = await this.HttpClient.PostAsync(requestUri, httpContent, cancellationToken);
-
-                // Process the response
-                Result<String> result = await this.HandleResponseX(httpResponse, cancellationToken);
+                Result<ResponseData<String>> result = await this.SendPostRequest<SendSMSRequest, ResponseData<String>>(requestUri, accessToken, sendSMSRequest, cancellationToken);
 
                 if (result.IsFailed)
                     return ResultHelpers.CreateFailure(result);
@@ -166,12 +103,6 @@ namespace MessagingService.Client
                 throw exception;
             }
         }
-
-        /// <summary>
-        /// Builds the request URL.
-        /// </summary>
-        /// <param name="route">The route.</param>
-        /// <returns></returns>
         private String BuildRequestUrl(String route)
         {
             String baseAddress = this.BaseAddressResolver("MessagingServiceApi");

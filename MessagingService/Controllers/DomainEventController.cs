@@ -67,13 +67,15 @@ namespace MessagingService.Controllers
             try {
                 Logger.LogInformation($"Processing event - ID [{domainEvent.EventId}], Type[{domainEvent.GetType().Name}]");
 
-                List<IDomainEventHandler> eventHandlers = this.DomainEventHandlerResolver.GetDomainEventHandlers(domainEvent);
+                var eventHandlersResult = this.DomainEventHandlerResolver.GetDomainEventHandlers(domainEvent);
 
-                if (eventHandlers == null || eventHandlers.Any() == false) {
+                if (eventHandlersResult.IsFailed) {
                     // Log a warning out 
                     Logger.LogWarning($"No event handlers configured for Event Type [{domainEvent.GetType().Name}]");
                     return this.Ok();
                 }
+
+                var eventHandlers = eventHandlersResult.Data;
 
                 List<Task> tasks = new List<Task>();
                 foreach (IDomainEventHandler domainEventHandler in eventHandlers) {
