@@ -117,28 +117,29 @@ namespace MessagingService.BusinessLogic.Services
             Result result = await ApplyEmailUpdates(async (EmailAggregate emailAggregate) =>
             {
                 // Check if this message has been sent before
-                if (emailAggregate.GetMessageStatus() != EmailMessageAggregate.MessageStatus.NotSet)
-                {
+                if (emailAggregate.GetMessageStatus() != EmailMessageAggregate.MessageStatus.NotSet) {
                     return Result.Success();
                 }
 
                 // send message to provider (record event)
-                emailAggregate.SendRequestToProvider(command.FromAddress, command.ToAddresses, command.Subject, command.Body, command.IsHtml, attachments);
+                Result stateResult = emailAggregate.SendRequestToProvider(command.FromAddress, command.ToAddresses, command.Subject, command.Body, command.IsHtml, attachments);
+                if (stateResult.IsFailed)
+                    return stateResult;
 
                 // Make call to Email provider here
                 EmailServiceProxyResponse emailResponse = await this.EmailServiceProxy.SendEmail(command.MessageId, command.FromAddress,
                     command.ToAddresses,command.Subject, command.Body, command.IsHtml, attachments, cancellationToken);
 
-                if (emailResponse.ApiCallSuccessful)
-                {
+                if (emailResponse.ApiCallSuccessful) {
                     // response message from provider (record event)
-                    emailAggregate.ReceiveResponseFromProvider(emailResponse.RequestIdentifier,
-                        emailResponse.EmailIdentifier);
+                    stateResult = emailAggregate.ReceiveResponseFromProvider(emailResponse.RequestIdentifier, emailResponse.EmailIdentifier);
                 }
-                else
-                {
-                    emailAggregate.ReceiveBadResponseFromProvider(emailResponse.Error, emailResponse.ErrorCode);
+                else {
+                    stateResult = emailAggregate.ReceiveBadResponseFromProvider(emailResponse.Error, emailResponse.ErrorCode);
                 }
+
+                if (stateResult.IsFailed)
+                    return stateResult;
 
                 return Result.Success();
             }, command.MessageId, cancellationToken, false);
@@ -187,8 +188,10 @@ namespace MessagingService.BusinessLogic.Services
 
             Result result = await ApplyEmailUpdates(async (EmailAggregate emailAggregate) => {
                 // re-send message to provider (record event)
-                emailAggregate.ResendRequestToProvider();
-                
+                Result stateResult = emailAggregate.ResendRequestToProvider();
+                if (stateResult.IsFailed)
+                    return stateResult;
+
                 // Make call to Email provider here
                 EmailServiceProxyResponse emailResponse =
                     await this.EmailServiceProxy.SendEmail(messageId, emailAggregate.FromAddress,
@@ -198,16 +201,15 @@ namespace MessagingService.BusinessLogic.Services
                                                            emailAggregate.IsHtml, null,
                                                            cancellationToken);
 
-                if (emailResponse.ApiCallSuccessful)
-                {
+                if (emailResponse.ApiCallSuccessful) {
                     // response message from provider (record event)
-                    emailAggregate.ReceiveResponseFromProvider(emailResponse.RequestIdentifier,
-                        emailResponse.EmailIdentifier);
+                    stateResult = emailAggregate.ReceiveResponseFromProvider(emailResponse.RequestIdentifier, emailResponse.EmailIdentifier);
                 }
-                else
-                {
-                    emailAggregate.ReceiveBadResponseFromProvider(emailResponse.Error, emailResponse.ErrorCode);
+                else {
+                    stateResult = emailAggregate.ReceiveBadResponseFromProvider(emailResponse.Error, emailResponse.ErrorCode);
                 }
+                if (stateResult.IsFailed)
+                    return stateResult;
 
                 return Result.Success();
             }, messageId, cancellationToken);
@@ -234,28 +236,34 @@ namespace MessagingService.BusinessLogic.Services
         public async Task<Result> UpdateMessageStatus(EmailCommands.UpdateMessageStatusCommand command,
                                                       CancellationToken cancellationToken) {
             Result result = await ApplyEmailUpdates(async (EmailAggregate emailAggregate) => {
+
+                Result stateResult;
+
                 switch (command.Status) {
                     case EmailServices.MessageStatus.Bounced:
-                        emailAggregate.MarkMessageAsBounced(command.Description, command.Timestamp);
+                        stateResult = emailAggregate.MarkMessageAsBounced(command.Description, command.Timestamp);
                         break;
                     case EmailServices.MessageStatus.Delivered:
-                        emailAggregate.MarkMessageAsDelivered(command.Description, command.Timestamp);
+                        stateResult = emailAggregate.MarkMessageAsDelivered(command.Description, command.Timestamp);
                         break;
                     case EmailServices.MessageStatus.Failed:
                     case EmailServices.MessageStatus.Unknown:
-                        emailAggregate.MarkMessageAsFailed(command.Description, command.Timestamp);
+                        stateResult = emailAggregate.MarkMessageAsFailed(command.Description, command.Timestamp);
                         break;
                     case EmailServices.MessageStatus.Rejected:
-                        emailAggregate.MarkMessageAsRejected(command.Description, command.Timestamp);
+                        stateResult = emailAggregate.MarkMessageAsRejected(command.Description, command.Timestamp);
                         break;
                     case EmailServices.MessageStatus.Spam:
-                        emailAggregate.MarkMessageAsSpam(command.Description, command.Timestamp);
+                        stateResult = emailAggregate.MarkMessageAsSpam(command.Description, command.Timestamp);
                         break;
                     default:
                         // Unknown status - treat as failed
-                        emailAggregate.MarkMessageAsFailed(command.Description, command.Timestamp);
+                        stateResult = emailAggregate.MarkMessageAsFailed(command.Description, command.Timestamp);
                         break;
                 }
+
+                if (stateResult.IsFailed)
+                    return stateResult;
 
                 return Result.Success();
             }, command.MessageId, cancellationToken);
