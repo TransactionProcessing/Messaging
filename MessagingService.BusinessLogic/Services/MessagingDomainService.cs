@@ -6,14 +6,10 @@ namespace MessagingService.BusinessLogic.Services
 {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics.Contracts;
-    using System.Net.Mail;
     using System.Threading;
     using System.Threading.Tasks;
-    using EmailMessage.DomainEvents;
     using EmailMessageAggregate;
     using EmailServices;
-    using Microsoft.Extensions.Logging;
     using Models;
     using Shared.DomainDrivenDesign.EventSourcing;
     using Shared.EventStore.Aggregate;
@@ -158,20 +154,23 @@ namespace MessagingService.BusinessLogic.Services
         {
             Result result = await ApplySMSUpdates(async (SMSAggregate smsAggregate) => {
                 // Check if this message has been sent before
-                if (smsAggregate.GetMessageStatus() != SMSMessageAggregate.MessageStatus.NotSet)
-                {
+                if (smsAggregate.GetMessageStatus() != SMSMessageAggregate.MessageStatus.NotSet) {
                     return Result.Success();
                 }
 
                 // send message to provider (record event)
-                smsAggregate.SendRequestToProvider(sender, destination, message);
+                Result stateResult = smsAggregate.SendRequestToProvider(sender, destination, message);
+                if (stateResult.IsFailed)
+                    return stateResult;
 
                 // Make call to SMS provider here
                 SMSServiceProxyResponse smsResponse =
                     await this.SmsServiceProxy.SendSMS(messageId, sender, destination, message, cancellationToken);
 
                 // response message from provider (record event)
-                smsAggregate.ReceiveResponseFromProvider(smsResponse.SMSIdentifier);
+                stateResult= smsAggregate.ReceiveResponseFromProvider(smsResponse.SMSIdentifier);
+                if (stateResult.IsFailed)
+                    return stateResult;
 
                 return Result.Success();
             }, messageId, cancellationToken, false);
@@ -219,14 +218,18 @@ namespace MessagingService.BusinessLogic.Services
         public async Task<Result> ResendSMSMessage(Guid connectionIdentifier, Guid messageId, CancellationToken cancellationToken){
             Result result = await ApplySMSUpdates(async (SMSAggregate smsAggregate) => {
                 // re-send message to provider (record event)
-                smsAggregate.ResendRequestToProvider();
+                Result stateResult = smsAggregate.ResendRequestToProvider();
+                if (stateResult.IsFailed)
+                    return stateResult;
 
                 // Make call to SMS provider here
                 SMSServiceProxyResponse smsResponse =
                     await this.SmsServiceProxy.SendSMS(messageId, smsAggregate.Sender, smsAggregate.Destination, smsAggregate.Message, cancellationToken);
 
                 // response message from provider (record event)
-                smsAggregate.ReceiveResponseFromProvider(smsResponse.SMSIdentifier);
+                stateResult = smsAggregate.ReceiveResponseFromProvider(smsResponse.SMSIdentifier);
+                if (stateResult.IsFailed)
+                    return stateResult;
 
                 return Result.Success();
             }, messageId, cancellationToken);
@@ -273,27 +276,30 @@ namespace MessagingService.BusinessLogic.Services
         public async Task<Result> UpdateMessageStatus(SMSCommands.UpdateMessageStatusCommand command,
                                                       CancellationToken cancellationToken) {
             Result result = await ApplySMSUpdates(async (SMSAggregate smsAggregate) => {
+                Result stateResult;
 
                 switch (command.Status) {
                     case SMSServices.MessageStatus.Delivered:
                     case SMSServices.MessageStatus.Sent:
                     case SMSServices.MessageStatus.InProgress:
-                        smsAggregate.MarkMessageAsDelivered(command.Description, command.Timestamp);
+                        stateResult = smsAggregate.MarkMessageAsDelivered(command.Description, command.Timestamp);
                         break;
                     case SMSServices.MessageStatus.Expired:
-                        smsAggregate.MarkMessageAsExpired(command.Description, command.Timestamp);
+                        stateResult = smsAggregate.MarkMessageAsExpired(command.Description, command.Timestamp);
                         break;
                     case SMSServices.MessageStatus.Rejected:
-                        smsAggregate.MarkMessageAsRejected(command.Description, command.Timestamp);
+                        stateResult = smsAggregate.MarkMessageAsRejected(command.Description, command.Timestamp);
                         break;
                     case SMSServices.MessageStatus.Undeliverable:
-                        smsAggregate.MarkMessageAsUndeliverable(command.Description, command.Timestamp);
+                        stateResult = smsAggregate.MarkMessageAsUndeliverable(command.Description, command.Timestamp);
                         break;
                     default:
-                        smsAggregate.MarkMessageAsRejected(command.Description, command.Timestamp);
+                        stateResult = smsAggregate.MarkMessageAsRejected(command.Description, command.Timestamp);
                         break;
                 }
-                
+                if (stateResult.IsFailed)
+                    return stateResult;
+
                 return Result.Success();
             }, command.MessageId, cancellationToken);
             return result;
