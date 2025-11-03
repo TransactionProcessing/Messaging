@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using Shared.Authorisation;
 
 namespace MessagingService.Bootstrapper
 {
@@ -45,18 +46,6 @@ namespace MessagingService.Bootstrapper
 
             this.ConfigureAuthentication();
             this.ConfigureSwagger();
-            
-            this.AddControllers().AddNewtonsoftJson(options =>
-                                                    {
-                                                        options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
-                                                        options.SerializerSettings.TypeNameHandling = TypeNameHandling.Auto;
-                                                        options.SerializerSettings.Formatting = Formatting.Indented;
-                                                        options.SerializerSettings.DateTimeZoneHandling = DateTimeZoneHandling.Utc;
-                                                        options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
-                                                    });
-
-            Assembly assembly = this.GetType().GetTypeInfo().Assembly;
-            this.AddMvcCore().AddApplicationPart(assembly).AddControllersAsServices();
 
             bool logRequests = ConfigurationReader.GetValueOrDefault<Boolean>("MiddlewareLogging", "LogRequests", true);
             bool logResponses = ConfigurationReader.GetValueOrDefault<Boolean>("MiddlewareLogging", "LogResponses", true);
@@ -92,6 +81,14 @@ namespace MessagingService.Bootstrapper
                     };
                     options.IncludeErrorDetails = true;
                 });
+            this.AddClientCredentialsOnlyPolicy();
+            this.AddClientCredentialsHandler();
+
+            this.ConfigureHttpJsonOptions(options =>
+            {
+                options.SerializerOptions.PropertyNamingPolicy = new SnakeCaseNamingPolicy();
+                options.SerializerOptions.PropertyNameCaseInsensitive = true; // optional, but safer
+            });
         }
         private void ConfigureSwagger() {
             this.AddSwaggerGen(c =>
