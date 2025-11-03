@@ -93,7 +93,6 @@ namespace MessagingService
             app.AddExceptionHandler();
 
             app.UseRouting();
-
             app.UseAuthentication();
             app.UseAuthorization();
 

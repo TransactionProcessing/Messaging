@@ -44,6 +44,8 @@ namespace MessagingService.Bootstrapper
                                failureStatus: HealthStatus.Unhealthy,
                                tags: new string[] { "db", "eventstore" });
 
+
+            this.AddControllers();
             this.ConfigureAuthentication();
             this.ConfigureSwagger();
 
@@ -91,6 +93,7 @@ namespace MessagingService.Bootstrapper
             });
         }
         private void ConfigureSwagger() {
+            
             this.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo
