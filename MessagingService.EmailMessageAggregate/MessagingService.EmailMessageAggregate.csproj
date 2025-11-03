@@ -6,8 +6,8 @@
 
   <ItemGroup>
 	  <PackageReference Include="Grpc.Net.Client" Version="2.71.0" />
-	  <PackageReference Include="Shared" Version="2025.10.3" />
-	  <PackageReference Include="Shared.EventStore" Version="2025.10.3" />
+	  <PackageReference Include="Shared" Version="2025.11.3" />
+	  <PackageReference Include="Shared.EventStore" Version="2025.11.3" />
   </ItemGroup>
 
   <ItemGroup>

@@ -6,6 +6,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using MessagingService.Endpoints;
 
 namespace MessagingService
 {
@@ -92,13 +93,15 @@ namespace MessagingService
             app.AddExceptionHandler();
 
             app.UseRouting();
-
             app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
                              {
-                                 endpoints.MapControllers();
+                                 endpoints.MapEmailEndpoints();
+                                 endpoints.MapSMSEndpoints();
+                                 endpoints.MapDomainEventEndpoint();
+
                                  endpoints.MapHealthChecks("health", new HealthCheckOptions()
                                  {
                                      Predicate = _ => true,
