@@ -23,7 +23,7 @@ namespace MessagingService.IntegrationTests.Common
     /// 
     /// </summary>
     /// <seealso cref="Shared.IntegrationTesting.DockerHelper" />
-    public class DockerHelper : global::Shared.IntegrationTesting.DockerHelper
+    public class DockerHelper : global::Shared.IntegrationTesting.TestContainers.DockerHelper
     {
         #region Fields
 
