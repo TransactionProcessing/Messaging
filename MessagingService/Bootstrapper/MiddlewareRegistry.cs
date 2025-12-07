@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using KurrentDB.Client;
+using Microsoft.Extensions.Logging;
+using Microsoft.OpenApi;
 using Shared.Authorisation;
 
 namespace MessagingService.Bootstrapper
@@ -6,24 +8,14 @@ namespace MessagingService.Bootstrapper
     using System;
     using System.IO;
     using System.Net.Http;
-    using System.Net.Security;
-    using System.Reflection;
-    using System.Threading.Tasks;
-    using System.Threading;
     using Common;
-    using EventStore.Client;
     using Lamar;
     using Microsoft.AspNetCore.Authentication.JwtBearer;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Diagnostics.HealthChecks;
-    using Microsoft.OpenApi.Models;
-    using Newtonsoft.Json;
-    using Newtonsoft.Json.Serialization;
     using Shared.EventStore.Extensions;
     using Shared.General;
     using Swashbuckle.AspNetCore.Filters;
-    using System.Collections.Generic;
-    using System.Linq;
     using System.Diagnostics.CodeAnalysis;
     using Microsoft.Extensions.Configuration;
     using Shared.Middleware;
@@ -36,7 +28,7 @@ namespace MessagingService.Bootstrapper
         public MiddlewareRegistry() {
             
             String connectionString = Startup.Configuration.GetValue<String>("EventStoreSettings:ConnectionString");
-            EventStoreClientSettings eventStoreConnectionSettings = EventStoreClientSettings.Create(connectionString);
+            KurrentDBClientSettings eventStoreConnectionSettings = KurrentDBClientSettings.Create(connectionString);
 
             this.AddHealthChecks()
                 .AddEventStore(eventStoreConnectionSettings,
