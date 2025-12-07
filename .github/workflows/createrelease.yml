@@ -83,7 +83,7 @@ jobs:
       - name: Download the artifact
         uses: actions/download-artifact@v4.1.8
         with:
-          name: callbackhandler
+          name: messagingservice
       
       - name: Remove existing  Windows service
         run: |
@@ -116,7 +116,7 @@ jobs:
       - name: Download the artifact
         uses: actions/download-artifact@v4.1.8
         with:
-          name: callbackhandler
+          name: messagingservice
 
       - name: Remove existing  Windows service
         run: |
