@@ -1,9 +1,10 @@
-﻿namespace MessagingService.Common
+﻿using Microsoft.OpenApi;
+
+namespace MessagingService.Common
 {
     using System.Diagnostics.CodeAnalysis;
     using System.Linq;
     using Microsoft.AspNetCore.Mvc.ApiExplorer;
-    using Microsoft.OpenApi.Models;
     using Swashbuckle.AspNetCore.SwaggerGen;
 
     /// <summary>

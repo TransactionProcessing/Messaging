@@ -23,16 +23,16 @@ public class RepositoryRegistry: ServiceRegistry
     {
         String connectionString = Startup.Configuration.GetValue<String>("EventStoreSettings:ConnectionString");
 
-        this.AddEventStoreProjectionManagementClient(connectionString);
-        this.AddEventStorePersistentSubscriptionsClient(connectionString);
+        this.AddKurrentDBPersistentSubscriptionsClient(connectionString);
+        this.AddKurrentDBProjectionManagementClient(connectionString);
 
-        this.AddEventStoreClient(connectionString);
+        this.AddKurrentDBClient(connectionString);
 
         this.AddTransient<IEventStoreContext, EventStoreContext>();
 
         this.AddSingleton<IAggregateRepository<EmailAggregate, DomainEvent>, AggregateRepository<EmailAggregate, DomainEvent>>();
         this.AddSingleton<IAggregateRepository<SMSAggregate, DomainEvent>, AggregateRepository<SMSAggregate, DomainEvent>>();
 
-        this.AddSingleton<Func<String, Int32, ISubscriptionRepository>>(cont => (esConnString, cacheDuration) => SubscriptionRepository.Create(esConnString, cacheDuration));
+        this.AddSingleton<Func<String, Int32, ISubscriptionRepository>>(cont => SubscriptionRepository.Create);
     }
 }
