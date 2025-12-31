@@ -30,20 +30,6 @@
     <ProjectReference Include="..\MessagingService.IntegrationTesting.Helpers\MessagingService.IntegrationTesting.Helpers.csproj" />
   </ItemGroup>
 
-  <!--<ItemGroup>
-    <Compile Update="Email\SendEmail.feature.cs">
-      <DesignTime>True</DesignTime>
-    </Compile>
-    <Compile Update="SMS\SendSMS.feature.cs">
-      <DesignTime>True</DesignTime>
-    </Compile>
-  </ItemGroup>-->
-  <ItemGroup>
-	  <None Update="**\*.feature">
-		  <Generator>ReqnrollSingleFileGenerator</Generator>
-		  <LastGenOutput>%(Filename).feature.cs</LastGenOutput>
-	  </None>
-  </ItemGroup>
   <ItemGroup>
     <None Update="nlog.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
