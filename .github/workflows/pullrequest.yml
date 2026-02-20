@@ -25,9 +25,10 @@ jobs:
     - name: Run Unit Tests
       run: |
         echo "ASPNETCORE_ENVIRONMENT are > ${ASPNETCORE_ENVIRONMENT}"
-        dotnet test "MessagingService.BusinessLogic.Tests\MessagingService.BusinessLogic.Tests.csproj"
-        dotnet test "MessagingService.EmailAggregate.Tests\MessagingService.EmailAggregate.Tests.csproj"
-        dotnet test "MessagingService.Tests\MessagingService.Tests.csproj"
+        dotnet test "MessagingService.BusinessLogic.Tests\MessagingService.BusinessLogic.Tests.csproj" --configuration Release --no-build --verbosity normal --logger "trx;LogFileName=businesslogic-test-results.trx" 
+        dotnet test "MessagingService.EmailAggregate.Tests\MessagingService.EmailAggregate.Tests.csproj" --configuration Release --no-build --verbosity normal --logger "trx;LogFileName=email-aggregate-test-results.trx"
+        dotnet test "MessagingService.EmailAggregate.Tests\MessagingService.SMSAggregate.Tests.csproj" --configuration Release --no-build --verbosity normal --logger "trx;LogFileName=sms-aggregate-test-results.trx"
+        dotnet test "MessagingService.Tests\MessagingService.Tests.csproj" --configuration Release --no-build --verbosity normal --logger "trx;LogFileName=service-test-results.trx"
 
     - name: Build Docker Image
       env:
@@ -35,4 +36,21 @@ jobs:
       run: docker build . --file MessagingService/Dockerfile --tag messagingservice:latest --build-arg NUGET_TOKEN=${{ secrets.PRIVATEFEED_APIKEY }}
         
     - name: Run Integration Tests
-      run: dotnet test "MessagingService.IntegrationTests\MessagingService.IntegrationTests.csproj" --filter Category=PRTest
+      run: dotnet test "MessagingService.IntegrationTests\MessagingService.IntegrationTests.csproj" --filter Category=PRTest  --configuration Release --no-build --verbosity normal --logger "trx;LogFileName=integration-test-results.trx" 
+
+    - name: Publish test results
+      uses: dorny/test-reporter@v1
+      if: always()
+      with:
+          name: Unit Test Results
+          path: '**/TestResults/*.trx'
+          reporter: dotnet-trx
+          fail-on-error: true
+    
+    - name: Upload test results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+          name: test-results
+          path: '**/TestResults/*.trx'
+          retention-days: 30
