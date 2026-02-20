@@ -27,7 +27,7 @@ jobs:
         echo "ASPNETCORE_ENVIRONMENT are > ${ASPNETCORE_ENVIRONMENT}"
         dotnet test "MessagingService.BusinessLogic.Tests\MessagingService.BusinessLogic.Tests.csproj" --configuration Release --no-build --verbosity normal --logger "trx;LogFileName=businesslogic-test-results.trx" 
         dotnet test "MessagingService.EmailAggregate.Tests\MessagingService.EmailAggregate.Tests.csproj" --configuration Release --no-build --verbosity normal --logger "trx;LogFileName=email-aggregate-test-results.trx"
-        dotnet test "MessagingService.EmailAggregate.Tests\MessagingService.SMSAggregate.Tests.csproj" --configuration Release --no-build --verbosity normal --logger "trx;LogFileName=sms-aggregate-test-results.trx"
+        dotnet test "MessagingService.SMSAggregate.Tests\MessagingService.SMSAggregate.Tests.csproj" --configuration Release --no-build --verbosity normal --logger "trx;LogFileName=sms-aggregate-test-results.trx"
         dotnet test "MessagingService.Tests\MessagingService.Tests.csproj" --configuration Release --no-build --verbosity normal --logger "trx;LogFileName=service-test-results.trx"
 
     - name: Build Docker Image
