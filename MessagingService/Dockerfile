@@ -31,4 +31,5 @@ RUN dotnet publish "MessagingService.csproj" -c Release -o /app/publish
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+USER 10001
 ENTRYPOINT ["dotnet", "MessagingService.dll"]
