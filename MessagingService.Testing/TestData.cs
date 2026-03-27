@@ -341,6 +341,7 @@
             configuration.Add("AppSettings:SMSProxy", "UnitTest");
             configuration.Add("ConnectionStrings:HealthCheck", "HeathCheckConnString");
             configuration.Add("SecurityConfiguration:Authority", "https://127.0.0.1");
+            configuration.Add("SecurityConfiguration:ApiName", "messagingService");
             configuration.Add("EventStoreSettings:ConnectionString", "esdb://127.0.0.1:2113");
             configuration.Add("EventStoreSettings:ConnectionName", "UnitTestConnection");
             configuration.Add("EventStoreSettings:UserName", "admin");
