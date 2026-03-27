@@ -1,6 +1,8 @@
 ﻿using KurrentDB.Client;
 using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
+using OpenIddict.Client;
 using Shared.Authorisation;
 
 namespace MessagingService.Bootstrapper
@@ -51,30 +53,62 @@ namespace MessagingService.Bootstrapper
         }
 
         private void ConfigureAuthentication() {
-            this.AddAuthentication(options =>
-                {
-                    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-                    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-                })
-                .AddJwtBearer(options =>
-                {
-                    options.BackchannelHttpHandler = new HttpClientHandler
-                    {
-                        ServerCertificateCustomValidationCallback =
-                            (message, certificate, chain, sslPolicyErrors) => true
-                    };
-                    options.Authority = GetSecurityConfigSetting("Authority");
-                    options.Audience = GetSecurityConfigSetting("ApiName");
+            //this.AddAuthentication(options =>
+            //    {
+            //        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            //        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            //        options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+            //    })
+            //    .AddJwtBearer(options =>
+            //    {
+            //        options.BackchannelHttpHandler = new HttpClientHandler
+            //        {
+            //            ServerCertificateCustomValidationCallback =
+            //                (message, certificate, chain, sslPolicyErrors) => true
+            //        };
+            //        options.Authority = GetSecurityConfigSetting("Authority");
+            //        options.Audience = GetSecurityConfigSetting("ApiName");
 
-                    options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters()
+            //        options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters()
+            //        {
+            //            ValidateAudience = false,
+            //            ValidAudience = GetSecurityConfigSetting("ApiName"),
+            //            ValidIssuer = GetSecurityConfigSetting("Authority"),
+            //        };
+            //        options.IncludeErrorDetails = true;
+            //    });
+            this.AddOpenIddict()
+                // Register the OpenIddict client components.
+                .AddClient(options =>
+                {
+                    // Allow grant_type=client_credentials to be negotiated.
+                    options.AllowClientCredentialsFlow();
+
+                    // Disable token storage, which is not necessary for non-interactive flows like
+                    // grant_type=password, grant_type=client_credentials or grant_type=refresh_token.
+                    options.DisableTokenStorage();
+
+                    // Register the System.Net.Http integration and use the identity of the current
+                    // assembly as a more specific user agent, which can be useful when dealing with
+                    // providers that use the user agent as a way to throttle requests (e.g Reddit).
+                    options.UseSystemNetHttp()
+                        .SetProductInformation(typeof(Program).Assembly);
+
+                    // Add a client registration matching the client application definition in the server project.
+                    options.AddRegistration(new OpenIddictClientRegistration
                     {
-                        ValidateAudience = false,
-                        ValidAudience = GetSecurityConfigSetting("ApiName"),
-                        ValidIssuer = GetSecurityConfigSetting("Authority"),
-                    };
-                    options.IncludeErrorDetails = true;
+                        Issuer = new Uri(GetSecurityConfigSetting("Authority"), UriKind.Absolute),
+
+                        ClientId = GetSecurityConfigSetting("ApiName"),
+                        TokenValidationParameters = {
+                            ValidateAudience = false,
+                            ValidAudience = GetSecurityConfigSetting("ApiName"),
+                            ValidIssuer = GetSecurityConfigSetting("Authority"),
+                        }
+                    });
+                    
                 });
+            
             this.AddClientCredentialsOnlyPolicy();
             this.AddClientCredentialsHandler();
 
