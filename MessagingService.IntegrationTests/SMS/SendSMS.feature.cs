@@ -113,53 +113,53 @@ namespace MessagingService.IntegrationTests.SMS
         {
 #line 4
 #line hidden
-            global::Reqnroll.Table table6 = new global::Reqnroll.Table(new string[] {
+            global::Reqnroll.Table table1 = new global::Reqnroll.Table(new string[] {
                         "Name",
                         "DisplayName",
                         "Description"});
-            table6.AddRow(new string[] {
+            table1.AddRow(new string[] {
                         "messagingService",
                         "Messaging REST Scope",
                         "A scope for Messaging REST"});
 #line 6
- await testRunner.GivenAsync("I create the following api scopes", ((string)(null)), table6, "Given ");
+ await testRunner.GivenAsync("I create the following api scopes", ((string)(null)), table1, "Given ");
 #line hidden
-            global::Reqnroll.Table table7 = new global::Reqnroll.Table(new string[] {
-                        "ResourceName",
+            global::Reqnroll.Table table2 = new global::Reqnroll.Table(new string[] {
+                        "Name",
                         "DisplayName",
                         "Secret",
                         "Scopes",
                         "UserClaims"});
-            table7.AddRow(new string[] {
+            table2.AddRow(new string[] {
                         "messagingService",
                         "Messaging REST",
                         "Secret1",
                         "messagingService",
                         ""});
 #line 10
- await testRunner.GivenAsync("the following api resources exist", ((string)(null)), table7, "Given ");
+ await testRunner.GivenAsync("the following api resources exist", ((string)(null)), table2, "Given ");
 #line hidden
-            global::Reqnroll.Table table8 = new global::Reqnroll.Table(new string[] {
+            global::Reqnroll.Table table3 = new global::Reqnroll.Table(new string[] {
                         "ClientId",
                         "ClientName",
                         "Secret",
                         "Scopes",
                         "GrantTypes"});
-            table8.AddRow(new string[] {
+            table3.AddRow(new string[] {
                         "serviceClient",
                         "Service Client",
                         "Secret1",
                         "messagingService",
                         "client_credentials"});
 #line 14
- await testRunner.GivenAsync("the following clients exist", ((string)(null)), table8, "Given ");
+ await testRunner.GivenAsync("the following clients exist", ((string)(null)), table3, "Given ");
 #line hidden
-            global::Reqnroll.Table table9 = new global::Reqnroll.Table(new string[] {
+            global::Reqnroll.Table table4 = new global::Reqnroll.Table(new string[] {
                         "ClientId"});
-            table9.AddRow(new string[] {
+            table4.AddRow(new string[] {
                         "serviceClient"});
 #line 18
- await testRunner.GivenAsync("I have a token to access the messaging service resource", ((string)(null)), table9, "Given ");
+ await testRunner.GivenAsync("I have a token to access the messaging service resource", ((string)(null)), table4, "Given ");
 #line hidden
         }
         
@@ -193,16 +193,16 @@ this.ScenarioInitialize(scenarioInfo, ruleInfo);
 #line 4
 await this.FeatureBackgroundAsync();
 #line hidden
-                global::Reqnroll.Table table10 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table5 = new global::Reqnroll.Table(new string[] {
                             "Sender",
                             "Destination",
                             "Message"});
-                table10.AddRow(new string[] {
+                table5.AddRow(new string[] {
                             "TestSender",
                             "07777777771",
                             "TestSMSMessage"});
 #line 24
- await testRunner.GivenAsync("I send the following SMS Messages", ((string)(null)), table10, "Given ");
+ await testRunner.GivenAsync("I send the following SMS Messages", ((string)(null)), table5, "Given ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();

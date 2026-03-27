@@ -8,7 +8,7 @@ Background:
 	| messagingService | Messaging REST Scope | A scope for Messaging REST |
 
 	Given the following api resources exist
-	| ResourceName     | DisplayName    | Secret  | Scopes           | UserClaims |
+	| Name     | DisplayName    | Secret  | Scopes           | UserClaims |
 	| messagingService | Messaging REST | Secret1 | messagingService |            |
 
 	Given the following clients exist
