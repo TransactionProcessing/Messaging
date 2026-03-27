@@ -2,25 +2,25 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
-using OpenIddict.Client;
 using Shared.Authorisation;
 
 namespace MessagingService.Bootstrapper
 {
-    using System;
-    using System.IO;
-    using System.Net.Http;
     using Common;
     using Lamar;
     using Microsoft.AspNetCore.Authentication.JwtBearer;
+    using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Diagnostics.HealthChecks;
+    using OpenIddict.Validation.AspNetCore;
     using Shared.EventStore.Extensions;
     using Shared.General;
-    using Swashbuckle.AspNetCore.Filters;
-    using System.Diagnostics.CodeAnalysis;
-    using Microsoft.Extensions.Configuration;
     using Shared.Middleware;
+    using Swashbuckle.AspNetCore.Filters;
+    using System;
+    using System.Diagnostics.CodeAnalysis;
+    using System.IO;
+    using System.Net.Http;
 
     [ExcludeFromCodeCoverage]
     public class MiddlewareRegistry : ServiceRegistry
@@ -53,51 +53,37 @@ namespace MessagingService.Bootstrapper
         }
 
         private void ConfigureAuthentication() {
-            //this.AddAuthentication(options =>
-            //    {
-            //        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-            //        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            //        options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-            //    })
-            //    .AddJwtBearer(options =>
-            //    {
-            //        options.BackchannelHttpHandler = new HttpClientHandler
-            //        {
-            //            ServerCertificateCustomValidationCallback =
-            //                (message, certificate, chain, sslPolicyErrors) => true
-            //        };
-            //        options.Authority = GetSecurityConfigSetting("Authority");
-            //        options.Audience = GetSecurityConfigSetting("ApiName");
+            this.AddAuthentication(options =>
+            {
+                options.DefaultScheme = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme;
+            });
 
-            //        options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters()
-            //        {
-            //            ValidateAudience = false,
-            //            ValidAudience = GetSecurityConfigSetting("ApiName"),
-            //            ValidIssuer = GetSecurityConfigSetting("Authority"),
-            //        };
-            //        options.IncludeErrorDetails = true;
-            //    });
             this.AddOpenIddict()
-                // Register the OpenIddict client components.
-                .AddClient(options => {
-                    // Allow grant_type=client_credentials to be negotiated.
-                    options.AllowClientCredentialsFlow();
+                .AddValidation(options =>
+                {
+                    // Same as your Authority
+                    options.SetIssuer(new Uri(GetSecurityConfigSetting("Authority")));
 
-                    // Disable token storage, which is not necessary for non-interactive flows like
-                    // grant_type=password, grant_type=client_credentials or grant_type=refresh_token.
-                    options.DisableTokenStorage();
+                    // Enables discovery and HTTP backchannel support
+                    options.UseSystemNetHttp()
+                        .ConfigureHttpClientHandler(handler =>
+                        {
+                            // DEV ONLY: bypass all certificate errors
+                            handler.ServerCertificateCustomValidationCallback =
+                                HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
+                        });
 
-                    // Register the System.Net.Http integration and use the identity of the current
-                    // assembly as a more specific user agent, which can be useful when dealing with
-                    // providers that use the user agent as a way to throttle requests (e.g Reddit).
-                    options.UseSystemNetHttp().SetProductInformation(typeof(Program).Assembly);
+                    // Register the ASP.NET Core integration
+                    options.UseAspNetCore();
 
-                    // Add a client registration matching the client application definition in the server project.
-                    options.AddRegistration(new OpenIddictClientRegistration { Issuer = new Uri(GetSecurityConfigSetting("Authority"), UriKind.Absolute), ClientId = GetSecurityConfigSetting("ApiName") });
+                    // Optionally set expected audience(s):
+                    options.AddAudiences(GetSecurityConfigSetting("ApiName"));
 
                 });
-                   
-            
+
+            this.AddAuthorization();
+
+
             this.AddClientCredentialsOnlyPolicy();
             this.AddClientCredentialsHandler();
 
