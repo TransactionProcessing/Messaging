@@ -29,41 +29,30 @@ public class MessagingProxyRegistry : ServiceRegistry
         this.RegisterSMSProxy();
     }
 
-    private void RegisterEmailProxy()
-    {
+    private void RegisterEmailProxy() {
         // read the config setting 
         String emailProxy = ConfigurationReader.GetValue("AppSettings", "EmailProxy");
 
-        if (emailProxy == "Smtp2Go")
-        {
-            Smtp2GConfig config = Startup.Configuration
-                                      .GetSection("AppSettings:Smtp2Go")
-                                      .Get<Smtp2GConfig>()
-                                  ?? throw new InvalidOperationException("Smtp2Go config missing"); ;
+        if (emailProxy == "Smtp2Go") {
+            Smtp2GConfig config = Startup.Configuration.GetSection("AppSettings:Smtp2Go").Get<Smtp2GConfig>() ?? throw new InvalidOperationException("Smtp2Go config missing");
             this.AddSingleton(config);
             this.RegisterHttpClient<IEmailServiceProxy, Smtp2GoProxy>();
         }
-        else
-        {
+        else {
             this.AddSingleton<IEmailServiceProxy, IntegrationTestEmailServiceProxy>();
         }
     }
 
-    private void RegisterSMSProxy()
-    {
+    private void RegisterSMSProxy() {
         // read the config setting 
         String smsProxy = ConfigurationReader.GetValue("AppSettings", "SMSProxy");
 
         if (smsProxy == "TheSMSWorks") {
-            SmsWorksConfig config = Startup.Configuration
-                                        .GetSection("AppSettings:TheSmsWorks")
-                                        .Get<SmsWorksConfig>()
-                                    ?? throw new InvalidOperationException("SmsWorks config missing"); ;
+            SmsWorksConfig config = Startup.Configuration.GetSection("AppSettings:TheSmsWorks").Get<SmsWorksConfig>() ?? throw new InvalidOperationException("SmsWorks config missing");
             this.AddSingleton(config);
             this.RegisterHttpClient<ISMSServiceProxy, TheSmsWorksProxy>();
         }
-        else
-        {
+        else {
             this.AddSingleton<ISMSServiceProxy, IntegrationTestSMSServiceProxy>();
         }
     }
