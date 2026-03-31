@@ -91,7 +91,8 @@ namespace MessagingService
                                                                                          o.Dsn = builtConfig["SentryConfiguration:Dsn"];
                                                                                          o.SendDefaultPii = true;
                                                                                          o.MaxRequestBodySize = RequestSize.Always;
-                                                                                         o.CaptureBlockingCalls = true;
+                                                                                         o.CaptureBlockingCalls = ConfigurationReader.GetValueOrDefault("SentryConfiguration", "CaptureBlockingCalls", false);
+                                                                                         o.IncludeActivityData = ConfigurationReader.GetValueOrDefault("SentryConfiguration", "IncludeActivityData", false);
                                                                                          o.Release = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "unknown";
                                                                                      });
                                                                                  }
