@@ -16,20 +16,24 @@ namespace MessagingService.BusinessLogic.Services.SMSServices.TheSMSWorks
     using Shared.Extensions;
     using Shared.General;
 
+    public record SmsWorksConfig {
+        public String BaseAddress { get; set; }
+        public String CustomerId { get; set; }
+        public String Key { get; set; }
+        public String Secret { get; set; }
+    }
+
     [ExcludeFromCodeCoverage]
     public class TheSmsWorksProxy : ISMSServiceProxy
     {
         private readonly HttpClient HttpClient;
+        private readonly SmsWorksConfig Configuration;
 
-        public TheSmsWorksProxy(HttpClient httpClient) {
+        public TheSmsWorksProxy(HttpClient httpClient, SmsWorksConfig configuration) {
             this.HttpClient = httpClient;
+            this.Configuration = configuration;
         }
-
-        private const String TheSMSWorksBaseAddressKey = "TheSMSWorksBaseAddress";
-        private const String TheSMSWorksCustomerIdKey = "TheSMSWorksCustomerId";
-        private const String TheSMSWorksKeyKey = "TheSMSWorksKey";
-        private const String TheSMSWorksSecretKey = "TheSMSWorksSecret";
-
+        
         /// <summary>
         /// Sends the SMS.
         /// </summary>
@@ -47,17 +51,16 @@ namespace MessagingService.BusinessLogic.Services.SMSServices.TheSMSWorks
             SMSServiceProxyResponse response = null;
 
             // Create the Auth Request                
-            TheSmsWorksTokenRequest apiTokenRequest = new() { CustomerId = ConfigurationReader.GetValue(TheSMSWorksCustomerIdKey), 
-                Key = ConfigurationReader.GetValue(TheSMSWorksKeyKey), Secret = ConfigurationReader.GetValue(TheSMSWorksSecretKey) };
+            TheSmsWorksTokenRequest apiTokenRequest = new() { CustomerId = Configuration.CustomerId, Key = Configuration.Key, Secret = Configuration.Secret };
 
             String apiTokenRequestSerialised = JsonConvert.SerializeObject(apiTokenRequest).ToLower();
             StringContent content = new(apiTokenRequestSerialised, Encoding.UTF8, "application/json");
 
             // First do the authentication
-            HttpResponseMessage apiTokenHttpResponse = await this.HttpClient.PostAsync($"{ConfigurationReader.GetValue(TheSMSWorksBaseAddressKey)}auth/token", content, cancellationToken);
+            HttpResponseMessage apiTokenHttpResponse = await this.HttpClient.PostAsync($"{Configuration.BaseAddress}auth/token", content, cancellationToken);
 
             if (apiTokenHttpResponse.IsSuccessStatusCode) {
-                TheSmsWorksTokenResponse apiTokenResponse = JsonConvert.DeserializeObject<TheSmsWorksTokenResponse>(await apiTokenHttpResponse.Content.ReadAsStringAsync());
+                TheSmsWorksTokenResponse apiTokenResponse = JsonConvert.DeserializeObject<TheSmsWorksTokenResponse>(await apiTokenHttpResponse.Content.ReadAsStringAsync(cancellationToken));
 
                 // Now do the actual send
                 TheSmsWorksSendSMSRequest apiSendSmsRequest = new() {
@@ -73,11 +76,11 @@ namespace MessagingService.BusinessLogic.Services.SMSServices.TheSMSWorks
                 content = new StringContent(apiSendSMSMessageRequestSerialised, Encoding.UTF8, "application/json");
 
                 this.HttpClient.DefaultRequestHeaders.Add("Authorization", apiTokenResponse.Token);
-                HttpResponseMessage apiSendSMSMessageHttpResponse = await this.HttpClient.PostAsync($"{ConfigurationReader.GetValue(TheSMSWorksBaseAddressKey)}message/send", content, cancellationToken);
+                HttpResponseMessage apiSendSMSMessageHttpResponse = await this.HttpClient.PostAsync($"{Configuration.BaseAddress}message/send", content, cancellationToken);
 
                 if (apiSendSMSMessageHttpResponse.IsSuccessStatusCode) {
                     // Message has been sent
-                    TheSmsWorksSendSMSResponse apiTheSmsWorksSendSmsResponse = JsonConvert.DeserializeObject<TheSmsWorksSendSMSResponse>(await apiSendSMSMessageHttpResponse.Content.ReadAsStringAsync());
+                    TheSmsWorksSendSMSResponse apiTheSmsWorksSendSmsResponse = JsonConvert.DeserializeObject<TheSmsWorksSendSMSResponse>(await apiSendSMSMessageHttpResponse.Content.ReadAsStringAsync(cancellationToken));
 
                     response = new SMSServiceProxyResponse { ApiCallSuccessful = true, SMSIdentifier = apiTheSmsWorksSendSmsResponse.MessageId, };
                 }
@@ -97,26 +100,23 @@ namespace MessagingService.BusinessLogic.Services.SMSServices.TheSMSWorks
             MessageStatusResponse response = new();
 
             // Create the Auth Request                
-            TheSmsWorksTokenRequest apiTokenRequest = new() { CustomerId = ConfigurationReader.GetValue(TheSMSWorksCustomerIdKey),
-                Key = ConfigurationReader.GetValue(TheSMSWorksKeyKey),
-                Secret = ConfigurationReader.GetValue(TheSMSWorksSecretKey)
-            };
+            TheSmsWorksTokenRequest apiTokenRequest = new() { CustomerId = Configuration.CustomerId, Key = Configuration.Key, Secret = Configuration.Secret };
 
             String apiTokenRequestSerialised = JsonConvert.SerializeObject(apiTokenRequest).ToLower();
             StringContent content = new(apiTokenRequestSerialised, Encoding.UTF8, "application/json");
 
             // First do the authentication
-            HttpResponseMessage apiTokenHttpResponse = await this.HttpClient.PostAsync($"{ConfigurationReader.GetValue(TheSMSWorksBaseAddressKey)}auth/token", content, cancellationToken);
+            HttpResponseMessage apiTokenHttpResponse = await this.HttpClient.PostAsync($"{Configuration.BaseAddress}auth/token", content, cancellationToken);
 
             if (apiTokenHttpResponse.IsSuccessStatusCode) {
                 TheSmsWorksTokenResponse apiTokenResponse = JsonConvert.DeserializeObject<TheSmsWorksTokenResponse>(await apiTokenHttpResponse.Content.ReadAsStringAsync(cancellationToken));
 
                 this.HttpClient.DefaultRequestHeaders.Add("Authorization", apiTokenResponse.Token);
-                HttpResponseMessage apiGetSMSMessageHttpResponse = await this.HttpClient.GetAsync($"{ConfigurationReader.GetValue(TheSMSWorksBaseAddressKey)}messages/{providerReference}", cancellationToken);
+                HttpResponseMessage apiGetSMSMessageHttpResponse = await this.HttpClient.GetAsync($"{Configuration.BaseAddress}messages/{providerReference}", cancellationToken);
 
                 if (apiGetSMSMessageHttpResponse.IsSuccessStatusCode) {
                     // Message has been sent
-                    TheSMSWorksGetMessageResponse apiSmsWorksGetMessageResponse = JsonConvert.DeserializeObject<TheSMSWorksGetMessageResponse>(await apiGetSMSMessageHttpResponse.Content.ReadAsStringAsync());
+                    TheSMSWorksGetMessageResponse apiSmsWorksGetMessageResponse = JsonConvert.DeserializeObject<TheSMSWorksGetMessageResponse>(await apiGetSMSMessageHttpResponse.Content.ReadAsStringAsync(cancellationToken));
 
                     response = new MessageStatusResponse { ApiStatusCode = apiGetSMSMessageHttpResponse.StatusCode, MessageStatus = this.TranslateMessageStatus(apiSmsWorksGetMessageResponse.Status), ProviderStatusDescription = apiSmsWorksGetMessageResponse.Status, Timestamp = DateTime.Parse(apiSmsWorksGetMessageResponse.Modified) };
                 }

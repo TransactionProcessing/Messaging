@@ -15,6 +15,11 @@
     using System.Threading;
     using System.Threading.Tasks;
 
+    public record Smtp2GConfig {
+        public String BaseAddress { get; set; }
+        public String APIKey { get; set; }
+    }
+
     /// <summary>
     /// 
     /// </summary>
@@ -29,13 +34,15 @@
         /// </summary>
         private readonly HttpClient HttpClient;
 
+        private readonly Smtp2GConfig Configuration;
+
         #endregion
 
         #region Constructors
 
-        public Smtp2GoProxy(HttpClient httpClient)
-        {
+        public Smtp2GoProxy(HttpClient httpClient, Smtp2GConfig configuration) {
             this.HttpClient = httpClient;
+            this.Configuration = configuration;
         }
 
         #endregion
@@ -52,7 +59,7 @@
                                                                CancellationToken cancellationToken) {
             // Translate the request message
             Smtp2GoSendEmailRequest apiRequest = new() {
-                ApiKey = ConfigurationReader.GetValue("SMTP2GoAPIKey"),
+                ApiKey = Configuration.APIKey,
                 HTMLBody = isHtml ? body : string.Empty,
                 TextBody = isHtml ? string.Empty : body,
                 Sender = fromAddress,
@@ -72,7 +79,7 @@
 
             StringContent content = new(requestSerialised, Encoding.UTF8, "application/json");
 
-            String requestUri = $"{ConfigurationReader.GetValue("SMTP2GoBaseAddress")}email/send";
+            String requestUri = $"{Configuration.BaseAddress}email/send";
             HttpRequestMessage requestMessage = new(HttpMethod.Post, requestUri);
             requestMessage.Content = content;
 
@@ -109,7 +116,7 @@
                                                                   DateTime endDate,
                                                                   CancellationToken cancellationToken) {
             Smtp2GoEmailSearchRequest apiRequest = new() {
-                ApiKey = ConfigurationReader.GetValue("SMTP2GoAPIKey"), EmailId = new List<String> { providerReference }, StartDate = startDate.ToString("yyyy-MM-dd"), EndDate = endDate.ToString("yyyy-MM-dd"),
+                ApiKey = Configuration.APIKey, EmailId = new List<String> { providerReference }, StartDate = startDate.ToString("yyyy-MM-dd"), EndDate = endDate.ToString("yyyy-MM-dd"),
             };
 
             String requestSerialised = JsonConvert.SerializeObject(apiRequest, new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.None });
@@ -118,13 +125,13 @@
 
             StringContent content = new(requestSerialised, Encoding.UTF8, "application/json");
 
-            String requestUri = $"{ConfigurationReader.GetValue("SMTP2GoBaseAddress")}email/search";
+            String requestUri = $"{Configuration.BaseAddress}email/search";
             HttpRequestMessage requestMessage = new(HttpMethod.Post, requestUri);
             requestMessage.Content = content;
 
             HttpResponseMessage httpResponse = await this.HttpClient.SendAsync(requestMessage, cancellationToken);
 
-            Smtp2GoEmailSearchResponse apiResponse = JsonConvert.DeserializeObject<Smtp2GoEmailSearchResponse>(await httpResponse.Content.ReadAsStringAsync());
+            Smtp2GoEmailSearchResponse apiResponse = JsonConvert.DeserializeObject<Smtp2GoEmailSearchResponse>(await httpResponse.Content.ReadAsStringAsync(cancellationToken));
 
             Logger.LogDebug($"Response Message Received from Email Provider [SMTP2Go] {JsonConvert.SerializeObject(apiResponse)}");
 
