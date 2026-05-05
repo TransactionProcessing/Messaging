@@ -1,3 +1,4 @@
+using MessagingService.Endpoints;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -6,7 +7,6 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
-using MessagingService.Endpoints;
 
 namespace MessagingService
 {
@@ -26,6 +26,7 @@ namespace MessagingService
     using Shared.General;
     using Shared.Logger;
     using Shared.Middleware;
+    using Shared.Serialisation;
     using SMSMessage.DomainEvents;
     using System.Diagnostics;
     using System.Diagnostics.CodeAnalysis;
@@ -56,8 +57,12 @@ namespace MessagingService
             services.IncludeRegistry<DomainServiceRegistry>();
             services.IncludeRegistry<DomainEventHandlerRegistry>();
             services.IncludeRegistry<MessagingProxyRegistry>();
+            services.IncludeRegistry<SerialiserRegistry>();
 
             Startup.Container = new Container(services);
+
+            var serialiser = Container.GetRequiredService<IStringSerialiser>();
+            StringSerialiser.Initialise(serialiser);
         }
         
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

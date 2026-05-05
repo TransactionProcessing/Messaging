@@ -3,21 +3,11 @@
 namespace MessagingService.IntegrationTests.Email
 {
     using System.Collections.Generic;
-    using System.Linq;
-    using System.Net;
-    using System.Net.Http;
-    using System.Net.Http.Headers;
-    using System.Text;
-    using System.Threading;
     using System.Threading.Tasks;
     using Common;
     using DataTransferObjects;
-    using global::Shared.IntegrationTesting;
     using IntegrationTesting.Helpers;
-    using Newtonsoft.Json;
     using Reqnroll;
-    using Shared;
-    using Shouldly;
 
     [Binding]
     [Scope(Tag = "email")]

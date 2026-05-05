@@ -4,13 +4,10 @@ namespace MessagingService.Client
 {
     using System;
     using System.Net.Http;
-    using System.Net.Http.Headers;
-    using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
     using ClientProxyBase;
     using DataTransferObjects;
-    using Newtonsoft.Json;
     using SimpleResults;
 
     public class MessagingServiceClient : ClientProxyBase, IMessagingServiceClient
@@ -26,7 +23,9 @@ namespace MessagingService.Client
         #region Constructors
 
         public MessagingServiceClient(Func<String, String> baseAddressResolver,
-                                      HttpClient httpClient) : base(httpClient)
+                                      HttpClient httpClient,
+                                      Func<object, string> serialise,
+                                      Func<string, Type, object> deserialise) : base(httpClient, serialise, deserialise)
         {
             this.BaseAddressResolver = baseAddressResolver;
         }
@@ -43,7 +42,7 @@ namespace MessagingService.Client
 
             try
             {
-                Result<ResponseData<String>> result = await this.SendHttpPostRequest<SendEmailRequest, ResponseData<String>>(requestUri, sendEmailRequest, accessToken, cancellationToken);
+                Result result = await this.Post(requestUri, sendEmailRequest, accessToken, cancellationToken);
                 
                 if (result.IsFailed)
                     return ResultHelpers.CreateFailure(result);
@@ -65,7 +64,7 @@ namespace MessagingService.Client
             String requestUri = this.BuildRequestUrl("/api/email/resend");
 
             try {
-                Result<ResponseData<String>> result = await this.SendHttpPostRequest<ResendEmailRequest, ResponseData<String>>(requestUri, resendEmailRequest, accessToken, cancellationToken);
+                Result result = await this.Post(requestUri, resendEmailRequest, accessToken, cancellationToken);
 
                 if (result.IsFailed)
                     return ResultHelpers.CreateFailure(result);
@@ -88,7 +87,7 @@ namespace MessagingService.Client
 
             try
             {
-                Result<ResponseData<String>> result = await this.SendHttpPostRequest<SendSMSRequest, ResponseData<String>>(requestUri, sendSMSRequest, accessToken, cancellationToken);
+                Result result = await this.Post(requestUri, sendSMSRequest, accessToken, cancellationToken);
 
                 if (result.IsFailed)
                     return ResultHelpers.CreateFailure(result);

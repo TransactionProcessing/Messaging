@@ -10,6 +10,7 @@ namespace MessagingService.IntegrationTests.Common
     using Ductus.FluentDocker.Services.Extensions;
     using global::Shared.IntegrationTesting;
     using global::Shared.Logger;
+    using global::Shared.Serialisation;
     using IntegrationTesting.Helpers;
     using Microsoft.AspNetCore.Http;
     using SecurityService.Client;
@@ -82,10 +83,20 @@ namespace MessagingService.IntegrationTests.Common
             
             HttpClient httpClient = CreateHttpClient();
             
-            this.SecurityServiceClient = new SecurityServiceClient(SecurityServiceBaseAddressResolver, httpClient);
-            this.MessagingServiceClient = new MessagingServiceClient(MessagingServiceBaseAddressResolver, httpClient);
+            this.SecurityServiceClient = new SecurityServiceClient(SecurityServiceBaseAddressResolver, httpClient, Serialise, Deserialise);
+            this.MessagingServiceClient = new MessagingServiceClient(MessagingServiceBaseAddressResolver, httpClient, Serialise, Deserialise);
         }
         #endregion
+
+        String Serialise(Object arg)
+        {
+            return StringSerialiser.Serialise<Object>(arg, new SerialiserOptions(SerialiserPropertyFormat.SnakeCase));
+        }
+
+        Object Deserialise(String arg, Type type)
+        {
+            return StringSerialiser.DeserializeObject<Object>(arg, type, new SerialiserOptions(SerialiserPropertyFormat.SnakeCase));
+        }
 
         private HttpClient CreateHttpClient() {
             // Set up test HttpContext

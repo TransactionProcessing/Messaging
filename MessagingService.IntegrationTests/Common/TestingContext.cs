@@ -1,13 +1,11 @@
 ﻿using Shared.Logger;
 using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace MessagingService.IntegrationTests.Common
 {
     using System.Linq;
     using DataTransferObjects;
-    using SecurityService.DataTransferObjects.Responses;
     using Shouldly;
 
     public class TestingContext
