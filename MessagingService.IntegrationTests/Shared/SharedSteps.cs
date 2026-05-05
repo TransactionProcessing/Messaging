@@ -1,11 +1,7 @@
 ﻿using MessagingService.IntegrationTests.Common;
-using SecurityService.DataTransferObjects.Requests;
-using SecurityService.DataTransferObjects.Responses;
-using Shouldly;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 

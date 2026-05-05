@@ -1,16 +1,15 @@
-﻿namespace MessagingService.BusinessLogic.Services.EmailServices.Smtp2Go
+﻿using Shared.Serialisation;
+
+namespace MessagingService.BusinessLogic.Services.EmailServices.Smtp2Go
 {
     using Models;
-    using Newtonsoft.Json;
     using Service.Services.Email.Smtp2Go;
-    using Shared.General;
     using Shared.Logger;
     using System;
     using System.Collections.Generic;
     using System.Diagnostics.CodeAnalysis;
     using System.Linq;
     using System.Net.Http;
-    using System.Reflection;
     using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
@@ -73,7 +72,7 @@
                 attachments.ForEach(a => apiRequest.Attachments.Add(new Smtp2GoAttachment { FileBlob = a.FileData, FileName = a.Filename, MimeType = this.ConvertFileType(a.FileType) }));
             }
 
-            String requestSerialised = JsonConvert.SerializeObject(apiRequest, Formatting.Indented, new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.None });
+            String requestSerialised = StringSerialiser.Serialise(apiRequest, new SerialiserOptions(SerialiserPropertyFormat.SnakeCase, WriteIndented:true));
 
             Logger.LogDebug($"Request Message Sent to Email Provider [SMTP2Go] {requestSerialised}");
 
@@ -86,12 +85,11 @@
             HttpResponseMessage httpResponse = await this.HttpClient.SendAsync(requestMessage, cancellationToken);
 
             Smtp2GoSendEmailResponse apiResponse = httpResponse.IsSuccessStatusCode switch {
-                true => JsonConvert.DeserializeObject<Smtp2GoSendEmailResponse>(await httpResponse.Content.ReadAsStringAsync(cancellationToken)),
+                true => StringSerialiser.Deserialise<Smtp2GoSendEmailResponse>(await httpResponse.Content.ReadAsStringAsync(cancellationToken)),
                 _ => new Smtp2GoSendEmailResponse { Data = new Smtp2GoSendEmailResponseData { Error = httpResponse.StatusCode.ToString(), ErrorCode = ((Int32)httpResponse.StatusCode).ToString() } }
             };
 
-            Logger.LogDebug($"Response Message Received from Email Provider [SMTP2Go] {JsonConvert.SerializeObject(apiResponse)}");
-
+            Logger.LogDebug($"Response Message Received from Email Provider [SMTP2Go] {StringSerialiser.Serialise(apiResponse)}");
             // Translate the Response
             return new EmailServiceProxyResponse {
                 ApiCallSuccessful = httpResponse.IsSuccessStatusCode && String.IsNullOrEmpty(apiResponse.Data.ErrorCode),
@@ -119,7 +117,7 @@
                 ApiKey = Configuration.APIKey, EmailId = new List<String> { providerReference }, StartDate = startDate.ToString("yyyy-MM-dd"), EndDate = endDate.ToString("yyyy-MM-dd"),
             };
 
-            String requestSerialised = JsonConvert.SerializeObject(apiRequest, new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.None });
+            String requestSerialised = StringSerialiser.Serialise(apiRequest, new SerialiserOptions(SerialiserPropertyFormat.SnakeCase, WriteIndented: true));
 
             Logger.LogDebug($"Request Message Sent to Email Provider [SMTP2Go] {requestSerialised}");
 
@@ -131,9 +129,9 @@
 
             HttpResponseMessage httpResponse = await this.HttpClient.SendAsync(requestMessage, cancellationToken);
 
-            Smtp2GoEmailSearchResponse apiResponse = JsonConvert.DeserializeObject<Smtp2GoEmailSearchResponse>(await httpResponse.Content.ReadAsStringAsync(cancellationToken));
+            Smtp2GoEmailSearchResponse apiResponse = StringSerialiser.Deserialise<Smtp2GoEmailSearchResponse>(await httpResponse.Content.ReadAsStringAsync(cancellationToken));
 
-            Logger.LogDebug($"Response Message Received from Email Provider [SMTP2Go] {JsonConvert.SerializeObject(apiResponse)}");
+            Logger.LogDebug($"Response Message Received from Email Provider [SMTP2Go] {StringSerialiser.Serialise(apiResponse)}");
 
             // Translate the Response
             return new MessageStatusResponse { ApiStatusCode = httpResponse.StatusCode, MessageStatus = this.TranslateMessageStatus(apiResponse.Data.EmailDetails.Single().Status), ProviderStatusDescription = apiResponse.Data.EmailDetails.Single().Status, Timestamp = apiResponse.Data.EmailDetails.Single().EmailStatusDate };
