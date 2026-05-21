@@ -92,12 +92,6 @@ namespace MessagingService.Bootstrapper
 
             this.AddClientCredentialsOnlyPolicy();
             this.AddClientCredentialsHandler();
-
-            //this.ConfigureHttpJsonOptions(options =>
-            //{
-            //    options.SerializerOptions.PropertyNamingPolicy = new SnakeCaseNamingPolicy();
-            //    options.SerializerOptions.PropertyNameCaseInsensitive = true; // optional, but safer
-            //});
         }
         private void ConfigureSwagger() {
             
