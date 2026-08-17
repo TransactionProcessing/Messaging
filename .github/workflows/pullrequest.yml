@@ -27,8 +27,7 @@ jobs:
         echo "ASPNETCORE_ENVIRONMENT are > ${ASPNETCORE_ENVIRONMENT}"
         dotnet test "MessagingService.BusinessLogic.Tests\MessagingService.BusinessLogic.Tests.csproj" --configuration Release --verbosity normal
         dotnet test "MessagingService.EmailAggregate.Tests\MessagingService.EmailAggregate.Tests.csproj" --configuration Release --verbosity normal
-        dotnet test "MessagingService.SMSAggregate.Tests\MessagingService.SMSAggregate.Tests.csproj" --configuration Release --verbosity normal
-        #dotnet test "MessagingService.Tests\MessagingService.Tests.csproj" --configuration Release --verbosity normal
+        dotnet test "MessagingService.SMSAggregate.Tests\MessagingService.SMSAggregate.Tests.csproj" --configuration Release --verbosity normal        
 
     - name: Build Docker Image
       env:
