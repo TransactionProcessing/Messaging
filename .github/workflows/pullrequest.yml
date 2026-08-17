@@ -35,7 +35,7 @@ jobs:
       run: docker build . --file MessagingService/Dockerfile --tag messagingservice:latest --build-arg NUGET_TOKEN=${{ secrets.PRIVATEFEED_APIKEY }}
         
     - name: Run Integration Tests
-      run: dotnet test "MessagingService.IntegrationTests/MessagingService.IntegrationTests.csproj" --filter Category=PRTest --configuration Release --verbosity normal -- --report-trx
+      run: dotnet test "MessagingService.IntegrationTests/MessagingService.IntegrationTests.csproj" --filter Category=PRTest --configuration Release --verbosity normal
 
     - uses: actions/upload-artifact@v4.4.0
       with:
