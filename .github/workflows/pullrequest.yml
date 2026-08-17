@@ -35,7 +35,7 @@ jobs:
       run: docker build . --file MessagingService/Dockerfile --tag messagingservice:latest --build-arg NUGET_TOKEN=${{ secrets.PRIVATEFEED_APIKEY }}
         
     - name: Run Integration Tests
-      run: dotnet test "MessagingService.IntegrationTests/MessagingService.IntegrationTests.csproj" --filter Category=PRTest --configuration Release --verbosity normal
+      run: dotnet test "MessagingService.IntegrationTests/MessagingService.IntegrationTests.csproj" --filter Category=PRTest --configuration Release --verbosity normal --results-directory "${{ github.workspace }}/TestResults" --settings "MessagingService.IntegrationTests/Integration.runsettings"
 
     - uses: actions/upload-artifact@v4.4.0
       with:
@@ -56,7 +56,7 @@ jobs:
       if: always()
       with:
           name: Integration Test Results
-          path: '**/TestResult.xml'
+          path: 'TestResults/Integration/TestResult.xml'
           reporter: dotnet-nunit
           fail-on-error: true
 
@@ -73,5 +73,5 @@ jobs:
       if: always()
       with:
           name: integration-test-results
-          path: '**/TestResult.xml'
+          path: 'TestResults/Integration/TestResult.xml'
           retention-days: 30
