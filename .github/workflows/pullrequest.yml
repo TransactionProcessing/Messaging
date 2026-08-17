@@ -42,7 +42,7 @@ jobs:
         name: tracelogs
         path: /home/runner/trace/ 
 
-    - name: Publish test results
+    - name: Publish unit test results
       uses: dorny/test-reporter@v1
       if: always()
       with:
@@ -50,11 +50,28 @@ jobs:
           path: '**/TestResults/*.trx'
           reporter: dotnet-trx
           fail-on-error: true
-    
+
+    - name: Publish integration test results
+      uses: dorny/test-reporter@v1
+      if: always()
+      with:
+          name: Integration Test Results
+          path: '**/TestResult.xml'
+          reporter: dotnet-nunit
+          fail-on-error: true
+
     - name: Upload test results
       uses: actions/upload-artifact@v4
       if: always()
       with:
           name: test-results
           path: '**/TestResults/*.trx'
+          retention-days: 30
+
+    - name: Upload integration test results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+          name: integration-test-results
+          path: '**/TestResult.xml'
           retention-days: 30
