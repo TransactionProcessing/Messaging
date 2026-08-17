@@ -5,7 +5,6 @@
     <DebugType>None</DebugType>
     <IsPackable>false</IsPackable>
     <OutputType>Exe</OutputType>
-    <TestingPlatformCommandLineArguments>$(TestingPlatformCommandLineArguments) --report-trx</TestingPlatformCommandLineArguments>
   </PropertyGroup>
 
   <ItemGroup>
