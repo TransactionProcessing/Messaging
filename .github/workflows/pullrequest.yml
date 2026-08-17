@@ -25,10 +25,9 @@ jobs:
     - name: Run Unit Tests
       run: |
         echo "ASPNETCORE_ENVIRONMENT are > ${ASPNETCORE_ENVIRONMENT}"
-        dotnet test "MessagingService.BusinessLogic.Tests\MessagingService.BusinessLogic.Tests.csproj" --configuration Release --no-build --verbosity normal --logger "trx;LogFileName=businesslogic-test-results.trx" 
-        dotnet test "MessagingService.EmailAggregate.Tests\MessagingService.EmailAggregate.Tests.csproj" --configuration Release --no-build --verbosity normal --logger "trx;LogFileName=email-aggregate-test-results.trx"
-        dotnet test "MessagingService.SMSAggregate.Tests\MessagingService.SMSAggregate.Tests.csproj" --configuration Release --no-build --verbosity normal --logger "trx;LogFileName=sms-aggregate-test-results.trx"
-        #dotnet test "MessagingService.Tests\MessagingService.Tests.csproj" --configuration Release --no-build --verbosity normal --logger "trx;LogFileName=service-test-results.trx"
+        dotnet test "MessagingService.BusinessLogic.Tests/MessagingService.BusinessLogic.Tests.csproj" --configuration Release --verbosity normal -- --report-trx
+        dotnet test "MessagingService.EmailAggregate.Tests/MessagingService.EmailAggregate.Tests.csproj" --configuration Release --verbosity normal -- --report-trx
+        dotnet test "MessagingService.SMSAggregate.Tests/MessagingService.SMSAggregate.Tests.csproj" --configuration Release --verbosity normal -- --report-trx
 
     - name: Build Docker Image
       env:
@@ -36,14 +35,14 @@ jobs:
       run: docker build . --file MessagingService/Dockerfile --tag messagingservice:latest --build-arg NUGET_TOKEN=${{ secrets.PRIVATEFEED_APIKEY }}
         
     - name: Run Integration Tests
-      run: dotnet test "MessagingService.IntegrationTests\MessagingService.IntegrationTests.csproj" --filter Category=PRTest  --configuration Release --no-build --verbosity normal --logger "trx;LogFileName=integration-test-results.trx" 
+      run: dotnet test "MessagingService.IntegrationTests/MessagingService.IntegrationTests.csproj" --filter Category=PRTest --configuration Release --verbosity normal --results-directory "${{ github.workspace }}/TestResults" --settings "MessagingService.IntegrationTests/Integration.runsettings"
 
     - uses: actions/upload-artifact@v4.4.0
       with:
         name: tracelogs
         path: /home/runner/trace/ 
 
-    - name: Publish test results
+    - name: Publish unit test results
       uses: dorny/test-reporter@v1
       if: always()
       with:
@@ -51,11 +50,28 @@ jobs:
           path: '**/TestResults/*.trx'
           reporter: dotnet-trx
           fail-on-error: true
-    
+
+    - name: Publish integration test results
+      uses: dorny/test-reporter@v1
+      if: always()
+      with:
+          name: Integration Test Results
+          path: 'TestResults/MessagingService.IntegrationTests.xml'
+          reporter: dotnet-nunit
+          fail-on-error: true
+
     - name: Upload test results
       uses: actions/upload-artifact@v4
       if: always()
       with:
           name: test-results
           path: '**/TestResults/*.trx'
+          retention-days: 30
+
+    - name: Upload integration test results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+          name: integration-test-results
+          path: 'TestResults/MessagingService.IntegrationTests.xml'
           retention-days: 30
