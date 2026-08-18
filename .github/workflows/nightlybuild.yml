@@ -42,7 +42,7 @@ jobs:
       run: docker build . --file MessagingService/Dockerfile --tag messagingservice:latest
         
     - name: Run Integration Tests
-      run: dotnet test "MessagingService.IntegrationTests\MessagingService.IntegrationTests.csproj"
+      run: dotnet run --project "MessagingService.IntegrationTests/MessagingService.IntegrationTests.csproj" --configuration Release --no-build
 
     - uses: actions/upload-artifact@v4.4.0
       with:
