@@ -7,41 +7,53 @@ on:
       - main
   workflow_dispatch:
 
-jobs:  
+permissions:
+  contents: read
+  code-quality: write
+
+jobs:
   build:
-    name: "Code Coverage"
+    name: Code Coverage
     env:
-        ASPNETCORE_ENVIRONMENT: "Production"
+      ASPNETCORE_ENVIRONMENT: Production
 
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2.3.4    
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
 
-    - name: Restore Nuget Packages
-      run: dotnet restore MessagingService.sln --source ${{ secrets.PUBLICFEEDURL }} --source ${{ secrets.PRIVATEFEED_URL }}
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
 
-    - name: Build Code
-      run: dotnet build MessagingService.sln --configuration Release
-    
-    - name: Run Unit Tests
-      run: |
-        echo "ASPNETCORE_ENVIRONMENT are > ${ASPNETCORE_ENVIRONMENT}"
-        dotnet test "MessagingService.BusinessLogic.Tests\MessagingService.BusinessLogic.Tests.csproj" /p:CollectCoverage=true /p:Exclude="[xunit*]*" /p:ExcludeByAttribute="Obsolete" /p:ExcludeByAttribute="GeneratedCodeAttribute" /p:ExcludeByAttribute="CompilerGeneratedAttribute" /p:ExcludeByAttribute="ExcludeFromCodeCoverageAttribute" /p:CoverletOutput="../lcov1.info" /maxcpucount:1 /p:CoverletOutputFormat="lcov"
-        dotnet test "MessagingService.EmailAggregate.Tests\MessagingService.EmailAggregate.Tests.csproj" /p:CollectCoverage=true /p:Exclude="[xunit*]*" /p:ExcludeByAttribute="Obsolete" /p:ExcludeByAttribute="GeneratedCodeAttribute" /p:ExcludeByAttribute="CompilerGeneratedAttribute" /p:ExcludeByAttribute="ExcludeFromCodeCoverageAttribute" /p:CoverletOutput="../lcov2.info" /maxcpucount:1 /p:CoverletOutputFormat="lcov"        
-        dotnet test "MessagingService.SMSAggregate.Tests\MessagingService.SMSAggregate.Tests.csproj" /p:CollectCoverage=true /p:Exclude="[xunit*]*" /p:ExcludeByAttribute="Obsolete" /p:ExcludeByAttribute="GeneratedCodeAttribute" /p:ExcludeByAttribute="CompilerGeneratedAttribute" /p:ExcludeByAttribute="ExcludeFromCodeCoverageAttribute" /p:CoverletOutput="../lcov3.info" /maxcpucount:1 /p:CoverletOutputFormat="lcov"        
-        #dotnet test "MessagingService.Tests\MessagingService.Tests.csproj" /p:CollectCoverage=true /p:Exclude="[xunit*]*" /p:ExcludeByAttribute="Obsolete" /p:ExcludeByAttribute="GeneratedCodeAttribute" /p:ExcludeByAttribute="CompilerGeneratedAttribute" /p:ExcludeByAttribute="ExcludeFromCodeCoverageAttribute" /p:CoverletOutput="../lcov4.info" /maxcpucount:1 /p:CoverletOutputFormat="lcov"               
+      - name: Restore Nuget Packages
+        run: dotnet restore MessagingService.sln --source ${{ secrets.PUBLICFEEDURL }} --source ${{ secrets.PRIVATEFEED_URL }}
 
-    - name: Install LCOV merger
-      run: npm install -g lcov-result-merger
+      - name: Build Code
+        run: dotnet build MessagingService.sln --configuration Release --no-restore
 
-    - name: Merge LCOV reports
-      run: |
-        mkdir -p coverage
-        lcov-result-merger "*.info" > lcov.info
+      - name: Run Unit Tests
+        run: |
+          echo "ASPNETCORE_ENVIRONMENT are > ${ASPNETCORE_ENVIRONMENT}"
+          dotnet test "MessagingService.BusinessLogic.Tests/MessagingService.BusinessLogic.Tests.csproj" --configuration Release --no-build /maxcpucount:1 /p:CollectCoverage=true /p:Exclude="[xunit*]*" /p:ExcludeByAttribute="Obsolete" /p:ExcludeByAttribute="GeneratedCodeAttribute" /p:ExcludeByAttribute="CompilerGeneratedAttribute" /p:ExcludeByAttribute="ExcludeFromCodeCoverageAttribute" /p:CoverletOutput="../coverage/businesslogic/" /p:CoverletOutputFormat="cobertura"
+          dotnet test "MessagingService.EmailAggregate.Tests/MessagingService.EmailAggregate.Tests.csproj" --configuration Release --no-build /maxcpucount:1 /p:CollectCoverage=true /p:Exclude="[xunit*]*" /p:ExcludeByAttribute="Obsolete" /p:ExcludeByAttribute="GeneratedCodeAttribute" /p:ExcludeByAttribute="CompilerGeneratedAttribute" /p:ExcludeByAttribute="ExcludeFromCodeCoverageAttribute" /p:CoverletOutput="../coverage/emailaggregate/" /p:CoverletOutputFormat="cobertura"
+          dotnet test "MessagingService.SMSAggregate.Tests/MessagingService.SMSAggregate.Tests.csproj" --configuration Release --no-build /maxcpucount:1 /p:CollectCoverage=true /p:Exclude="[xunit*]*" /p:ExcludeByAttribute="Obsolete" /p:ExcludeByAttribute="GeneratedCodeAttribute" /p:ExcludeByAttribute="CompilerGeneratedAttribute" /p:ExcludeByAttribute="ExcludeFromCodeCoverageAttribute" /p:CoverletOutput="../coverage/smsaggregate/" /p:CoverletOutputFormat="cobertura"
+          #dotnet test "MessagingService.Tests/MessagingService.Tests.csproj" --configuration Release --no-build /maxcpucount:1 /p:CollectCoverage=true /p:Exclude="[xunit*]*" /p:ExcludeByAttribute="Obsolete" /p:ExcludeByAttribute="GeneratedCodeAttribute" /p:ExcludeByAttribute="CompilerGeneratedAttribute" /p:ExcludeByAttribute="ExcludeFromCodeCoverageAttribute" /p:CoverletOutput="../coverage/tests/" /p:CoverletOutputFormat="cobertura"
 
-    - name: Upload merged coverage to Codacy
-      uses: codacy/codacy-coverage-reporter-action@v1
-      with:
-        project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
-        coverage-reports: ./lcov.info  
+      - name: Merge Coverage Reports
+        uses: danielpalme/ReportGenerator-GitHub-Action@v5
+        with:
+          reports: ./coverage/**/*.cobertura.xml
+          targetdir: ./coverage-report
+          reporttypes: Cobertura
+
+      - name: Upload coverage report
+        if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+        uses: actions/upload-code-coverage@v1
+        with:
+          file: ./coverage-report/Cobertura.xml
+          language: C#
+          label: code-coverage/messagingservice
