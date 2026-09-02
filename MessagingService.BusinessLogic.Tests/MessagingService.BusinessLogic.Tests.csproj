@@ -10,7 +10,7 @@
 
   <ItemGroup>
     <PackageReference Include="Lamar" />
-    <PackageReference Include="Moq" />
+    <PackageReference Include="Imposter" />
     <PackageReference Include="Microsoft.Testing.Extensions.TrxReport">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
