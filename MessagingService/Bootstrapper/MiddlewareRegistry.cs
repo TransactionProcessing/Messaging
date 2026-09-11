@@ -3,10 +3,10 @@ using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
 using Shared.Authorisation;
+using Shared.Serialisation;
 using System;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Shared.Serialisation;
 
 namespace MessagingService.Bootstrapper
 {
@@ -20,6 +20,7 @@ namespace MessagingService.Bootstrapper
     using Shared.EventStore.Extensions;
     using Shared.General;
     using Shared.Middleware;
+    using Shared.Monitoring;
     using Swashbuckle.AspNetCore.Filters;
     using System;
     using System.Diagnostics.CodeAnalysis;
@@ -56,6 +57,8 @@ namespace MessagingService.Bootstrapper
             this.AddSingleton(config);
 
             this.ConfigureHttpJsonOptions(jsonOptions => JsonSerializerConfiguration.ConfigureMinimalApi(jsonOptions.SerializerOptions));
+
+            this.AddUptimeKuma();
         }
 
         private void ConfigureAuthentication() {

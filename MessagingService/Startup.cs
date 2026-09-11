@@ -7,6 +7,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace MessagingService
 {
@@ -26,6 +27,7 @@ namespace MessagingService
     using Shared.General;
     using Shared.Logger;
     using Shared.Middleware;
+    using Shared.Monitoring;
     using Shared.Serialisation;
     using SMSMessage.DomainEvents;
     using System.Diagnostics;
@@ -66,7 +68,8 @@ namespace MessagingService
         }
         
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory,
+                              IHostApplicationLifetime lifetime, IHost host)
         {
             if (env.IsDevelopment())
             {
@@ -113,7 +116,24 @@ namespace MessagingService
 
             app.UseSwaggerUI();
 
+            lifetime.ApplicationStarted.Register(() =>
+            {
+                _ = RegisterWithUptimeKumaAsync(host);
+            });
+
             app.PreWarm();
+        }
+
+        private static async Task RegisterWithUptimeKumaAsync(IHost host)
+        {
+            try
+            {
+                await host.RegisterWithUptimeKumaAsync();
+            }
+            catch (Exception ex)
+            {
+                Shared.Logger.Logger.LogError("Failed to register the Messaging Service with Uptime Kuma.", ex);
+            }
         }
     }
 }
