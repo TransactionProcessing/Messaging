@@ -7,6 +7,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace MessagingService
 {
@@ -117,12 +118,22 @@ namespace MessagingService
 
             lifetime.ApplicationStarted.Register(() =>
             {
-                host.RegisterWithUptimeKumaAsync()
-                    .GetAwaiter()
-                    .GetResult();
+                _ = RegisterWithUptimeKumaAsync(host);
             });
 
             app.PreWarm();
+        }
+
+        private static async Task RegisterWithUptimeKumaAsync(IHost host)
+        {
+            try
+            {
+                await host.RegisterWithUptimeKumaAsync();
+            }
+            catch (Exception ex)
+            {
+                Shared.Logger.Logger.LogError("Failed to register the Messaging Service with Uptime Kuma.", ex);
+            }
         }
     }
 }
