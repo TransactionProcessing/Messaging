@@ -3,8 +3,8 @@
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>
   <ItemGroup>
-    <PackageVersion Include="ClientProxyBase" Version="2026.9.3" />
-    <PackageVersion Include="Shared.Results" Version="2026.9.3" />
+    <PackageVersion Include="ClientProxyBase" Version="2026.9.4" />
+    <PackageVersion Include="Shared.Results" Version="2026.9.4" />
     <PackageVersion Include="NLog.Extensions.Logging" Version="6.2.0" />
     <PackageVersion Include="MediatR" Version="14.2.0" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.12" />
@@ -14,16 +14,16 @@
     <PackageVersion Include="SimpleResults" Version="4.0.0" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.10.0" />
     <PackageVersion Include="Microsoft.Testing.Extensions.TrxReport" Version="2.4.0" />
-    <PackageVersion Include="Shared.EventStore" Version="2026.9.3" />
+    <PackageVersion Include="Shared.EventStore" Version="2026.9.4" />
     <PackageVersion Include="Shouldly" Version="4.3.0" />
     <PackageVersion Include="xunit.v3.mtp-v2" Version="4.0.0" />
-    <PackageVersion Include="Microsoft.Testing.Extensions.CodeCoverage" Version="18.11.0" />
+    <PackageVersion Include="Microsoft.Testing.Extensions.CodeCoverage" Version="18.11.2" />
     <PackageVersion Include="Grpc.Net.Client" Version="2.83.0" />
-    <PackageVersion Include="Shared" Version="2026.9.3" />
-    <PackageVersion Include="Shared.DomainDrivenDesign" Version="2026.9.3" />
-    <PackageVersion Include="Shared.IntegrationTesting" Version="2026.9.3" />
-    <PackageVersion Include="Shared.Logger" Version="2026.9.3" />
-    <PackageVersion Include="Shared.Results.Web" Version="2026.9.3" />
+    <PackageVersion Include="Shared" Version="2026.9.4" />
+    <PackageVersion Include="Shared.DomainDrivenDesign" Version="2026.9.4" />
+    <PackageVersion Include="Shared.IntegrationTesting" Version="2026.9.4" />
+    <PackageVersion Include="Shared.Logger" Version="2026.9.4" />
+    <PackageVersion Include="Shared.Results.Web" Version="2026.9.4" />
     <PackageVersion Include="Ductus.FluentDocker" Version="2.85.0" />
     <PackageVersion Include="Reqnroll.Tools.MsBuild.Generation" Version="3.3.4" />
     <PackageVersion Include="NUnit" Version="4.6.1" />
@@ -55,8 +55,8 @@
     <PackageVersion Include="NUnit3TestAdapter" Version="6.3.0" />
     <PackageVersion Include="Reqnroll" Version="3.3.4" />
     <PackageVersion Include="Reqnroll.NUnit" Version="3.3.4" />
-    <PackageVersion Include="SecurityService.Client" Version="2026.9.2.177" />
-    <PackageVersion Include="SecurityService.IntegrationTesting.Helpers" Version="2026.9.2.177" />
+    <PackageVersion Include="SecurityService.Client" Version="2026.9.2.178" />
+    <PackageVersion Include="SecurityService.IntegrationTesting.Helpers" Version="2026.9.2.178" />
     <PackageVersion Include="coverlet.collector" Version="10.0.1" />
   </ItemGroup>
 </Project>
