@@ -4,7 +4,7 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageVersion Include="ClientProxyBase" Version="2026.9.4" />
-    <PackageVersion Include="HealthMonitoring.Client" Version="2026.9.2.28" />
+    <PackageVersion Include="HealthMonitoring.Client" Version="2026.9.2.29" />
     <PackageVersion Include="Shared.Results" Version="2026.9.4" />
     <PackageVersion Include="NLog.Extensions.Logging" Version="6.2.0" />
     <PackageVersion Include="MediatR" Version="14.2.0" />
