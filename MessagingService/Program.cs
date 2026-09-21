@@ -3,18 +3,19 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using NLog.Extensions.Logging;
+using Sentry.Extensibility;
 using Shared.Logger;
 using Shared.Middleware;
 using System;
 using System.IO;
 using System.Reflection;
-using Sentry.Extensibility;
 
 namespace MessagingService
 {
     using Lamar.Microsoft.DependencyInjection;
     using NLog;
     using Shared.General;
+    using System.Collections.Generic;
     using System.Diagnostics.CodeAnalysis;
 
     [ExcludeFromCodeCoverage]
@@ -77,7 +78,10 @@ namespace MessagingService
                     .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
                     .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true, reloadOnChange: true)
                     .AddJsonFile($"/home/txnproc/config/appsettings.local.json", optional: true, reloadOnChange: true)
-                    .AddEnvironmentVariables();
+                    .AddEnvironmentVariables().AddInMemoryCollection(new Dictionary<string, string?>
+                    {
+                        ["HealthMonitoring:Service:Version"] = Assembly.GetEntryAssembly()?.GetName().Version?.ToString() ?? "0.0.0.0"
+                    });
 
                 // Build a snapshot of configuration so we can use it immediately (e.g. for Sentry)
                 var builtConfig = configBuilder.Build();
