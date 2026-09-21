@@ -115,25 +115,8 @@ namespace MessagingService
             app.UseSwagger();
 
             app.UseSwaggerUI();
-
-            lifetime.ApplicationStarted.Register(() =>
-            {
-                _ = RegisterWithUptimeKumaAsync(host);
-            });
-
+            
             app.PreWarm();
-        }
-
-        private static async Task RegisterWithUptimeKumaAsync(IHost host)
-        {
-            try
-            {
-                await host.RegisterWithUptimeKumaAsync();
-            }
-            catch (Exception ex)
-            {
-                Shared.Logger.Logger.LogError("Failed to register the Messaging Service with Uptime Kuma.", ex);
-            }
         }
     }
 }

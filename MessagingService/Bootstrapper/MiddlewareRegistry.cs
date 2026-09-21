@@ -7,6 +7,7 @@ using Shared.Serialisation;
 using System;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using HealthMonitoring.Client;
 
 namespace MessagingService.Bootstrapper
 {
@@ -58,7 +59,7 @@ namespace MessagingService.Bootstrapper
 
             this.ConfigureHttpJsonOptions(jsonOptions => JsonSerializerConfiguration.ConfigureMinimalApi(jsonOptions.SerializerOptions));
 
-            this.AddUptimeKuma();
+            this.AddHealthMonitoringRegistration(Startup.Configuration);
         }
 
         private void ConfigureAuthentication() {
