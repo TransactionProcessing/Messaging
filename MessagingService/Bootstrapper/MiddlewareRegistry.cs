@@ -1,19 +1,16 @@
 ﻿using KurrentDB.Client;
 using Microsoft.Extensions.Logging;
-using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
 using Shared.Authorisation;
 using Shared.Serialisation;
 using System;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using HealthMonitoring.Client;
 
 namespace MessagingService.Bootstrapper
 {
     using Common;
     using Lamar;
-    using Microsoft.AspNetCore.Authentication.JwtBearer;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Diagnostics.HealthChecks;
@@ -21,7 +18,6 @@ namespace MessagingService.Bootstrapper
     using Shared.EventStore.Extensions;
     using Shared.General;
     using Shared.Middleware;
-    using Shared.Monitoring;
     using Swashbuckle.AspNetCore.Filters;
     using System;
     using System.Diagnostics.CodeAnalysis;
