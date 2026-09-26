@@ -7,33 +7,19 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace MessagingService
 {
     using Bootstrapper;
     using Common;
-    using EmailMessage.DomainEvents;
-    using EventStore.Client;
     using HealthChecks.UI.Client;
     using Lamar;
     using Microsoft.AspNetCore.Diagnostics.HealthChecks;
-    using NLog;
-    using NLog.Extensions.Logging;
-    using Shared.EventStore.Aggregate;
-    using Shared.EventStore.EventHandling;
-    using Shared.EventStore.SubscriptionWorker;
     using Shared.Extensions;
     using Shared.General;
-    using Shared.Logger;
     using Shared.Middleware;
-    using Shared.Monitoring;
     using Shared.Serialisation;
-    using SMSMessage.DomainEvents;
-    using System.Diagnostics;
     using System.Diagnostics.CodeAnalysis;
-    using System.IO;
-    using System.Threading;
 
     [ExcludeFromCodeCoverage]
     public class Startup
