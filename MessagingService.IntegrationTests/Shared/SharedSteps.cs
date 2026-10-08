@@ -28,7 +28,7 @@ namespace MessagingService.IntegrationTests.Shared
         {
             this.ScenarioContext = scenarioContext;
             this.TestingContext = testingContext;
-            this.SecurityServiceSteps = new SecurityServiceSteps(testingContext.DockerHelper.SecurityServiceClient);
+            this.SecurityServiceSteps = new SecurityServiceSteps(testingContext.DockerHelper.SecurityServiceClient, testingContext.DockerHelper.AccessToken);
         }
 
         [Given(@"I create the following api scopes")]

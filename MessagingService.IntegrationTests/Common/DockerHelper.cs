@@ -18,6 +18,7 @@ namespace MessagingService.IntegrationTests.Common
     using System.Collections.Generic;
     using System.Linq;
     using System.Net.Http;
+    using System.Threading;
     using System.Threading.Tasks;
     
     /// <summary>
@@ -70,10 +71,8 @@ namespace MessagingService.IntegrationTests.Common
             }
         }
 
-        /// <summary>
-        /// Starts the containers for scenario run.
-        /// </summary>
-        /// <param name="scenarioName">Name of the scenario.</param>
+        public String AccessToken;
+
         public override async Task StartContainersForScenarioRun(String scenarioName, DockerServices dockerServices){
             await base.StartContainersForScenarioRun(scenarioName, dockerServices);
 
@@ -85,6 +84,13 @@ namespace MessagingService.IntegrationTests.Common
             
             this.SecurityServiceClient = new SecurityServiceClient(SecurityServiceBaseAddressResolver, httpClient, Serialise, Deserialise);
             this.MessagingServiceClient = new MessagingServiceClient(MessagingServiceBaseAddressResolver, httpClient, Serialise, Deserialise);
+
+            SimpleResults.Result<SecurityService.DataTransferObjects.TokenResponse> bootstrapToken = await this.SecurityServiceClient.GetToken("management-bootstrap", "management-bootstrap-secret", CancellationToken.None);
+            if (bootstrapToken.IsFailed || String.IsNullOrWhiteSpace(bootstrapToken.Data?.AccessToken))
+            {
+                throw new InvalidOperationException("Unable to obtain the integration-test management bootstrap token.");
+            }
+            this.AccessToken = bootstrapToken.Data.AccessToken;
         }
         #endregion
 
