@@ -63,7 +63,7 @@ namespace MessagingService.IntegrationTests.Common
 
         #region Methods
 
-        public override async Task CreateSubscriptions(){
+        public override async Task CreateSubscriptions(CancellationToken cancellationToken){
             List<(String streamName, String groupName, Int32 maxRetries)> subscriptions = SubscriptionsHelper.GetSubscriptions();
             foreach ((String streamName, String groupName, Int32 maxRetries) subscription in subscriptions)
             {
@@ -73,8 +73,9 @@ namespace MessagingService.IntegrationTests.Common
 
         public String AccessToken;
 
-        public override async Task StartContainersForScenarioRun(String scenarioName, DockerServices dockerServices){
-            await base.StartContainersForScenarioRun(scenarioName, dockerServices);
+        public override async Task StartContainersForScenarioRun(String scenarioName, DockerServices dockerServices, CancellationToken cancellationToken)
+        {
+            await base.StartContainersForScenarioRun(scenarioName, dockerServices, cancellationToken);
 
             // Setup the base address resolvers
             String SecurityServiceBaseAddressResolver(String api) => $"https://127.0.0.1:{this.SecurityServicePort}";
