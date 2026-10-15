@@ -8,6 +8,7 @@
   <ItemGroup>
 	<PackageReference Include="Shared" />
 	<PackageReference Include="Shared.DomainDrivenDesign" />
+	<PackageReference Include="System.Security.Cryptography.Pkcs" />
   </ItemGroup>
 
 </Project>

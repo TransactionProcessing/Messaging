@@ -8,6 +8,8 @@
 
   <ItemGroup>
 	<PackageReference Include="Shared.IntegrationTesting" />
+	<PackageReference Include="SSH.NET" />
+	<PackageReference Include="System.Security.Cryptography.Pkcs" />
   </ItemGroup>
 
   <ItemGroup>

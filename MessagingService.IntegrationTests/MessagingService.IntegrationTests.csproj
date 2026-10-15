@@ -19,11 +19,14 @@
     <PackageReference Include="SecurityService.Client" />
     <PackageReference Include="SecurityService.IntegrationTesting.Helpers" />
     <PackageReference Include="Shared.IntegrationTesting" />
+    <PackageReference Include="SharpCompress" />
     <PackageReference Include="Shouldly" />
     <PackageReference Include="coverlet.collector">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="SSH.NET" />
+    <PackageReference Include="System.Security.Cryptography.Pkcs" />
   </ItemGroup>
 
   <ItemGroup>
