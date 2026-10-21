@@ -14,18 +14,14 @@ using Shared.EventStore.EventHandling;
 [ExcludeFromCodeCoverage]
 public class DomainEventHandlerRegistry : ServiceRegistry
 {
-    public DomainEventHandlerRegistry()
+    public DomainEventHandlerRegistry(IConfiguration configuration)
     {
         Dictionary<String, String[]> eventHandlersConfiguration = new Dictionary<String, String[]>();
 
-        if (Startup.Configuration != null)
+        IConfigurationSection section = configuration.GetSection("AppSettings:EventHandlerConfiguration");
+        if (section.Exists())
         {
-            IConfigurationSection section = Startup.Configuration.GetSection("AppSettings:EventHandlerConfiguration");
-
-            if (section != null)
-            {
-                Startup.Configuration.GetSection("AppSettings:EventHandlerConfiguration").Bind(eventHandlersConfiguration);
-            }
+            section.Bind(eventHandlersConfiguration);
         }
         this.AddSingleton<EmailDomainEventHandler>();
         this.AddSingleton<SMSDomainEventHandler>();
@@ -37,7 +33,7 @@ public class DomainEventHandlerRegistry : ServiceRegistry
                                                                             return handler;
                                                                         });
 
-        this.For<IDomainEventHandlerResolver>().Use<DomainEventHandlerResolver>().Named("Main")
+        this.For<IDomainEventHandlerResolver>().Use<DomainEventHandlerResolver>()
             .Ctor<Dictionary<String, String[]>>().Is(eventHandlersConfiguration).Singleton();
         this.AddSingleton<IDomainEventFactory<IDomainEvent>, DomainEventFactory>();
     }

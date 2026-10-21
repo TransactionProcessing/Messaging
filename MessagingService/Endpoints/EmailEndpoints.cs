@@ -21,12 +21,14 @@ namespace MessagingService.Endpoints
                 .RequireAuthorization(AuthorizationExtensions.PolicyNames.ClientCredentialsOnlyPolicy)
                 .WithName("Send Email")
                 .WithSummary("Sends an email")
+                .WithDescription("Submits an email for delivery. If messageId is omitted or null, the service generates a message identifier. Attachments may be included in the request.")
                 .WithStandardProduces<SendEmailResponse,ErrorResponse>(StatusCodes.Status201Created);
 
             emailGroup.MapPost("/resend", EmailHandlers.ResendEmail)
                 .RequireAuthorization(AuthorizationExtensions.PolicyNames.ClientCredentialsOnlyPolicy)
                 .WithName("Resend Email")
                 .WithSummary("Resends an email by id")
+                .WithDescription("Requests delivery of an existing email message, identified by messageId and connectionIdentifier.")
                 .WithStandardProduces< ErrorResponse>(StatusCodes.Status202Accepted);
 
             return endpoints;

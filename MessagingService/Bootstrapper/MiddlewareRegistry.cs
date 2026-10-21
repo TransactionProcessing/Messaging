@@ -1,11 +1,11 @@
-﻿using KurrentDB.Client;
+﻿using HealthMonitoring.Client;
+using KurrentDB.Client;
 using Microsoft.Extensions.Logging;
-using Microsoft.OpenApi;
+using Microsoft.AspNetCore.OpenApi;
 using Shared.Authorisation;
 using Shared.Serialisation;
 using System;
 using System.Text.Json;
-using HealthMonitoring.Client;
 
 namespace MessagingService.Bootstrapper
 {
@@ -16,22 +16,22 @@ namespace MessagingService.Bootstrapper
     using Microsoft.Extensions.Diagnostics.HealthChecks;
     using OpenIddict.Validation.AspNetCore;
     using Shared.EventStore.Extensions;
-    using Shared.General;
     using Shared.Middleware;
-    using Swashbuckle.AspNetCore.Filters;
     using System;
     using System.Diagnostics.CodeAnalysis;
     using System.IO;
     using System.Net.Http;
+    using TransactionProcessing.ApiDefaults;
 
     [ExcludeFromCodeCoverage]
     public class MiddlewareRegistry : ServiceRegistry
     {
-        internal String GetSecurityConfigSetting(String settingName) => ConfigurationReader.GetValue("SecurityConfiguration", settingName);
+        private readonly IConfiguration configuration;
 
-        public MiddlewareRegistry() {
-            
-            String connectionString = Startup.Configuration.GetValue<String>("EventStoreSettings:ConnectionString");
+        public MiddlewareRegistry(IConfiguration configuration)
+        {
+            this.configuration = configuration;
+            String connectionString = configuration.GetValue<String>("EventStoreSettings:ConnectionString");
             KurrentDBClientSettings eventStoreConnectionSettings = KurrentDBClientSettings.Create(connectionString);
 
             this.AddHealthChecks()
@@ -43,11 +43,10 @@ namespace MessagingService.Bootstrapper
 
             this.AddControllers();
             this.ConfigureAuthentication();
-            this.ConfigureSwagger();
 
-            bool logRequests = ConfigurationReader.GetValueOrDefault<Boolean>("MiddlewareLogging", "LogRequests", true);
-            bool logResponses = ConfigurationReader.GetValueOrDefault<Boolean>("MiddlewareLogging", "LogResponses", true);
-            LogLevel middlewareLogLevel = ConfigurationReader.GetValueOrDefault<LogLevel>("MiddlewareLogging", "MiddlewareLogLevel", LogLevel.Warning);
+            bool logRequests = configuration.GetValue("MiddlewareLogging:LogRequests", true);
+            bool logResponses = configuration.GetValue("MiddlewareLogging:LogResponses", true);
+            LogLevel middlewareLogLevel = configuration.GetValue("MiddlewareLogging:MiddlewareLogLevel", LogLevel.Warning);
 
             RequestResponseMiddlewareLoggingConfig config = new(middlewareLogLevel, logRequests, logResponses);
 
@@ -55,7 +54,19 @@ namespace MessagingService.Bootstrapper
 
             this.ConfigureHttpJsonOptions(jsonOptions => JsonSerializerConfiguration.ConfigureMinimalApi(jsonOptions.SerializerOptions));
 
-            this.AddHealthMonitoringRegistration(Startup.Configuration);
+            this.AddHealthMonitoringRegistration(configuration);
+
+            this.AddApiDefaults(options =>
+            {
+                options.Title = "Messaging Service";
+                options.Description = "API to allow email and sms integrations";
+            });
+
+            this.AddOpenApi(options =>
+            {
+                options.AddSchemaTransformer(new DtoXmlDocumentationSchemaTransformer());
+                options.AddOperationTransformer(new MessagingRequestExamplesOperationTransformer());
+            });
         }
 
         private void ConfigureAuthentication() {
@@ -68,7 +79,7 @@ namespace MessagingService.Bootstrapper
                 .AddValidation(options =>
                 {
                     // Same as your Authority
-                    options.SetIssuer(new Uri(GetSecurityConfigSetting("Authority")));
+                    options.SetIssuer(new Uri(this.configuration.GetValue<String>("SecurityConfiguration:Authority")));
 
                     // Enables discovery and HTTP backchannel support
                     options.UseSystemNetHttp()
@@ -83,7 +94,7 @@ namespace MessagingService.Bootstrapper
                     options.UseAspNetCore();
 
                     // Optionally set expected audience(s):
-                    options.AddAudiences(GetSecurityConfigSetting("ApiName"));
+                    options.AddAudiences(this.configuration.GetValue<String>("SecurityConfiguration:ApiName"));
 
                 });
 
@@ -92,38 +103,6 @@ namespace MessagingService.Bootstrapper
 
             this.AddClientCredentialsOnlyPolicy();
             this.AddClientCredentialsHandler();
-        }
-        private void ConfigureSwagger() {
-            
-            this.AddSwaggerGen(c =>
-            {
-                c.SwaggerDoc("v1", new OpenApiInfo
-                {
-                    Title = "Messaging API",
-                    Version = "1.0",
-                    Description = "A REST Api to manage sending of various messages over different formats, currently only Email and SMS are supported.",
-                    Contact = new OpenApiContact
-                    {
-                        Name = "Stuart Ferguson",
-                        Email = "golfhandicapping@btinternet.com"
-                    }
-                });
-                // add a custom operation filter which sets default values
-                c.OperationFilter<SwaggerDefaultValues>();
-                c.ExampleFilters();
-
-                //Locate the XML files being generated by ASP.NET...
-                var directory = new DirectoryInfo(AppContext.BaseDirectory);
-                var xmlFiles = directory.GetFiles("*.xml");
-
-                //... and tell Swagger to use those XML comments.
-                foreach (FileInfo fileInfo in xmlFiles)
-                {
-                    c.IncludeXmlComments(fileInfo.FullName);
-                }
-            });
-
-            this.AddSwaggerExamplesFromAssemblyOf<SwaggerJsonConverter>();
         }
     }
 }

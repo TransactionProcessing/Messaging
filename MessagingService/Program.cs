@@ -1,117 +1,201 @@
+using Lamar;
+using Lamar.Microsoft.DependencyInjection;
+using MessagingService.Bootstrapper;
+using MessagingService.Common;
+using MessagingService.Endpoints;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http.Metadata;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Configuration.Json;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using NLog;
 using NLog.Extensions.Logging;
 using Sentry.Extensibility;
+using Shared.Extensions;
+using Shared.General;
 using Shared.Logger;
 using Shared.Middleware;
+using Shared.Serialisation;
 using System;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Reflection;
+using TransactionProcessing.ApiDefaults;
 
-namespace MessagingService
+namespace MessagingService;
+
+[ExcludeFromCodeCoverage]
+public static class Program
 {
-    using Lamar.Microsoft.DependencyInjection;
-    using NLog;
-    using Shared.General;
-    using System.Collections.Generic;
-    using System.Diagnostics.CodeAnalysis;
-
-    [ExcludeFromCodeCoverage]
-    public class Program
+    public static void Main(string[] args)
     {
-        public static void Main(string[] args)
+        ConfigureLogging();
+
+        string assemblyDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)
+                                   ?? AppContext.BaseDirectory;
+        WebApplicationBuilder builder = WebApplication.CreateBuilder(new WebApplicationOptions
         {
-            Program.CreateHostBuilder(args).Build() .Run();
-        }
+            Args = args,
+            ContentRootPath = assemblyDirectory
+        });
 
-        public static IHostBuilder CreateHostBuilder(string[] args)
+        builder.Host.UseWindowsService();
+        builder.Logging.AddConsole();
+        builder.Logging.AddNLog();
+
+        ConfigureConfiguration(builder.Configuration, builder.Environment, assemblyDirectory);
+        ConfigurationReader.Initialise(builder.Configuration);
+        ConfigureSentry(builder);
+
+        builder.Services.AddHostedService<SubscriptionPreWarmHostedService>();
+
+        builder.Host.UseLamar((_, services) =>
         {
-            //At this stage, we only need our hosting file for ip and ports
-            FileInfo fi = new(System.Reflection.Assembly.GetExecutingAssembly().Location);
-            
-            ConfigureLogging();
+            IConfiguration configuration = builder.Configuration;
+            services.IncludeRegistry(new MediatorRegistry());
+            services.IncludeRegistry(new RepositoryRegistry(configuration));
+            services.IncludeRegistry(new MiddlewareRegistry(configuration));
+            services.IncludeRegistry(new DomainServiceRegistry());
+            services.IncludeRegistry(new DomainEventHandlerRegistry(configuration));
+            services.IncludeRegistry(new MessagingProxyRegistry(configuration));
+            services.IncludeRegistry(new SerialiserRegistry());
+        });
 
-            IHostBuilder hostBuilder = Host.CreateDefaultBuilder(args);
-            hostBuilder.UseWindowsService();
-            hostBuilder.UseLamar();
-            hostBuilder.ConfigureLogging(logging =>
-                                         {
-                                             logging.AddConsole();
-                                             logging.AddNLog();
+        WebApplication app = builder.Build();
+        ConfigureApplication(app);
+        app.Run();
+    }
 
-                                         });
-            hostBuilder.ConfigureWebHostDefaults(webBuilder => { ConfigureWebHost(webBuilder, fi.Directory.FullName); });
+    private static void ConfigureLogging()
+    {
+        string nlogConfigPath = Path.Combine(Directory.GetCurrentDirectory(), "nlog.config");
 
-            
-            return hostBuilder;
-        }
-
-        private static void ConfigureLogging() {
-            String contentRoot = Directory.GetCurrentDirectory();
-            String nlogConfigPath = Path.Combine(contentRoot, "nlog.config");
-
-            LogManager.Setup(b =>
+        LogManager.Setup(b =>
+        {
+            b.SetupLogFactory(setup =>
             {
-                b.SetupLogFactory(setup =>
-                {
-                    setup.AddCallSiteHiddenAssembly(typeof(NlogLogger).Assembly);
-                    setup.AddCallSiteHiddenAssembly(typeof(Shared.Logger.Logger).Assembly);
-                    setup.AddCallSiteHiddenAssembly(typeof(TenantMiddleware).Assembly);
-                });
-                b.LoadConfigurationFromFile(nlogConfigPath);
+                setup.AddCallSiteHiddenAssembly(typeof(NlogLogger).Assembly);
+                setup.AddCallSiteHiddenAssembly(typeof(Shared.Logger.Logger).Assembly);
+                setup.AddCallSiteHiddenAssembly(typeof(TenantMiddleware).Assembly);
             });
-        }
+            b.LoadConfigurationFromFile(nlogConfigPath);
+        });
+    }
 
-        private static void ConfigureWebHost(IWebHostBuilder webBuilder,
-                                             String basePath) {
-            webBuilder.ConfigureAppConfiguration((context, configBuilder) =>
+    private static void ConfigureConfiguration(IConfigurationManager configuration,
+                                               IHostEnvironment environment,
+                                               string basePath)
+    {
+        RemoveDefaultAppSettingsSources(configuration, environment.EnvironmentName);
+
+        configuration.SetBasePath(basePath)
+            .AddJsonFile("hosting.json", optional: true)
+            .AddJsonFile($"hosting.{environment.EnvironmentName}.json", optional: true)
+            .AddJsonFile("/home/txnproc/config/appsettings.json", optional: true, reloadOnChange: true)
+            .AddJsonFile($"/home/txnproc/config/appsettings.{environment.EnvironmentName}.json", optional: true, reloadOnChange: true)
+            .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+            .AddJsonFile($"appsettings.{environment.EnvironmentName}.json", optional: true, reloadOnChange: true)
+            .AddJsonFile("/home/txnproc/config/appsettings.local.json", optional: true, reloadOnChange: true)
+            .AddEnvironmentVariables()
+            .AddInMemoryCollection(new Dictionary<string, string>
             {
-                var env = context.HostingEnvironment;
-
-                configBuilder.SetBasePath(basePath)
-                    .AddJsonFile("hosting.json", optional: true)
-                    .AddJsonFile($"hosting.{env.EnvironmentName}.json", optional: true)
-                    .AddJsonFile("/home/txnproc/config/appsettings.json", optional: true, reloadOnChange: true)
-                    .AddJsonFile($"/home/txnproc/config/appsettings.{env.EnvironmentName}.json", optional: true, reloadOnChange: true)
-                    .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
-                    .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true, reloadOnChange: true)
-                    .AddJsonFile($"/home/txnproc/config/appsettings.local.json", optional: true, reloadOnChange: true)
-                    .AddEnvironmentVariables().AddInMemoryCollection(new Dictionary<string, string?>
-                    {
-                        ["HealthMonitoring:Service:Version"] = Assembly.GetEntryAssembly()?.GetName().Version?.ToString() ?? "0.0.0.0"
-                    });
-
-                // Build a snapshot of configuration so we can use it immediately (e.g. for Sentry)
-                var builtConfig = configBuilder.Build();
-
-                // Keep existing static usage (if you must), and initialise the ConfigurationReader now.
-                Startup.Configuration = builtConfig;
-                ConfigurationReader.Initialise(Startup.Configuration);
-
-                // Configure Sentry on the webBuilder using the config snapshot.
-                var sentrySection = builtConfig.GetSection("SentryConfiguration");
-                if (sentrySection.Exists())
-                {
-                    // Replace the condition below if you intended to only enable Sentry in certain environments.
-                    if (env.IsDevelopment() == false)
-                    {
-                        webBuilder.UseSentry(o =>
-                        {
-                            o.Dsn = builtConfig["SentryConfiguration:Dsn"];
-                            o.SendDefaultPii = true;
-                            o.MaxRequestBodySize = RequestSize.Always;
-                            o.CaptureBlockingCalls = ConfigurationReader.GetValueOrDefault("SentryConfiguration", "CaptureBlockingCalls", false);
-                            o.IncludeActivityData = ConfigurationReader.GetValueOrDefault("SentryConfiguration", "IncludeActivityData", false);
-                            o.Release = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "unknown";
-                        });
-                    }
-                }
+                ["HealthMonitoring:Service:Version"] = Assembly.GetEntryAssembly()?.GetName().Version?.ToString() ?? "0.0.0.0"
             });
+    }
 
-            webBuilder.UseStartup<Startup>();
-            webBuilder.UseKestrel();
+    private static void RemoveDefaultAppSettingsSources(IConfigurationManager configuration,
+                                                        string environmentName)
+    {
+        string environmentSettingsPath = $"appsettings.{environmentName}.json";
+
+        for (int index = configuration.Sources.Count - 1; index >= 0; index--)
+        {
+            if (configuration.Sources[index] is JsonConfigurationSource jsonSource
+                && (jsonSource.Path == "appsettings.json" || jsonSource.Path == environmentSettingsPath))
+            {
+                configuration.Sources.RemoveAt(index);
+            }
         }
     }
+
+    private static void ConfigureSentry(WebApplicationBuilder builder)
+    {
+        IConfiguration configuration = builder.Configuration;
+        IHostEnvironment environment = builder.Environment;
+        IConfigurationSection sentrySection = configuration.GetSection("SentryConfiguration");
+
+        if (sentrySection.Exists() && environment.IsDevelopment() == false)
+        {
+            builder.WebHost.UseSentry(options =>
+            {
+                options.Dsn = configuration["SentryConfiguration:Dsn"];
+                options.SendDefaultPii = true;
+                options.MaxRequestBodySize = RequestSize.Always;
+                options.CaptureBlockingCalls = configuration.GetValue("SentryConfiguration:CaptureBlockingCalls", false);
+                options.IncludeActivityData = configuration.GetValue("SentryConfiguration:IncludeActivityData", false);
+                options.Release = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "unknown";
+            });
+        }
+    }
+
+    private static void ConfigureApplication(WebApplication app)
+    {
+        if (app.Environment.IsDevelopment())
+        {
+            app.UseDeveloperExceptionPage();
+        }
+
+        Microsoft.Extensions.Logging.ILogger logger = app.Services.GetRequiredService<ILoggerFactory>().CreateLogger("MessagingService");
+        Shared.Logger.Logger.Initialise(logger);
+        ((IConfigurationRoot)app.Configuration).LogConfiguration(Shared.Logger.Logger.LogWarning);
+
+        IStringSerialiser serialiser = app.Services.GetRequiredService<IStringSerialiser>();
+        StringSerialiser.Initialise(serialiser);
+
+        foreach (KeyValuePair<Type, string> type in TypeMap.Map)
+        {
+            Shared.Logger.Logger.LogInformation($"Type name {type.Value} mapped to {type.Key.Name}");
+        }
+
+        app.UseMiddleware<TenantMiddleware>();
+        app.AddRequestResponseLogging();
+        app.AddExceptionHandler();
+
+        app.UseRouting();
+        app.UseAuthentication();
+        app.UseAuthorization();
+
+        app.MapEmailEndpoints();
+        app.MapSMSEndpoints();
+        app.MapDomainEventEndpoint();
+
+        app.MapHealthChecks("health", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions
+        {
+            Predicate = _ => true,
+            ResponseWriter = Shared.HealthChecks.HealthCheckMiddleware.WriteResponse
+        })
+            .WithName("HealthCheck")
+            .WithMetadata(
+                new EndpointSummaryMetadata("Checks the health of the Messaging Service"),
+                new EndpointDescriptionMetadata("Returns the health status of the service and its configured dependency checks."));
+        app.MapHealthChecks("healthui", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions
+        {
+            Predicate = _ => true,
+            ResponseWriter = HealthChecks.UI.Client.UIResponseWriter.WriteHealthCheckUIResponse
+        })
+            .WithName("HealthCheckUi")
+            .WithMetadata(
+                new EndpointSummaryMetadata("Returns health details for the health-check UI"),
+                new EndpointDescriptionMetadata("Returns the health-check data formatted for the health monitoring UI."));
+
+        app.UseApiDefaults();
+    }
+
+    private sealed record EndpointSummaryMetadata(string Summary) : IEndpointSummaryMetadata;
+
+    private sealed record EndpointDescriptionMetadata(string Description) : IEndpointDescriptionMetadata;
 }

@@ -2,10 +2,7 @@
 
   <PropertyGroup>
 	  <TargetFrameworks>net10.0</TargetFrameworks>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net5.0|AnyCPU'">
-    <DocumentationFile>D:\Projects\StuartFerguson\Messaging\MessagingService.DataTransferObjects\MessagingService.DataTransferObjects.xml</DocumentationFile>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
