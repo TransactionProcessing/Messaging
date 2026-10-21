@@ -10,6 +10,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Xunit;
+using MessagingService.Bootstrapper;
+using Shared.General;
 
 namespace MessagingService.BusinessLogic.Tests.Mediator
 {
@@ -40,15 +42,21 @@ namespace MessagingService.BusinessLogic.Tests.Mediator
             hostingEnvironment.ApplicationName.Getter().Returns("Test Application");
 
             ServiceRegistry services = new();
-            Startup s = new(hostingEnvironment.Instance());
-            Startup.Configuration = this.SetupMemoryConfiguration();
+            IConfigurationRoot configuration = this.SetupMemoryConfiguration();
+            ConfigurationReader.Initialise(configuration);
 
-            this.AddTestRegistrations(services, hostingEnvironment.Instance());
-            s.ConfigureContainer(services);
-            //Startup.Container.AssertConfigurationIsValid(AssertMode.Full);
+            this.AddTestRegistrations(services, hostingEnvironment.Instance(), configuration);
+            services.IncludeRegistry(new MediatorRegistry());
+            services.IncludeRegistry(new RepositoryRegistry(configuration));
+            services.IncludeRegistry(new MiddlewareRegistry(configuration));
+            services.IncludeRegistry(new DomainServiceRegistry());
+            services.IncludeRegistry(new DomainEventHandlerRegistry(configuration));
+            services.IncludeRegistry(new MessagingProxyRegistry(configuration));
+            services.IncludeRegistry(new SerialiserRegistry());
+            Container container = new(services);
 
             List<String> errors = new();
-            IMediator mediator = Startup.Container.GetService<IMediator>();
+            IMediator mediator = container.GetService<IMediator>();
             foreach (IBaseRequest baseRequest in this.Requests) {
                 try {
                     await mediator.Send(baseRequest);
@@ -76,14 +84,15 @@ namespace MessagingService.BusinessLogic.Tests.Mediator
         }
 
         private void AddTestRegistrations(ServiceRegistry services,
-                                          IWebHostEnvironment hostingEnvironment) {
+                                          IWebHostEnvironment hostingEnvironment,
+                                          IConfiguration configuration) {
             services.AddLogging();
             DiagnosticListener diagnosticSource = new(hostingEnvironment.ApplicationName);
             services.AddSingleton<DiagnosticSource>(diagnosticSource);
             services.AddSingleton<DiagnosticListener>(diagnosticSource);
             services.AddSingleton<IWebHostEnvironment>(hostingEnvironment);
             services.AddSingleton<IHostEnvironment>(hostingEnvironment);
-            services.AddSingleton<IConfiguration>(Startup.Configuration);
+            services.AddSingleton(configuration);
 
             services.OverrideServices(s => { s.AddSingleton<IMessagingDomainService, DummyMessagingDomainService>(); });
         }

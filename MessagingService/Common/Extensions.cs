@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Net.Http;
 using System.Threading;
+using System.Threading.Tasks;
 using EventStore.Client;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
@@ -47,29 +48,33 @@ public static class Extensions
                                                                  }
                                                              };
     
-    public static void PreWarm(this IApplicationBuilder applicationBuilder)
+    public static async Task PreWarm(IConfiguration configuration,
+                                    IServiceProvider services,
+                                    CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         TypeProvider.LoadDomainEventsTypeDynamically();
 
-        IConfigurationSection subscriptionConfigSection = Startup.Configuration.GetSection("AppSettings:SubscriptionConfiguration");
+        IConfigurationSection subscriptionConfigSection = configuration.GetSection("AppSettings:SubscriptionConfiguration");
         SubscriptionWorkersRoot subscriptionWorkersRoot = new();
         subscriptionConfigSection.Bind(subscriptionWorkersRoot);
         
-        IDomainEventHandlerResolver mainEventHandlerResolver = Startup.Container.GetInstance<IDomainEventHandlerResolver>("Main");
+        IDomainEventHandlerResolver mainEventHandlerResolver = services.GetRequiredService<IDomainEventHandlerResolver>();
         
         Dictionary<String, IDomainEventHandlerResolver> eventHandlerResolvers = new() {
                                                                                     {"Main", mainEventHandlerResolver}
                                                                                 };
 
-        Func<String, Int32, ISubscriptionRepository> subscriptionRepositoryResolver = Startup.Container.GetInstance<Func<String, Int32, ISubscriptionRepository>>();
+        Func<String, Int32, ISubscriptionRepository> subscriptionRepositoryResolver = services.GetRequiredService<Func<String, Int32, ISubscriptionRepository>>();
 
 
-        String connectionString = Startup.Configuration.GetValue<String>("EventStoreSettings:ConnectionString");
+        String connectionString = configuration.GetValue<String>("EventStoreSettings:ConnectionString");
 
-        applicationBuilder.ConfigureSubscriptionService(subscriptionWorkersRoot,
-            connectionString,
-                                                        eventHandlerResolvers,
-                                                        Extensions.log,
-                                                        subscriptionRepositoryResolver).Wait(CancellationToken.None);
+        IApplicationBuilder applicationBuilder = new ApplicationBuilder(services);
+        await applicationBuilder.ConfigureSubscriptionService(subscriptionWorkersRoot,
+                                                               connectionString,
+                                                               eventHandlerResolvers,
+                                                               Extensions.log,
+                                                               subscriptionRepositoryResolver);
     }
 }

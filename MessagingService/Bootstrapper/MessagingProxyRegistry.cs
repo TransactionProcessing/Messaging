@@ -21,8 +21,11 @@ using System.Threading.Tasks;
 [ExcludeFromCodeCoverage]
 public class MessagingProxyRegistry : ServiceRegistry
 {
-    public MessagingProxyRegistry()
+    private readonly IConfiguration configuration;
+
+    public MessagingProxyRegistry(IConfiguration configuration)
     {
+        this.configuration = configuration;
         this.AddHttpContextAccessor();
         
         this.RegisterEmailProxy();
@@ -31,10 +34,10 @@ public class MessagingProxyRegistry : ServiceRegistry
 
     private void RegisterEmailProxy() {
         // read the config setting 
-        String emailProxy = ConfigurationReader.GetValue("AppSettings", "EmailProxy");
+        String emailProxy = this.configuration.GetValue<String>("AppSettings:EmailProxy");
 
         if (emailProxy == "Smtp2Go") {
-            Smtp2GConfig config = Startup.Configuration.GetSection("AppSettings:Smtp2Go").Get<Smtp2GConfig>() ?? throw new InvalidOperationException("Smtp2Go config missing");
+            Smtp2GConfig config = this.configuration.GetSection("AppSettings:Smtp2Go").Get<Smtp2GConfig>() ?? throw new InvalidOperationException("Smtp2Go config missing");
             this.AddSingleton(config);
             this.RegisterHttpClient<IEmailServiceProxy, Smtp2GoProxy>();
         }
@@ -45,10 +48,10 @@ public class MessagingProxyRegistry : ServiceRegistry
 
     private void RegisterSMSProxy() {
         // read the config setting 
-        String smsProxy = ConfigurationReader.GetValue("AppSettings", "SMSProxy");
+        String smsProxy = this.configuration.GetValue<String>("AppSettings:SMSProxy");
 
         if (smsProxy == "TheSMSWorks") {
-            SmsWorksConfig config = Startup.Configuration.GetSection("AppSettings:TheSmsWorks").Get<SmsWorksConfig>() ?? throw new InvalidOperationException("SmsWorks config missing");
+            SmsWorksConfig config = this.configuration.GetSection("AppSettings:TheSmsWorks").Get<SmsWorksConfig>() ?? throw new InvalidOperationException("SmsWorks config missing");
             this.AddSingleton(config);
             this.RegisterHttpClient<ISMSServiceProxy, TheSmsWorksProxy>();
         }

@@ -19,9 +19,9 @@ using SMSMessageAggregate;
 [ExcludeFromCodeCoverage]
 public class RepositoryRegistry: ServiceRegistry
 {
-    public RepositoryRegistry()
+    public RepositoryRegistry(IConfiguration configuration)
     {
-        String connectionString = Startup.Configuration.GetValue<String>("EventStoreSettings:ConnectionString");
+        String connectionString = configuration.GetValue<String>("EventStoreSettings:ConnectionString");
 
         this.AddKurrentDBPersistentSubscriptionsClient(connectionString);
         this.AddKurrentDBProjectionManagementClient(connectionString);

@@ -20,12 +20,14 @@ public static class SMSEndpoints
             .RequireAuthorization(AuthorizationExtensions.PolicyNames.ClientCredentialsOnlyPolicy)
             .WithName("Send SMS")
             .WithSummary("Sends an SMS message")
+            .WithDescription("Submits an SMS message for delivery. If messageId is omitted or null, the service generates a message identifier.")
             .WithStandardProduces<SendSMSResponse, ErrorResponse>(StatusCodes.Status201Created);
 
         smsGroup.MapPost("/resend", SMSHandlers.ResendSMS)
             .RequireAuthorization(AuthorizationExtensions.PolicyNames.ClientCredentialsOnlyPolicy)
             .WithName("Resend SMS")
             .WithSummary("Resends an SMS message by id")
+            .WithDescription("Requests delivery of an existing SMS message, identified by messageId and connectionIdentifier.")
             .WithStandardProduces< ErrorResponse>(StatusCodes.Status202Accepted);
             
         return endpoints;
