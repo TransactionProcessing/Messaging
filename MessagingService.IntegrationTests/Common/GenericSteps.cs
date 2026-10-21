@@ -36,7 +36,7 @@ namespace MessagingService.IntegrationTests.Common
             logger.Initialise(LogManager.GetLogger(scenarioName), scenarioName);
             LogManager.AddHiddenAssembly(typeof(NlogLogger).Assembly);
 
-            DockerServices dockerServices = DockerServices.SqlServer | DockerServices.MessagingService | DockerServices.EventStore | DockerServices.SecurityService;
+            DockerServices dockerServices = DockerServices.SqlServer | DockerServices.MessagingService | DockerServices.KurrentDb | DockerServices.SecurityService;
 
             this.TestingContext.DockerHelper = new();
             this.TestingContext.DockerHelper.Logger = logger;
