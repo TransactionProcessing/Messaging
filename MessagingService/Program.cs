@@ -149,8 +149,8 @@ public static class Program
             app.UseDeveloperExceptionPage();
         }
 
-        Microsoft.Extensions.Logging.ILogger logger = app.Services.GetRequiredService<ILoggerFactory>().CreateLogger("MessagingService");
-        Shared.Logger.Logger.Initialise(logger);
+        NLog.Logger logger = LogManager.GetLogger("MessagingService");
+        Shared.Logger.Logger.Initialise(logger, "messagingservice");
         ((IConfigurationRoot)app.Configuration).LogConfiguration(Shared.Logger.Logger.LogWarning);
 
         IStringSerialiser serialiser = app.Services.GetRequiredService<IStringSerialiser>();

@@ -74,7 +74,7 @@ namespace MessagingService.BusinessLogic.Services.EmailServices.Smtp2Go
 
             String requestSerialised = StringSerialiser.Serialise(apiRequest, new SerialiserOptions(SerialiserPropertyFormat.SnakeCase, WriteIndented:true));
 
-            Logger.LogDebug($"Request Message Sent to Email Provider [SMTP2Go] {requestSerialised}");
+            Logger.LogDebug("Request Message Sent to Email Provider [SMTP2Go] {apiRequest}", requestSerialised);
 
             StringContent content = new(requestSerialised, Encoding.UTF8, "application/json");
 
@@ -89,7 +89,7 @@ namespace MessagingService.BusinessLogic.Services.EmailServices.Smtp2Go
                 _ => new Smtp2GoSendEmailResponse { Data = new Smtp2GoSendEmailResponseData { Error = httpResponse.StatusCode.ToString(), ErrorCode = ((Int32)httpResponse.StatusCode).ToString() } }
             };
 
-            Logger.LogDebug($"Response Message Received from Email Provider [SMTP2Go] {StringSerialiser.Serialise(apiResponse)}");
+            Logger.LogDebug("Response Message Received from Email Provider [SMTP2Go] {apiResponse}", StringSerialiser.Serialise(apiResponse));
             // Translate the Response
             return new EmailServiceProxyResponse {
                 ApiCallSuccessful = httpResponse.IsSuccessStatusCode && String.IsNullOrEmpty(apiResponse.Data.ErrorCode),
@@ -119,7 +119,7 @@ namespace MessagingService.BusinessLogic.Services.EmailServices.Smtp2Go
 
             String requestSerialised = StringSerialiser.Serialise(apiRequest, new SerialiserOptions(SerialiserPropertyFormat.SnakeCase, WriteIndented: true));
 
-            Logger.LogDebug($"Request Message Sent to Email Provider [SMTP2Go] {requestSerialised}");
+            Logger.LogDebug("Request Message Sent to Email Provider [SMTP2Go] {apiRequest}", requestSerialised);
 
             StringContent content = new(requestSerialised, Encoding.UTF8, "application/json");
 
@@ -131,7 +131,7 @@ namespace MessagingService.BusinessLogic.Services.EmailServices.Smtp2Go
 
             Smtp2GoEmailSearchResponse apiResponse = StringSerialiser.Deserialise<Smtp2GoEmailSearchResponse>(await httpResponse.Content.ReadAsStringAsync(cancellationToken));
 
-            Logger.LogDebug($"Response Message Received from Email Provider [SMTP2Go] {StringSerialiser.Serialise(apiResponse)}");
+            Logger.LogDebug("Response Message Received from Email Provider [SMTP2Go] {apiResponse}", StringSerialiser.Serialise(apiResponse));
 
             // Translate the Response
             return new MessageStatusResponse { ApiStatusCode = httpResponse.StatusCode, MessageStatus = this.TranslateMessageStatus(apiResponse.Data.EmailDetails.Single().Status), ProviderStatusDescription = apiResponse.Data.EmailDetails.Single().Status, Timestamp = apiResponse.Data.EmailDetails.Single().EmailStatusDate };
