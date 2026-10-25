@@ -28,13 +28,13 @@ public static class DomainEventHandlers
 
         try
         {
-            Logger.LogInformation($"Processing event - ID [{domainEvent.EventId}], Type[{domainEvent.GetType().Name}]");
+            Logger.LogInformation("Processing event - ID [{eventId}], Type[{eventType}]", domainEvent.EventId, domainEvent.GetType().Name);
 
             Result<List<IDomainEventHandler>> eventHandlersResult = resolver.GetDomainEventHandlers(domainEvent);
 
             if (eventHandlersResult.IsFailed)
             {
-                Logger.LogWarning($"No event handlers configured for Event Type [{domainEvent.GetType().Name}]");
+                Logger.LogWarning("No event handlers configured for Event Type [{eventType}]", domainEvent.GetType().Name);
                 return Results.Ok();
             }
 
@@ -42,14 +42,14 @@ public static class DomainEventHandlers
             var tasks = eventHandlers.Select(h => h.Handle(domainEvent, cancellationToken));
             await Task.WhenAll(tasks);
 
-            Logger.LogInformation("Finished processing event - ID [{domainEvent.EventId}]");
+            Logger.LogInformation("Finished processing event - ID [{eventId}]", domainEvent.EventId);
 
             return Results.Ok();
         }
         catch (Exception ex)
         {
             string domainEventData = StringSerialiser.Serialise(domainEvent);
-            Logger.LogError($"Failed to process event. Data received [{domainEventData}]", ex);
+            Logger.LogError(ex, "Failed to process event. Data received [{domainEventData}]", domainEventData);
             throw;
         }
     }
@@ -58,7 +58,7 @@ public static class DomainEventHandlers
     {
         if (cancellationToken.IsCancellationRequested)
         {
-            Logger.LogInformation($"Cancel request for EventId {eventId}");
+            Logger.LogInformation("Cancel request for EventId {eventId}", eventId);
             cancellationToken.ThrowIfCancellationRequested();
         }
     }

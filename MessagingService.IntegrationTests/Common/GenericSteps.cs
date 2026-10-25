@@ -2,8 +2,6 @@
 using Shared.IntegrationTesting;
 using Shared.Logger;
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace MessagingService.IntegrationTests.Common
@@ -31,10 +29,11 @@ namespace MessagingService.IntegrationTests.Common
         {
             
             // Initialise a logger
-            String scenarioName = this.ScenarioContext.ScenarioInfo.Title.Replace(" ", "");
+            String scenarioName = this.ScenarioContext.ScenarioInfo.Title.Replace(" ", String.Empty);
             NlogLogger logger = new();
             logger.Initialise(LogManager.GetLogger(scenarioName), scenarioName);
-            LogManager.AddHiddenAssembly(typeof(NlogLogger).Assembly);
+            LogManager.Setup().SetupLogFactory(setup =>
+                setup.AddCallSiteHiddenAssembly(typeof(NlogLogger).Assembly));
 
             DockerServices dockerServices = DockerServices.SqlServer | DockerServices.MessagingService | DockerServices.KurrentDb | DockerServices.SecurityService;
 
