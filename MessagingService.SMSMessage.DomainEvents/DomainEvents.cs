@@ -1,7 +1,7 @@
 ﻿namespace MessagingService.SMSMessage.DomainEvents;
 
 using System;
-using Shared.DomainDrivenDesign.EventSourcing;
+using TransactionProcessing.Shared.DomainDrivenDesign.EventSourcing;
 
 public record RequestSentToSMSProviderEvent(Guid MessageId,
                                             String Sender,

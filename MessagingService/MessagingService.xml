@@ -234,7 +234,7 @@
             The domain event handler resolver
             </summary>
         </member>
-        <member name="M:MessagingService.Controllers.DomainEventController.#ctor(Shared.EventStore.EventHandling.IDomainEventHandlerResolver)">
+        <member name="M:MessagingService.Controllers.DomainEventController.#ctor(TransactionProcessing.Shared.EventStore.EventHandling.IDomainEventHandlerResolver)">
             <summary>
             Initializes a new instance of the <see cref="T:MessagingService.Controllers.DomainEventController"/> class.
             </summary>

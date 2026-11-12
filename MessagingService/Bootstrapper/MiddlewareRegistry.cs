@@ -2,8 +2,8 @@
 using KurrentDB.Client;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.OpenApi;
-using Shared.Authorisation;
-using Shared.Serialisation;
+using TransactionProcessing.Shared.Authorisation;
+using TransactionProcessing.Shared.Serialisation;
 using System;
 using System.Text.Json;
 
@@ -15,13 +15,14 @@ namespace MessagingService.Bootstrapper
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Diagnostics.HealthChecks;
     using OpenIddict.Validation.AspNetCore;
-    using Shared.EventStore.Extensions;
-    using Shared.Middleware;
+    using TransactionProcessing.Shared.EventStore.Extensions;
+    using TransactionProcessing.Shared.Middleware;
     using System;
     using System.Diagnostics.CodeAnalysis;
     using System.IO;
     using System.Net.Http;
     using TransactionProcessing.ApiDefaults;
+    using TransactionProcessing.UnionResults.AspNetCore;
 
     [ExcludeFromCodeCoverage]
     public class MiddlewareRegistry : ServiceRegistry
@@ -39,6 +40,8 @@ namespace MessagingService.Bootstrapper
                                name: "Eventstore",
                                failureStatus: HealthStatus.Unhealthy,
                                tags: new string[] { "db", "eventstore" });
+
+            this.AddUnionResults();
 
 
             this.AddControllers();

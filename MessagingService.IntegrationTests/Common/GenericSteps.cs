@@ -1,6 +1,6 @@
 ﻿using NLog;
-using Shared.IntegrationTesting;
-using Shared.Logger;
+using TransactionProcessing.Shared.IntegrationTesting;
+using TransactionProcessing.Shared.Logger;
 using System;
 using System.Threading.Tasks;
 

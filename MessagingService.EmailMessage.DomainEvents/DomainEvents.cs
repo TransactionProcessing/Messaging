@@ -2,7 +2,7 @@
 
 using System;
 using System.Collections.Generic;
-using Shared.DomainDrivenDesign.EventSourcing;
+using TransactionProcessing.Shared.DomainDrivenDesign.EventSourcing;
 
 public record ResponseReceivedFromEmailProviderEvent(Guid MessageId,
                                                      String ProviderRequestReference,

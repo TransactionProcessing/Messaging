@@ -6,7 +6,7 @@
     using System.Threading.Tasks;
     using MessagingService.Client;
     using MessagingService.DataTransferObjects;
-    using Shared.IntegrationTesting;
+    using TransactionProcessing.Shared.IntegrationTesting;
     using Shouldly;
 
     public class MessagingSteps{

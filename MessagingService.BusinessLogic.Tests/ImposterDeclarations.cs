@@ -3,8 +3,8 @@ using MediatR;
 using Microsoft.AspNetCore.Hosting;
 using MessagingService.BusinessLogic.Services.EmailServices;
 using MessagingService.BusinessLogic.Services.SMSServices;
-using Shared.DomainDrivenDesign.EventSourcing;
-using Shared.EventStore.Aggregate;
+using TransactionProcessing.Shared.DomainDrivenDesign.EventSourcing;
+using TransactionProcessing.Shared.EventStore.Aggregate;
 
 [assembly: GenerateImposter(typeof(IAggregateRepository<,>))]
 [assembly: GenerateImposter(typeof(IEmailServiceProxy))]

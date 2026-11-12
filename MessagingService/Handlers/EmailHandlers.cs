@@ -1,10 +1,9 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Http;
 using MessagingService.BusinessLogic.Requests;
 using MessagingService.DataTransferObjects;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using Shared.Results.Web;
-using SimpleResults;
+using TransactionProcessing.UnionResults;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -17,7 +16,7 @@ namespace MessagingService.Handlers
 {
     public static class EmailHandlers
     {
-        public static async Task<IResult> SendEmail(SendEmailRequest sendEmailRequest,
+        public static async Task<Result<SendEmailResponse>> SendEmail(SendEmailRequest sendEmailRequest,
                                                     IMediator mediator,
                                                     CancellationToken cancellationToken) {
             Guid messageId = sendEmailRequest.MessageId.HasValue ? sendEmailRequest.MessageId.Value : Guid.NewGuid();
@@ -46,13 +45,15 @@ namespace MessagingService.Handlers
             // Route the command
             Result<Guid> result = await mediator.Send(command, cancellationToken);
 
-            return ResponseFactory.FromResult<Guid>(result, (r) => new SendEmailResponse
-            {
-                MessageId = r
-            });
+            return result.Match(
+                messageId => Result<SendEmailResponse>.Created(new SendEmailResponse { MessageId = messageId }),
+                (messageId, location) => Result<SendEmailResponse>.Created(new SendEmailResponse { MessageId = messageId }, location),
+                Result<SendEmailResponse>.NoContent,
+                Result<SendEmailResponse>.Fail,
+                Result<SendEmailResponse>.Fail);
         }
 
-        public static async Task<IResult> ResendEmail(ResendEmailRequest resendEmailRequest,
+        public static async Task<object> ResendEmail(ResendEmailRequest resendEmailRequest,
                                                     IMediator mediator,
                                                     CancellationToken cancellationToken) {
             // Create the command
@@ -61,7 +62,7 @@ namespace MessagingService.Handlers
             // Route the command
             Result result = await mediator.Send(command, cancellationToken);
 
-            return ResponseFactory.FromResult(result);
+            return result.IsSuccess ? Results.Accepted() : Result.Fail(new ErrorList(result.Errors));
         }
 
         internal static FileType ConvertFileType(DataTransferObjects.FileType emailAttachmentFileType) {

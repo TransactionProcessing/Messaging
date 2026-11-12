@@ -1,10 +1,10 @@
-﻿using Shared.Serialisation;
+﻿using TransactionProcessing.Shared.Serialisation;
 
 namespace MessagingService.BusinessLogic.Services.EmailServices.Smtp2Go
 {
     using Models;
     using Service.Services.Email.Smtp2Go;
-    using Shared.Logger;
+    using TransactionProcessing.Shared.Logger;
     using System;
     using System.Collections.Generic;
     using System.Diagnostics.CodeAnalysis;

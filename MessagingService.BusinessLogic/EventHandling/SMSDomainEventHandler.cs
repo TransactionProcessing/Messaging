@@ -1,4 +1,4 @@
-﻿using SimpleResults;
+﻿using TransactionProcessing.UnionResults;
 
 namespace MessagingService.BusinessLogic.EventHandling
 {
@@ -7,9 +7,9 @@ namespace MessagingService.BusinessLogic.EventHandling
     using MediatR;
     using MessagingService.BusinessLogic.Requests;
     using Services.SMSServices;
-    using Shared.DomainDrivenDesign.EventSourcing;
-    using Shared.EventStore.Aggregate;
-    using Shared.EventStore.EventHandling;
+    using TransactionProcessing.Shared.DomainDrivenDesign.EventSourcing;
+    using TransactionProcessing.Shared.EventStore.Aggregate;
+    using TransactionProcessing.Shared.EventStore.EventHandling;
     using SMSMessage.DomainEvents;
     using SMSMessageAggregate;
     using MessageStatus = Services.SMSServices.MessageStatus;

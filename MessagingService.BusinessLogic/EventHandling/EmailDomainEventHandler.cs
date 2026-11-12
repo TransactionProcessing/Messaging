@@ -1,6 +1,6 @@
 ﻿using MediatR;
 using MessagingService.BusinessLogic.Requests;
-using SimpleResults;
+using TransactionProcessing.UnionResults;
 
 namespace MessagingService.BusinessLogic.EventHandling
 {
@@ -9,9 +9,9 @@ namespace MessagingService.BusinessLogic.EventHandling
     using EmailMessage.DomainEvents;
     using EmailMessageAggregate;
     using Services.EmailServices;
-    using Shared.DomainDrivenDesign.EventSourcing;
-    using Shared.EventStore.Aggregate;
-    using Shared.EventStore.EventHandling;
+    using TransactionProcessing.Shared.DomainDrivenDesign.EventSourcing;
+    using TransactionProcessing.Shared.EventStore.Aggregate;
+    using TransactionProcessing.Shared.EventStore.EventHandling;
     using MessageStatus = Services.EmailServices.MessageStatus;
 
     public class EmailDomainEventHandler : IDomainEventHandler

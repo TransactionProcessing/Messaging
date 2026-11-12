@@ -2,7 +2,7 @@
 
 using MessagingService.DataTransferObjects;
 using Reqnroll;
-using Shared.IntegrationTesting;
+using TransactionProcessing.Shared.IntegrationTesting;
 
 public static class ReqnrollExtensions{
     public static List<SendEmailRequest> ToSendEmailRequests(this DataTableRows tableRows){

@@ -1,14 +1,12 @@
-﻿using Shared.Results;
-
-namespace MessagingService.Client
+﻿namespace MessagingService.Client
 {
     using System;
     using System.Net.Http;
     using System.Threading;
     using System.Threading.Tasks;
-    using ClientProxyBase;
+    using TransactionProcessing.ClientProxyBase;
     using DataTransferObjects;
-    using SimpleResults;
+    using TransactionProcessing.UnionResults;
 
     public class MessagingServiceClient : ClientProxyBase, IMessagingServiceClient
     {
@@ -45,7 +43,7 @@ namespace MessagingService.Client
                 Result result = await this.Post(requestUri, sendEmailRequest, accessToken, cancellationToken);
                 
                 if (result.IsFailed)
-                    return ResultHelpers.CreateFailure(result);
+                    return Result.Fail(new ErrorList(result.Errors));
 
                 return Result.Success();
             }
@@ -67,7 +65,7 @@ namespace MessagingService.Client
                 Result result = await this.Post(requestUri, resendEmailRequest, accessToken, cancellationToken);
 
                 if (result.IsFailed)
-                    return ResultHelpers.CreateFailure(result);
+                    return Result.Fail(new ErrorList(result.Errors));
 
                 return Result.Success();
             }
@@ -90,7 +88,7 @@ namespace MessagingService.Client
                 Result result = await this.Post(requestUri, sendSMSRequest, accessToken, cancellationToken);
 
                 if (result.IsFailed)
-                    return ResultHelpers.CreateFailure(result);
+                    return Result.Fail(new ErrorList(result.Errors));
 
                 return Result.Success();
             }

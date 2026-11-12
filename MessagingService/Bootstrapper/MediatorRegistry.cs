@@ -3,7 +3,7 @@
 using BusinessLogic.RequestHandlers;
 using Lamar;
 using Microsoft.Extensions.DependencyInjection;
-using Shared.General;
+using TransactionProcessing.Shared.General;
 using System;
 using System.Diagnostics.CodeAnalysis;
 

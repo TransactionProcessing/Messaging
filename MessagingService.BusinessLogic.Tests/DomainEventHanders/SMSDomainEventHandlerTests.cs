@@ -10,8 +10,8 @@ namespace MessagingService.BusinessLogic.Tests.DomainEventHanders
     using Imposter.Abstractions;
     using System.Threading.Tasks;
     using BusinessLogic.Services.SMSServices;
-    using Shared.DomainDrivenDesign.EventSourcing;
-    using Shared.EventStore.Aggregate;
+    using TransactionProcessing.Shared.DomainDrivenDesign.EventSourcing;
+    using TransactionProcessing.Shared.EventStore.Aggregate;
     using SMSMessageAggregate;
     using Testing;
     using Xunit;

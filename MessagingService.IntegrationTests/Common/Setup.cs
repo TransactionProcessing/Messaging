@@ -1,14 +1,14 @@
 ﻿using Ductus.FluentDocker.Services;
 using Ductus.FluentDocker.Services.Extensions;
 using NLog;
-using Shared.Logger;
+using TransactionProcessing.Shared.Logger;
 using Shouldly;
 using System;
 
 namespace MessagingService.IntegrationTests.Common
 {
     using System.Threading.Tasks;
-    using global::Shared.IntegrationTesting;
+    using global::TransactionProcessing.Shared.IntegrationTesting;
     using Reqnroll;
 
     [Binding]
