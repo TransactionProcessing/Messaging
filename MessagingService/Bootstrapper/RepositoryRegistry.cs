@@ -9,11 +9,11 @@ using EmailMessageAggregate;
 using Lamar;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Shared.DomainDrivenDesign.EventSourcing;
-using Shared.EventStore.Aggregate;
-using Shared.EventStore.EventStore;
-using Shared.EventStore.SubscriptionWorker;
-using Shared.General;
+using TransactionProcessing.Shared.DomainDrivenDesign.EventSourcing;
+using TransactionProcessing.Shared.EventStore.Aggregate;
+using TransactionProcessing.Shared.EventStore.EventStore;
+using TransactionProcessing.Shared.EventStore.SubscriptionWorker;
+using TransactionProcessing.Shared.General;
 using SMSMessageAggregate;
 
 [ExcludeFromCodeCoverage]

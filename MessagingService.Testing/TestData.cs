@@ -9,7 +9,7 @@
     using EmailMessage.DomainEvents;
     using EmailMessageAggregate;
     using Microsoft.EntityFrameworkCore.SqlServer.Query.Internal;
-    using Shared.DomainDrivenDesign.EventSourcing;
+    using TransactionProcessing.Shared.DomainDrivenDesign.EventSourcing;
     using SMSMessage.DomainEvents;
     using SMSMessageAggregate;
     using EmailMessageStatus = BusinessLogic.Services.EmailServices.MessageStatus;

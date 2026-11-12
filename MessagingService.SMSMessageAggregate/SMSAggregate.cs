@@ -1,12 +1,12 @@
-﻿using SimpleResults;
+﻿using TransactionProcessing.UnionResults;
 
 namespace MessagingService.SMSMessageAggregate{
     using System;
     using System.Collections.Generic;
     using System.Diagnostics.CodeAnalysis;
-    using Shared.DomainDrivenDesign.EventSourcing;
-    using Shared.EventStore.Aggregate;
-    using Shared.General;
+    using TransactionProcessing.Shared.DomainDrivenDesign.EventSourcing;
+    using TransactionProcessing.Shared.EventStore.Aggregate;
+    using TransactionProcessing.Shared.General;
     using SMSMessage.DomainEvents;
 
     public static class SMSAggregateExtensions{

@@ -1,4 +1,4 @@
-﻿using SimpleResults;
+﻿using TransactionProcessing.UnionResults;
 
 namespace MessagingService.EmailMessageAggregate
 {
@@ -8,10 +8,10 @@ namespace MessagingService.EmailMessageAggregate
     using System.Linq;
     using EmailMessage.DomainEvents;
     using Models;
-    using Shared.DomainDrivenDesign.EventSourcing;
-    using Shared.EventStore.Aggregate;
-    using Shared.General;
-    using Shared.Logger;
+    using TransactionProcessing.Shared.DomainDrivenDesign.EventSourcing;
+    using TransactionProcessing.Shared.EventStore.Aggregate;
+    using TransactionProcessing.Shared.General;
+    using TransactionProcessing.Shared.Logger;
 
     public static class EmailAggregateExtensions{
         public static Result MarkMessageAsBounced(this EmailAggregate aggregate, String providerStatus,

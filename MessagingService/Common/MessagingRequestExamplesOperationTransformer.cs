@@ -64,9 +64,12 @@ internal sealed class MessagingRequestExamplesOperationTransformer : IOpenApiOpe
 
         if (example is not null
             && operation.RequestBody is OpenApiRequestBody requestBody
-            && requestBody.Content.TryGetValue("application/json", out OpenApiMediaType? mediaType))
+            && requestBody.Content.TryGetValue("application/json", out IOpenApiMediaType? mediaType))
         {
-            mediaType.Example = JsonNode.Parse(example);
+            if (mediaType is OpenApiMediaType concreteMediaType)
+            {
+                concreteMediaType.Example = JsonNode.Parse(example);
+            }
         }
 
         return Task.CompletedTask;

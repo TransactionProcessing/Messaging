@@ -1,19 +1,19 @@
-﻿using MessagingService.BusinessLogic.Requests;
-using Shared.Results;
-using SimpleResults;
+using MessagingService.BusinessLogic.Requests;
+using TransactionProcessing.UnionResults;
 
 namespace MessagingService.BusinessLogic.Services
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
     using EmailMessageAggregate;
     using EmailServices;
     using Models;
-    using Shared.DomainDrivenDesign.EventSourcing;
-    using Shared.EventStore.Aggregate;
-    using Shared.Exceptions;
+    using TransactionProcessing.Shared.DomainDrivenDesign.EventSourcing;
+    using TransactionProcessing.Shared.EventStore.Aggregate;
+    using TransactionProcessing.Shared.Exceptions;
     using SMSMessageAggregate;
     using SMSServices;
 
@@ -66,11 +66,11 @@ namespace MessagingService.BusinessLogic.Services
                 EmailAggregate emailAggregate = emailAggregateResult.Data;
                 Result result = await action(emailAggregate);
                 if (result.IsFailed)
-                    return ResultHelpers.CreateFailure(result);
+                    return Result.Fail(new ErrorList(result.Errors));
 
                 Result saveResult = await this.EmailAggregateRepository.SaveChanges(emailAggregate, cancellationToken);
                 if (saveResult.IsFailed)
-                    return ResultHelpers.CreateFailure(saveResult);
+                    return Result.Fail(new ErrorList(saveResult.Errors));
                 return Result.Success();
             }
             catch (Exception ex)
@@ -94,11 +94,11 @@ namespace MessagingService.BusinessLogic.Services
                 SMSAggregate smsAggregate = smsAggregateResult.Data;
                 Result result = await action(smsAggregate);
                 if (result.IsFailed)
-                    return ResultHelpers.CreateFailure(result);
+                    return Result.Fail(new ErrorList(result.Errors));
 
                 Result saveResult = await this.SmsAggregateRepository.SaveChanges(smsAggregate, cancellationToken);
                 if (saveResult.IsFailed)
-                    return ResultHelpers.CreateFailure(saveResult);
+                    return Result.Fail(new ErrorList(saveResult.Errors));
                 return Result.Success();
             }
             catch (Exception ex)
@@ -141,7 +141,7 @@ namespace MessagingService.BusinessLogic.Services
             }, command.MessageId, cancellationToken, false);
 
             if (result.IsFailed)
-                return result;
+                return Result<Guid>.FromFailure(result);
             return Result.Success(command.MessageId);
         }
 
@@ -176,7 +176,7 @@ namespace MessagingService.BusinessLogic.Services
             }, messageId, cancellationToken, false);
 
             if (result.IsFailed)
-                return result;
+                return Result<Guid>.FromFailure(result);
             return Result.Success(messageId);
 
         }
@@ -311,23 +311,18 @@ namespace MessagingService.BusinessLogic.Services
         public static Result<T> HandleGetAggregateResult<T>(Result<T> result, Guid aggregateId, bool isNotFoundError = true)
             where T : Aggregate, new()  // Constraint: T is a subclass of Aggregate and has a parameterless constructor
         {
-            if (result.IsFailed && result.Status != ResultStatus.NotFound)
+            if (result.IsFailed)
             {
-                return ResultHelpers.CreateFailure(result);
+                bool isNotFound = result.Errors.All(error => error.ErrorType == ErrorType.NotFound);
+                if (!isNotFound || isNotFoundError)
+                {
+                    return Result<T>.FromFailure(result);
+                }
+
+                return Result.Success(new T { AggregateId = aggregateId });
             }
 
-            if (result.Status == ResultStatus.NotFound && isNotFoundError)
-            {
-                return ResultHelpers.CreateFailure(result);
-            }
-
-            T aggregate = result.Status switch
-            {
-                ResultStatus.NotFound => new T { AggregateId = aggregateId },  // Set AggregateId when creating a new instance
-                _ => result.Data
-            };
-
-            return Result.Success(aggregate);
+            return result;
         }
     }
 

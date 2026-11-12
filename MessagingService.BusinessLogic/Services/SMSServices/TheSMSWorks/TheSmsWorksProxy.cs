@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Security.Authentication;
 using System.Text;
-using Shared.Serialisation;
+using TransactionProcessing.Shared.Serialisation;
 
 namespace MessagingService.BusinessLogic.Services.SMSServices.TheSMSWorks
 {
@@ -10,8 +10,8 @@ namespace MessagingService.BusinessLogic.Services.SMSServices.TheSMSWorks
     using System.Net.Http;
     using System.Threading;
     using System.Threading.Tasks;
-    using Shared.Exceptions;
-    using Shared.Extensions;
+    using TransactionProcessing.Shared.Exceptions;
+    using TransactionProcessing.Shared.Extensions;
 
     public record SmsWorksConfig {
         public String BaseAddress { get; set; }

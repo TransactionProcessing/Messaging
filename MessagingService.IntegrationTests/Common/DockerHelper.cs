@@ -1,4 +1,4 @@
-﻿using ClientProxyBase;
+﻿using TransactionProcessing.ClientProxyBase;
 
 namespace MessagingService.IntegrationTests.Common
 {
@@ -8,9 +8,9 @@ namespace MessagingService.IntegrationTests.Common
     using Ductus.FluentDocker.Model.Builders;
     using Ductus.FluentDocker.Services;
     using Ductus.FluentDocker.Services.Extensions;
-    using global::Shared.IntegrationTesting;
-    using global::Shared.Logger;
-    using global::Shared.Serialisation;
+    using global::TransactionProcessing.Shared.IntegrationTesting;
+    using global::TransactionProcessing.Shared.Logger;
+    using global::TransactionProcessing.Shared.Serialisation;
     using IntegrationTesting.Helpers;
     using Microsoft.AspNetCore.Http;
     using SecurityService.Client;
@@ -24,8 +24,8 @@ namespace MessagingService.IntegrationTests.Common
     /// <summary>
     /// 
     /// </summary>
-    /// <seealso cref="Shared.IntegrationTesting.DockerHelper" />
-    public class DockerHelper : global::Shared.IntegrationTesting.TestContainers.DockerHelper
+    /// <seealso cref="TransactionProcessing.Shared.IntegrationTesting.DockerHelper" />
+    public class DockerHelper : global::TransactionProcessing.Shared.IntegrationTesting.TestContainers.DockerHelper
     {
         #region Fields
 
@@ -86,7 +86,7 @@ namespace MessagingService.IntegrationTests.Common
             this.SecurityServiceClient = new SecurityServiceClient(SecurityServiceBaseAddressResolver, httpClient, Serialise, Deserialise);
             this.MessagingServiceClient = new MessagingServiceClient(MessagingServiceBaseAddressResolver, httpClient, Serialise, Deserialise);
 
-            SimpleResults.Result<SecurityService.DataTransferObjects.TokenResponse> bootstrapToken = await this.SecurityServiceClient.GetToken("management-bootstrap", "management-bootstrap-secret", CancellationToken.None);
+            var bootstrapToken = await this.SecurityServiceClient.GetToken("management-bootstrap", "management-bootstrap-secret", CancellationToken.None);
             if (bootstrapToken.IsFailed || String.IsNullOrWhiteSpace(bootstrapToken.Data?.AccessToken))
             {
                 throw new InvalidOperationException("Unable to obtain the integration-test management bootstrap token.");

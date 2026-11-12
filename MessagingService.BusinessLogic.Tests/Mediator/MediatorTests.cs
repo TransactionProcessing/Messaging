@@ -11,7 +11,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Xunit;
 using MessagingService.Bootstrapper;
-using Shared.General;
+using TransactionProcessing.Shared.General;
 
 namespace MessagingService.BusinessLogic.Tests.Mediator
 {

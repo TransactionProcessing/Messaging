@@ -14,11 +14,11 @@ using Microsoft.Extensions.Logging;
 using NLog;
 using NLog.Extensions.Logging;
 using Sentry.Extensibility;
-using Shared.Extensions;
-using Shared.General;
-using Shared.Logger;
-using Shared.Middleware;
-using Shared.Serialisation;
+using TransactionProcessing.Shared.Extensions;
+using TransactionProcessing.Shared.General;
+using TransactionProcessing.Shared.Logger;
+using TransactionProcessing.Shared.Middleware;
+using TransactionProcessing.Shared.Serialisation;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -79,7 +79,7 @@ public static class Program
             b.SetupLogFactory(setup =>
             {
                 setup.AddCallSiteHiddenAssembly(typeof(NlogLogger).Assembly);
-                setup.AddCallSiteHiddenAssembly(typeof(Shared.Logger.Logger).Assembly);
+                setup.AddCallSiteHiddenAssembly(typeof(TransactionProcessing.Shared.Logger.Logger).Assembly);
                 setup.AddCallSiteHiddenAssembly(typeof(TenantMiddleware).Assembly);
             });
             b.LoadConfigurationFromFile(nlogConfigPath);
@@ -150,15 +150,15 @@ public static class Program
         }
 
         NLog.Logger logger = LogManager.GetLogger("MessagingService");
-        Shared.Logger.Logger.Initialise(logger, "messagingservice");
-        ((IConfigurationRoot)app.Configuration).LogConfiguration(Shared.Logger.Logger.LogWarning);
+        TransactionProcessing.Shared.Logger.Logger.Initialise(logger, "messagingservice");
+        ((IConfigurationRoot)app.Configuration).LogConfiguration(TransactionProcessing.Shared.Logger.Logger.LogWarning);
 
         IStringSerialiser serialiser = app.Services.GetRequiredService<IStringSerialiser>();
         StringSerialiser.Initialise(serialiser);
 
         foreach (KeyValuePair<Type, string> type in TypeMap.Map)
         {
-            Shared.Logger.Logger.LogInformation($"Type name {type.Value} mapped to {type.Key.Name}");
+            TransactionProcessing.Shared.Logger.Logger.LogInformation($"Type name {type.Value} mapped to {type.Key.Name}");
         }
 
         app.UseMiddleware<TenantMiddleware>();
@@ -176,7 +176,7 @@ public static class Program
         app.MapHealthChecks("health", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions
         {
             Predicate = _ => true,
-            ResponseWriter = Shared.HealthChecks.HealthCheckMiddleware.WriteResponse
+            ResponseWriter = TransactionProcessing.Shared.HealthChecks.HealthCheckMiddleware.WriteResponse
         })
             .WithName("HealthCheck")
             .WithMetadata(

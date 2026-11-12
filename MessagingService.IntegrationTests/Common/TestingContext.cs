@@ -1,4 +1,4 @@
-﻿using Shared.Logger;
+﻿using TransactionProcessing.Shared.Logger;
 using System;
 using System.Collections.Generic;
 

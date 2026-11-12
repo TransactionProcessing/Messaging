@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using SimpleResults;
+using TransactionProcessing.UnionResults;
 
 namespace MessagingService.SMSAggregate.Tests
 {
     using EmailMessageAggregate;
-    using Shared.Logger;
+    using TransactionProcessing.Shared.Logger;
     using Shouldly;
     using SMSMessageAggregate;
     using Testing;
@@ -98,7 +98,7 @@ namespace MessagingService.SMSAggregate.Tests
 
             var result = smsAggregate.MarkMessageAsDelivered(TestData.ProviderStatusDescription, TestData.DeliveredDateTime);
             result.IsFailed.ShouldBeTrue();
-            result.Status.ShouldBe(ResultStatus.Invalid);
+            result.Errors[0].ErrorType.ShouldBe(ErrorType.Validation);
         }
 
         [Fact]
@@ -152,7 +152,7 @@ namespace MessagingService.SMSAggregate.Tests
 
             var result = smsAggregate.MarkMessageAsExpired(TestData.ProviderStatusDescription, TestData.DeliveredDateTime);
             result.IsFailed.ShouldBeTrue();
-            result.Status.ShouldBe(ResultStatus.Invalid);
+            result.Errors[0].ErrorType.ShouldBe(ErrorType.Validation);
         }
 
         [Fact]
@@ -206,7 +206,7 @@ namespace MessagingService.SMSAggregate.Tests
 
             var result = smsAggregate.MarkMessageAsUndeliverable(TestData.ProviderStatusDescription, TestData.DeliveredDateTime);
             result.IsFailed.ShouldBeTrue();
-            result.Status.ShouldBe(ResultStatus.Invalid);
+            result.Errors[0].ErrorType.ShouldBe(ErrorType.Validation);
         }
 
         [Fact]
@@ -260,7 +260,7 @@ namespace MessagingService.SMSAggregate.Tests
 
             var result = smsAggregate.MarkMessageAsRejected(TestData.ProviderStatusDescription, TestData.DeliveredDateTime);
             result.IsFailed.ShouldBeTrue();
-            result.Status.ShouldBe(ResultStatus.Invalid);
+            result.Errors[0].ErrorType.ShouldBe(ErrorType.Validation);
         }
 
         [Fact]
@@ -299,7 +299,7 @@ namespace MessagingService.SMSAggregate.Tests
 
             var result = smsAggregate.ResendRequestToProvider();
             result.IsFailed.ShouldBeTrue();
-            result.Status.ShouldBe(ResultStatus.Invalid);
+            result.Errors[0].ErrorType.ShouldBe(ErrorType.Validation);
         }
         
         [Fact]
@@ -310,7 +310,7 @@ namespace MessagingService.SMSAggregate.Tests
             smsAggregate.SendRequestToProvider(TestData.Sender, TestData.Destination, TestData.Message);
             var result = smsAggregate.ResendRequestToProvider();
             result.IsFailed.ShouldBeTrue();
-            result.Status.ShouldBe(ResultStatus.Invalid);
+            result.Errors[0].ErrorType.ShouldBe(ErrorType.Validation);
         }
         
         [Fact]
@@ -323,7 +323,7 @@ namespace MessagingService.SMSAggregate.Tests
             smsAggregate.MarkMessageAsRejected(TestData.ProviderStatusDescription, TestData.RejectedDateTime);
             var result = smsAggregate.ResendRequestToProvider();
             result.IsFailed.ShouldBeTrue();
-            result.Status.ShouldBe(ResultStatus.Invalid);
+            result.Errors[0].ErrorType.ShouldBe(ErrorType.Validation);
         }
         
         [Fact]
@@ -336,7 +336,7 @@ namespace MessagingService.SMSAggregate.Tests
             smsAggregate.MarkMessageAsExpired(TestData.ProviderStatusDescription, TestData.ExpiredDateTime);
             var result = smsAggregate.ResendRequestToProvider();
             result.IsFailed.ShouldBeTrue();
-            result.Status.ShouldBe(ResultStatus.Invalid);
+            result.Errors[0].ErrorType.ShouldBe(ErrorType.Validation);
         }
 
         [Fact]
@@ -349,7 +349,7 @@ namespace MessagingService.SMSAggregate.Tests
             smsAggregate.MarkMessageAsUndeliverable(TestData.ProviderStatusDescription, TestData.UndeliveredDateTime);
             var result = smsAggregate.ResendRequestToProvider();
             result.IsFailed.ShouldBeTrue();
-            result.Status.ShouldBe(ResultStatus.Invalid);
+            result.Errors[0].ErrorType.ShouldBe(ErrorType.Validation);
         }
 
         [Fact]

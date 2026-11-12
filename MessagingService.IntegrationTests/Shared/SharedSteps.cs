@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace MessagingService.IntegrationTests.Shared
 {
-    using global::Shared.IntegrationTesting;
+    using global::TransactionProcessing.Shared.IntegrationTesting;
     using Reqnroll;
     using SecurityService.DataTransferObjects;
     using SecurityService.IntegrationTesting.Helpers;

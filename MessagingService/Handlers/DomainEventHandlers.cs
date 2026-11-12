@@ -4,20 +4,20 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
-using Shared.DomainDrivenDesign.EventSourcing;
-using Shared.EventStore.Aggregate;
-using Shared.EventStore.EventHandling;
-using Shared.Exceptions;
-using Shared.General;
-using Shared.Logger;
-using Shared.Serialisation;
-using SimpleResults;
+using TransactionProcessing.Shared.DomainDrivenDesign.EventSourcing;
+using TransactionProcessing.Shared.EventStore.Aggregate;
+using TransactionProcessing.Shared.EventStore.EventHandling;
+using TransactionProcessing.Shared.Exceptions;
+using TransactionProcessing.Shared.General;
+using TransactionProcessing.Shared.Logger;
+using TransactionProcessing.Shared.Serialisation;
+using TransactionProcessing.UnionResults;
 
 namespace MessagingService.Handlers;
 
 public static class DomainEventHandlers
 {
-    public static async Task<IResult> HandleDomainEvent(HttpRequest request,
+    public static async Task<Result> HandleDomainEvent(HttpRequest request,
                                                         object body,
                                                         IDomainEventHandlerResolver resolver,
                                                         CancellationToken cancellationToken)
@@ -35,7 +35,7 @@ public static class DomainEventHandlers
             if (eventHandlersResult.IsFailed)
             {
                 Logger.LogWarning("No event handlers configured for Event Type [{eventType}]", domainEvent.GetType().Name);
-                return Results.Ok();
+                return Result.Success();
             }
 
             var eventHandlers = eventHandlersResult.Data;
@@ -44,7 +44,7 @@ public static class DomainEventHandlers
 
             Logger.LogInformation("Finished processing event - ID [{eventId}]", domainEvent.EventId);
 
-            return Results.Ok();
+            return Result.Success();
         }
         catch (Exception ex)
         {

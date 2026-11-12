@@ -1,5 +1,5 @@
 ﻿using System;
-using SimpleResults;
+using TransactionProcessing.UnionResults;
 
 namespace MessagingService.BusinessLogic.RequestHandlers{
     using System.Collections.Generic;

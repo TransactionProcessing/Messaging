@@ -1,5 +1,5 @@
 ﻿using MessagingService.BusinessLogic.Requests;
-using SimpleResults;
+using TransactionProcessing.UnionResults;
 
 namespace MessagingService.BusinessLogic.Services
 {

@@ -2,16 +2,15 @@
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
+using Microsoft.AspNetCore.Http;
 using MessagingService.BusinessLogic.Requests;
 using MessagingService.DataTransferObjects;
-using Microsoft.AspNetCore.Http;
-using Shared.Results.Web;
-using SimpleResults;
+using TransactionProcessing.UnionResults;
 
 namespace MessagingService.Handlers;
 
 public static class SMSHandlers {
-    public static async Task<IResult> SendSMS(SendSMSRequest sendSMSRequest,
+    public static async Task<Result<SendSMSResponse>> SendSMS(SendSMSRequest sendSMSRequest,
                                               IMediator mediator,
                                               CancellationToken cancellationToken) {
         Guid messageId = sendSMSRequest.MessageId.HasValue ? sendSMSRequest.MessageId.Value : Guid.NewGuid();
@@ -23,13 +22,15 @@ public static class SMSHandlers {
             sendSMSRequest.Message);
         // Route the command
         Result<Guid> result = await mediator.Send(command, cancellationToken);
-        return ResponseFactory.FromResult<Guid>(result, (r) => new SendSMSResponse
-        {
-            MessageId = r
-        });
+        return result.Match(
+            messageId => Result<SendSMSResponse>.Created(new SendSMSResponse { MessageId = messageId }),
+            (messageId, location) => Result<SendSMSResponse>.Created(new SendSMSResponse { MessageId = messageId }, location),
+            Result<SendSMSResponse>.NoContent,
+            Result<SendSMSResponse>.Fail,
+            Result<SendSMSResponse>.Fail);
     }
 
-    public static async Task<IResult> ResendSMS(ResendSMSRequest resendSMSRequest,
+    public static async Task<object> ResendSMS(ResendSMSRequest resendSMSRequest,
                                                 IMediator mediator,
                                                 CancellationToken cancellationToken) {
         // Create the command
@@ -37,6 +38,6 @@ public static class SMSHandlers {
             resendSMSRequest.MessageId);
         // Route the command
         Result result = await mediator.Send(command, cancellationToken);
-        return ResponseFactory.FromResult(result);
+        return result.IsSuccess ? Results.Accepted() : Result.Fail(new ErrorList(result.Errors));
     }
 }

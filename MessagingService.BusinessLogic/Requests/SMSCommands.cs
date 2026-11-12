@@ -2,7 +2,7 @@
 using System.Diagnostics.CodeAnalysis;
 using MediatR;
 using MessagingService.BusinessLogic.Services.SMSServices;
-using SimpleResults;
+using TransactionProcessing.UnionResults;
 
 namespace MessagingService.BusinessLogic.Requests;
 

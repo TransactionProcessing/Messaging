@@ -2,8 +2,8 @@
 using System.Diagnostics.CodeAnalysis;
 using Lamar;
 using Microsoft.Extensions.DependencyInjection;
-using Shared.EventStore.SubscriptionWorker;
-using Shared.Serialisation;
+using TransactionProcessing.Shared.EventStore.SubscriptionWorker;
+using TransactionProcessing.Shared.Serialisation;
 
 namespace MessagingService.Bootstrapper;
 
