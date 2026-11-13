@@ -20,8 +20,6 @@ jobs:
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 11.0.x
-      with:
-        fetch-depth: 0
         
     - name: Restore Nuget Packages
       run: dotnet restore MessagingService.sln --source ${{ secrets.PUBLICFEEDURL }} --source ${{ secrets.PRIVATEFEED_URL }}
