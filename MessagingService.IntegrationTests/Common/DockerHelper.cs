@@ -1,4 +1,5 @@
 ﻿using TransactionProcessing.ClientProxyBase;
+using TransactionProcessing.UnionResults;
 
 namespace MessagingService.IntegrationTests.Common
 {
@@ -87,11 +88,12 @@ namespace MessagingService.IntegrationTests.Common
             this.MessagingServiceClient = new MessagingServiceClient(MessagingServiceBaseAddressResolver, httpClient, Serialise, Deserialise);
 
             var bootstrapToken = await this.SecurityServiceClient.GetToken("management-bootstrap", "management-bootstrap-secret", CancellationToken.None);
-            if (bootstrapToken.IsFailed || String.IsNullOrWhiteSpace(bootstrapToken.Data?.AccessToken))
+            if (bootstrapToken.Value is not Success<SecurityService.DataTransferObjects.TokenResponse> success ||
+                String.IsNullOrWhiteSpace(success.Value?.AccessToken))
             {
                 throw new InvalidOperationException("Unable to obtain the integration-test management bootstrap token.");
             }
-            this.AccessToken = bootstrapToken.Data.AccessToken;
+            this.AccessToken = success.Value.AccessToken;
         }
         #endregion
 

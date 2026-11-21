@@ -1,4 +1,4 @@
-using System.Linq;
+﻿using System.Linq;
 using TransactionProcessing.UnionResults;
 using Xunit;
 
@@ -122,8 +122,8 @@ namespace MessagingService.EmailAggregate.Tests
             }
 
             Result result = emailAggregate.MarkMessageAsDelivered(TestData.ProviderStatusDescription, TestData.DeliveredDateTime);
-            result.IsFailed.ShouldBeTrue();
-            result.Errors[0].ErrorType.ShouldBe(ErrorType.Validation);
+            result.IsSuccess().ShouldBeFalse();
+            result.GetErrors()[0].ErrorType.ShouldBe(ErrorType.Validation);
         }
 
         [Fact]
@@ -175,8 +175,8 @@ namespace MessagingService.EmailAggregate.Tests
             }
 
             Result result = emailAggregate.MarkMessageAsRejected(TestData.ProviderStatusDescription, TestData.RejectedDateTime);
-            result.IsFailed.ShouldBeTrue();
-            result.Errors[0].ErrorType.ShouldBe(ErrorType.Validation);
+            result.IsSuccess().ShouldBeFalse();
+            result.GetErrors()[0].ErrorType.ShouldBe(ErrorType.Validation);
         }
 
         [Fact]
@@ -228,8 +228,8 @@ namespace MessagingService.EmailAggregate.Tests
             }
 
             Result result = emailAggregate.MarkMessageAsFailed(TestData.ProviderStatusDescription, TestData.FailedDateTime);
-            result.IsFailed.ShouldBeTrue();
-            result.Errors[0].ErrorType.ShouldBe(ErrorType.Validation);
+            result.IsSuccess().ShouldBeFalse();
+            result.GetErrors()[0].ErrorType.ShouldBe(ErrorType.Validation);
         }
 
         [Fact]
@@ -281,8 +281,8 @@ namespace MessagingService.EmailAggregate.Tests
             }
 
             Result result = emailAggregate.MarkMessageAsBounced(TestData.ProviderStatusDescription, TestData.BouncedDateTime);
-            result.IsFailed.ShouldBeTrue();
-            result.Errors[0].ErrorType.ShouldBe(ErrorType.Validation);
+            result.IsSuccess().ShouldBeFalse();
+            result.GetErrors()[0].ErrorType.ShouldBe(ErrorType.Validation);
         }
 
         [Fact]
@@ -334,8 +334,8 @@ namespace MessagingService.EmailAggregate.Tests
             }
 
             Result result = emailAggregate.MarkMessageAsSpam(TestData.ProviderStatusDescription, TestData.SpamDateTime);
-            result.IsFailed.ShouldBeTrue();
-            result.Errors[0].ErrorType.ShouldBe(ErrorType.Validation);
+            result.IsSuccess().ShouldBeFalse();
+            result.GetErrors()[0].ErrorType.ShouldBe(ErrorType.Validation);
         }
 
 
@@ -370,8 +370,8 @@ namespace MessagingService.EmailAggregate.Tests
             EmailAggregate emailAggregate = EmailAggregate.Create(TestData.MessageId);
 
             Result result = emailAggregate.ResendRequestToProvider();
-            result.IsFailed.ShouldBeTrue();
-            result.Errors[0].ErrorType.ShouldBe(ErrorType.Validation);
+            result.IsSuccess().ShouldBeFalse();
+            result.GetErrors()[0].ErrorType.ShouldBe(ErrorType.Validation);
         }
 
         [Fact]
@@ -380,8 +380,8 @@ namespace MessagingService.EmailAggregate.Tests
 
             emailAggregate.SendRequestToProvider(TestData.FromAddress, TestData.ToAddresses, TestData.Subject, TestData.Body, TestData.IsHtmlTrue, TestData.EmailAttachmentModels);
             Result result = emailAggregate.ResendRequestToProvider();
-            result.IsFailed.ShouldBeTrue();
-            result.Errors[0].ErrorType.ShouldBe(ErrorType.Validation);
+            result.IsSuccess().ShouldBeFalse();
+            result.GetErrors()[0].ErrorType.ShouldBe(ErrorType.Validation);
         }
 
         [Fact]
@@ -392,8 +392,8 @@ namespace MessagingService.EmailAggregate.Tests
             emailAggregate.ReceiveResponseFromProvider(TestData.ProviderRequestReference, TestData.ProviderEmailReference);
             emailAggregate.MarkMessageAsRejected(TestData.ProviderStatusDescription, TestData.RejectedDateTime);
             Result result = emailAggregate.ResendRequestToProvider();
-            result.IsFailed.ShouldBeTrue();
-            result.Errors[0].ErrorType.ShouldBe(ErrorType.Validation);
+            result.IsSuccess().ShouldBeFalse();
+            result.GetErrors()[0].ErrorType.ShouldBe(ErrorType.Validation);
         }
 
         [Fact]
@@ -404,8 +404,8 @@ namespace MessagingService.EmailAggregate.Tests
             emailAggregate.ReceiveResponseFromProvider(TestData.ProviderRequestReference, TestData.ProviderEmailReference);
             emailAggregate.MarkMessageAsFailed(TestData.ProviderStatusDescription, TestData.FailedDateTime);
             Result result = emailAggregate.ResendRequestToProvider();
-            result.IsFailed.ShouldBeTrue();
-            result.Errors[0].ErrorType.ShouldBe(ErrorType.Validation);
+            result.IsSuccess().ShouldBeFalse();
+            result.GetErrors()[0].ErrorType.ShouldBe(ErrorType.Validation);
         }
 
         [Fact]
@@ -416,8 +416,8 @@ namespace MessagingService.EmailAggregate.Tests
             emailAggregate.ReceiveResponseFromProvider(TestData.ProviderRequestReference, TestData.ProviderEmailReference);
             emailAggregate.MarkMessageAsSpam(TestData.ProviderStatusDescription, TestData.SpamDateTime);
             Result result = emailAggregate.ResendRequestToProvider();
-            result.IsFailed.ShouldBeTrue();
-            result.Errors[0].ErrorType.ShouldBe(ErrorType.Validation);
+            result.IsSuccess().ShouldBeFalse();
+            result.GetErrors()[0].ErrorType.ShouldBe(ErrorType.Validation);
         }
 
         [Fact]
@@ -428,8 +428,8 @@ namespace MessagingService.EmailAggregate.Tests
             emailAggregate.ReceiveResponseFromProvider(TestData.ProviderRequestReference, TestData.ProviderEmailReference);
             emailAggregate.MarkMessageAsBounced(TestData.ProviderStatusDescription, TestData.BouncedDateTime);
             Result result = emailAggregate.ResendRequestToProvider();
-            result.IsFailed.ShouldBeTrue();
-            result.Errors[0].ErrorType.ShouldBe(ErrorType.Validation);
+            result.IsSuccess().ShouldBeFalse();
+            result.GetErrors()[0].ErrorType.ShouldBe(ErrorType.Validation);
         }
 
         [Fact]

@@ -6,11 +6,12 @@ using Microsoft.AspNetCore.Http;
 using MessagingService.BusinessLogic.Requests;
 using MessagingService.DataTransferObjects;
 using TransactionProcessing.UnionResults;
+using HttpResults = Microsoft.AspNetCore.Http.Results;
 
 namespace MessagingService.Handlers;
 
 public static class SMSHandlers {
-    public static async Task<Result<SendSMSResponse>> SendSMS(SendSMSRequest sendSMSRequest,
+    public static async Task<object> SendSMS(SendSMSRequest sendSMSRequest,
                                               IMediator mediator,
                                               CancellationToken cancellationToken) {
         Guid messageId = sendSMSRequest.MessageId.HasValue ? sendSMSRequest.MessageId.Value : Guid.NewGuid();
@@ -22,12 +23,9 @@ public static class SMSHandlers {
             sendSMSRequest.Message);
         // Route the command
         Result<Guid> result = await mediator.Send(command, cancellationToken);
-        return result.Match(
-            messageId => Result<SendSMSResponse>.Created(new SendSMSResponse { MessageId = messageId }),
-            (messageId, location) => Result<SendSMSResponse>.Created(new SendSMSResponse { MessageId = messageId }, location),
-            Result<SendSMSResponse>.NoContent,
-            Result<SendSMSResponse>.Fail,
-            Result<SendSMSResponse>.Fail);
+        return result.Value is Success<Guid> success
+            ? HttpResults.Created((string)null, new SendSMSResponse { MessageId = success.Value })
+            : result;
     }
 
     public static async Task<object> ResendSMS(ResendSMSRequest resendSMSRequest,
@@ -38,6 +36,6 @@ public static class SMSHandlers {
             resendSMSRequest.MessageId);
         // Route the command
         Result result = await mediator.Send(command, cancellationToken);
-        return result.IsSuccess ? Results.Accepted() : Result.Fail(new ErrorList(result.Errors));
+        return result.IsSuccess() ? HttpResults.Accepted() : result;
     }
 }

@@ -24,59 +24,59 @@ namespace MessagingService.SMSMessageAggregate{
                                                   String providerStatus,
                                                   DateTime failedDateTime){
             if (aggregate.DeliveryStatusList[aggregate.ResendCount] == MessageStatus.Delivered)
-                return Result.Success();
+                return Results.Ok();
 
             Result result = aggregate.CheckMessageCanBeSetToDelivered();
-            if (result.IsFailed)
+            if (!result.IsSuccess())
                 return result;
             SMSMessageDeliveredEvent messageDeliveredEvent = new(aggregate.AggregateId, providerStatus, failedDateTime);
 
             aggregate.ApplyAndAppend(messageDeliveredEvent);
-            return Result.Success();
+            return Results.Ok();
         }
 
         public static Result MarkMessageAsExpired(this SMSAggregate aggregate,
                                                 String providerStatus,
                                                 DateTime failedDateTime){
             if (aggregate.DeliveryStatusList[aggregate.ResendCount] == MessageStatus.Expired)
-                return Result.Success();
+                return Results.Ok();
             Result result = aggregate.CheckMessageCanBeSetToExpired();
-            if (result.IsFailed)
+            if (!result.IsSuccess())
                 return result;
             SMSMessageExpiredEvent messageExpiredEvent = new(aggregate.AggregateId, providerStatus, failedDateTime);
 
             aggregate.ApplyAndAppend(messageExpiredEvent);
 
-            return Result.Success();
+            return Results.Ok();
         }
 
         public static Result MarkMessageAsRejected(this SMSAggregate aggregate,
                                                  String providerStatus,
                                                  DateTime failedDateTime){
             if (aggregate.DeliveryStatusList[aggregate.ResendCount] == MessageStatus.Rejected)
-                return Result.Success();
+                return Results.Ok();
             Result result = aggregate.CheckMessageCanBeSetToRejected();
-            if (result.IsFailed)
+            if (!result.IsSuccess())
                 return result;
             SMSMessageRejectedEvent messageRejectedEvent = new(aggregate.AggregateId, providerStatus, failedDateTime);
 
             aggregate.ApplyAndAppend(messageRejectedEvent);
 
-            return Result.Success();
+            return Results.Ok();
         }
 
         public static Result MarkMessageAsUndeliverable(this SMSAggregate aggregate,
                                                       String providerStatus,
                                                       DateTime failedDateTime){
             if (aggregate.DeliveryStatusList[aggregate.ResendCount] == MessageStatus.Undeliverable)
-                return Result.Success();
+                return Results.Ok();
             Result result = aggregate.CheckMessageCanBeSetToUndeliverable();
-            if (result.IsFailed)
+            if (!result.IsSuccess())
                 return result;
             SMSMessageUndeliveredEvent messageUndeliveredEvent = new(aggregate.AggregateId, providerStatus, failedDateTime);
 
             aggregate.ApplyAndAppend(messageUndeliveredEvent);
-            return Result.Success();
+            return Results.Ok();
         }
 
         public static void PlayEvent(this SMSAggregate aggregate, RequestSentToSMSProviderEvent domainEvent){
@@ -118,20 +118,20 @@ namespace MessagingService.SMSMessageAggregate{
 
             aggregate.ApplyAndAppend(responseReceivedFromProviderEvent);
 
-            return Result.Success();
+            return Results.Ok();
         }
 
         public static Result ResendRequestToProvider(this SMSAggregate aggregate){
             if (aggregate.DeliveryStatusList[aggregate.ResendCount] != MessageStatus.Sent &&
                 aggregate.DeliveryStatusList[aggregate.ResendCount] != MessageStatus.Delivered){
-                return Result.Invalid($"Cannot re-send a message to provider that has not already been sent. Current Status [{aggregate.DeliveryStatusList[aggregate.ResendCount]}]");
+                return Results.Validation($"Cannot re-send a message to provider that has not already been sent. Current Status [{aggregate.DeliveryStatusList[aggregate.ResendCount]}]");
             }
 
             RequestResentToSMSProviderEvent requestResentToSMSProviderEvent = new(aggregate.AggregateId);
 
             aggregate.ApplyAndAppend(requestResentToSMSProviderEvent);
 
-            return Result.Success();
+            return Results.Ok();
         }
 
         public static Result SendRequestToProvider(this SMSAggregate aggregate,
@@ -144,35 +144,35 @@ namespace MessagingService.SMSMessageAggregate{
 
             aggregate.ApplyAndAppend(requestSentToProviderEvent);
 
-            return Result.Success();
+            return Results.Ok();
         }
 
         private static Result CheckMessageCanBeSetToDelivered(this SMSAggregate aggregate) {
             if (aggregate.DeliveryStatusList[aggregate.ResendCount] != MessageStatus.Sent){
-                return Result.Invalid($"Message at status {aggregate.DeliveryStatusList[aggregate.ResendCount]} cannot be set to delivered");
+                return Results.Validation($"Message at status {aggregate.DeliveryStatusList[aggregate.ResendCount]} cannot be set to delivered");
             }
-            return Result.Success();
+            return Results.Ok();
         }
 
         private static Result CheckMessageCanBeSetToExpired(this SMSAggregate aggregate){
             if (aggregate.DeliveryStatusList[aggregate.ResendCount] != MessageStatus.Sent){
-                return Result.Invalid($"Message at status {aggregate.DeliveryStatusList[aggregate.ResendCount]} cannot be set to expired");
+                return Results.Validation($"Message at status {aggregate.DeliveryStatusList[aggregate.ResendCount]} cannot be set to expired");
             }
-            return Result.Success();
+            return Results.Ok();
         }
 
         private static Result CheckMessageCanBeSetToRejected(this SMSAggregate aggregate){
             if (aggregate.DeliveryStatusList[aggregate.ResendCount] != MessageStatus.Sent){
-                return Result.Invalid($"Message at status {aggregate.DeliveryStatusList[aggregate.ResendCount]} cannot be set to rejected");
+                return Results.Validation($"Message at status {aggregate.DeliveryStatusList[aggregate.ResendCount]} cannot be set to rejected");
             }
-            return Result.Success();
+            return Results.Ok();
         }
 
         private static Result CheckMessageCanBeSetToUndeliverable(this SMSAggregate aggregate){
             if (aggregate.DeliveryStatusList[aggregate.ResendCount] != MessageStatus.Sent){
-                return Result.Invalid($"Message at status {aggregate.DeliveryStatusList[aggregate.ResendCount]} cannot be set to undeliverable");
+                return Results.Validation($"Message at status {aggregate.DeliveryStatusList[aggregate.ResendCount]} cannot be set to undeliverable");
             }
-            return Result.Success();
+            return Results.Ok();
         }
 
         public static MessageStatus GetMessageStatus(this SMSAggregate aggregate) {

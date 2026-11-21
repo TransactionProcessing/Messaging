@@ -4,6 +4,7 @@ using MessagingService.BusinessLogic.Requests;
 using MessagingService.DataTransferObjects;
 using Microsoft.Extensions.Logging;
 using TransactionProcessing.UnionResults;
+using HttpResults = Microsoft.AspNetCore.Http.Results;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -16,7 +17,7 @@ namespace MessagingService.Handlers
 {
     public static class EmailHandlers
     {
-        public static async Task<Result<SendEmailResponse>> SendEmail(SendEmailRequest sendEmailRequest,
+        public static async Task<object> SendEmail(SendEmailRequest sendEmailRequest,
                                                     IMediator mediator,
                                                     CancellationToken cancellationToken) {
             Guid messageId = sendEmailRequest.MessageId.HasValue ? sendEmailRequest.MessageId.Value : Guid.NewGuid();
@@ -45,12 +46,9 @@ namespace MessagingService.Handlers
             // Route the command
             Result<Guid> result = await mediator.Send(command, cancellationToken);
 
-            return result.Match(
-                messageId => Result<SendEmailResponse>.Created(new SendEmailResponse { MessageId = messageId }),
-                (messageId, location) => Result<SendEmailResponse>.Created(new SendEmailResponse { MessageId = messageId }, location),
-                Result<SendEmailResponse>.NoContent,
-                Result<SendEmailResponse>.Fail,
-                Result<SendEmailResponse>.Fail);
+            return result.Value is Success<Guid> success
+                ? HttpResults.Created((string)null, new SendEmailResponse { MessageId = success.Value })
+                : result;
         }
 
         public static async Task<object> ResendEmail(ResendEmailRequest resendEmailRequest,
@@ -62,7 +60,7 @@ namespace MessagingService.Handlers
             // Route the command
             Result result = await mediator.Send(command, cancellationToken);
 
-            return result.IsSuccess ? Results.Accepted() : Result.Fail(new ErrorList(result.Errors));
+            return result.IsSuccess() ? HttpResults.Accepted() : result;
         }
 
         internal static FileType ConvertFileType(DataTransferObjects.FileType emailAttachmentFileType) {

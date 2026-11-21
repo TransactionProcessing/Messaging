@@ -40,12 +40,7 @@
 
             try
             {
-                Result result = await this.Post(requestUri, sendEmailRequest, accessToken, cancellationToken);
-                
-                if (result.IsFailed)
-                    return Result.Fail(new ErrorList(result.Errors));
-
-                return Result.Success();
+                return await this.Post(requestUri, sendEmailRequest, accessToken, cancellationToken);
             }
             catch(Exception ex)
             {
@@ -62,12 +57,7 @@
             String requestUri = this.BuildRequestUrl("/api/email/resend");
 
             try {
-                Result result = await this.Post(requestUri, resendEmailRequest, accessToken, cancellationToken);
-
-                if (result.IsFailed)
-                    return Result.Fail(new ErrorList(result.Errors));
-
-                return Result.Success();
+                return await this.Post(requestUri, resendEmailRequest, accessToken, cancellationToken);
             }
             catch(Exception ex) {
                 // An exception has occurred, add some additional information to the message
@@ -85,12 +75,7 @@
 
             try
             {
-                Result result = await this.Post(requestUri, sendSMSRequest, accessToken, cancellationToken);
-
-                if (result.IsFailed)
-                    return Result.Fail(new ErrorList(result.Errors));
-
-                return Result.Success();
+                return await this.Post(requestUri, sendSMSRequest, accessToken, cancellationToken);
             }
             catch (Exception ex)
             {

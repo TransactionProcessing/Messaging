@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 using MessagingService.BusinessLogic.Requests;
@@ -27,8 +27,8 @@ namespace MessagingService.BusinessLogic.Tests.Services
         public async Task MessagingDomainService_SendEmailMessage_MessageSent()
         {
             IAggregateRepositoryImposter<EmailAggregate, DomainEvent> emailAggregateRepository = new();
-            emailAggregateRepository.GetLatestVersion(Arg<Guid>.Any(), Arg<CancellationToken>.Any()).ReturnsAsync(Result.Success(TestData.GetEmptyEmailAggregate()));
-            emailAggregateRepository.SaveChanges(Arg<EmailAggregate>.Any(), Arg<CancellationToken>.Any()).ReturnsAsync(Result.Success());
+            emailAggregateRepository.GetLatestVersion(Arg<Guid>.Any(), Arg<CancellationToken>.Any()).ReturnsAsync(Results.Ok(TestData.GetEmptyEmailAggregate()));
+            emailAggregateRepository.SaveChanges(Arg<EmailAggregate>.Any(), Arg<CancellationToken>.Any()).ReturnsAsync(Results.Ok());
             IAggregateRepositoryImposter<SMSAggregate, DomainEvent> smsAggregateRepository = new();
             IEmailServiceProxyImposter emailServiceProxy = new();
             emailServiceProxy
@@ -48,16 +48,16 @@ namespace MessagingService.BusinessLogic.Tests.Services
             var result  = await messagingDomainService.SendEmailMessage(TestData.SendEmailCommand,
                                                           TestData.EmailAttachmentModels,
                                                           CancellationToken.None);
-            result.IsSuccess.ShouldBeTrue();
-            result.Data.ShouldBe(TestData.MessageId);
+            result.IsSuccess().ShouldBeTrue();
+            result.Value.ShouldBeOfType<Success<Guid>>().Value.ShouldBe(TestData.MessageId);
         }
 
         [Fact]
         public async Task MessagingDomainService_SendEmailMessage_SecondSend_MessageNotSent()
         {
             IAggregateRepositoryImposter<EmailAggregate, DomainEvent> emailAggregateRepository = new();
-            emailAggregateRepository.GetLatestVersion(Arg<Guid>.Any(), Arg<CancellationToken>.Any()).ReturnsAsync(Result.Success(TestData.GetSentEmailAggregate()));
-            emailAggregateRepository.SaveChanges(Arg<EmailAggregate>.Any(), Arg<CancellationToken>.Any()).ReturnsAsync(Result.Success());
+            emailAggregateRepository.GetLatestVersion(Arg<Guid>.Any(), Arg<CancellationToken>.Any()).ReturnsAsync(Results.Ok(TestData.GetSentEmailAggregate()));
+            emailAggregateRepository.SaveChanges(Arg<EmailAggregate>.Any(), Arg<CancellationToken>.Any()).ReturnsAsync(Results.Ok());
             IAggregateRepositoryImposter<SMSAggregate, DomainEvent> smsAggregateRepository = new();
             IEmailServiceProxyImposter emailServiceProxy = new();
             emailServiceProxy
@@ -76,15 +76,15 @@ namespace MessagingService.BusinessLogic.Tests.Services
             var result = await messagingDomainService.SendEmailMessage(TestData.SendEmailCommand,
                 TestData.EmailAttachmentModels,
                 CancellationToken.None);
-            result.IsSuccess.ShouldBeTrue();
-            result.Data.ShouldBe(TestData.MessageId);
+            result.IsSuccess().ShouldBeTrue();
+            result.Value.ShouldBeOfType<Success<Guid>>().Value.ShouldBe(TestData.MessageId);
         }
 
         [Fact] public async Task MessagingDomainService_SendEmailMessage_SaveFailed_MessageSent()
         {
             IAggregateRepositoryImposter<EmailAggregate, DomainEvent> emailAggregateRepository = new();
-            emailAggregateRepository.GetLatestVersion(Arg<Guid>.Any(), Arg<CancellationToken>.Any()).ReturnsAsync(Result.Success(TestData.GetEmptyEmailAggregate()));
-            emailAggregateRepository.SaveChanges(Arg<EmailAggregate>.Any(), Arg<CancellationToken>.Any()).ReturnsAsync(Result.Failure("Save failed"));
+            emailAggregateRepository.GetLatestVersion(Arg<Guid>.Any(), Arg<CancellationToken>.Any()).ReturnsAsync(Results.Ok(TestData.GetEmptyEmailAggregate()));
+            emailAggregateRepository.SaveChanges(Arg<EmailAggregate>.Any(), Arg<CancellationToken>.Any()).ReturnsAsync(Results.Fail("Save failed"));
             IAggregateRepositoryImposter<SMSAggregate, DomainEvent> smsAggregateRepository = new();
             IEmailServiceProxyImposter emailServiceProxy = new();
             emailServiceProxy
@@ -110,7 +110,7 @@ namespace MessagingService.BusinessLogic.Tests.Services
         public async Task MessagingDomainService_SendEmailMessage_EmailSentFailed_APICallFailed_MessageFailed()
         {
             IAggregateRepositoryImposter<EmailAggregate, DomainEvent> emailAggregateRepository = new();
-            emailAggregateRepository.GetLatestVersion(Arg<Guid>.Any(), Arg<CancellationToken>.Any()).ReturnsAsync(Result.Success(TestData.GetEmptyEmailAggregate()));
+            emailAggregateRepository.GetLatestVersion(Arg<Guid>.Any(), Arg<CancellationToken>.Any()).ReturnsAsync(Results.Ok(TestData.GetEmptyEmailAggregate()));
             IAggregateRepositoryImposter<SMSAggregate, DomainEvent> smsAggregateRepository = new();
             IEmailServiceProxyImposter emailServiceProxy = new();
             emailServiceProxy
@@ -136,7 +136,7 @@ namespace MessagingService.BusinessLogic.Tests.Services
         public async Task MessagingDomainService_SendEmailMessage_EmailSentFailed_APIResponseError_MessageFailed()
         {
             IAggregateRepositoryImposter<EmailAggregate, DomainEvent> emailAggregateRepository = new();
-            emailAggregateRepository.GetLatestVersion(Arg<Guid>.Any(), Arg<CancellationToken>.Any()).ReturnsAsync(Result.Success(TestData.GetEmptyEmailAggregate()));
+            emailAggregateRepository.GetLatestVersion(Arg<Guid>.Any(), Arg<CancellationToken>.Any()).ReturnsAsync(Results.Ok(TestData.GetEmptyEmailAggregate()));
             IAggregateRepositoryImposter<SMSAggregate, DomainEvent> smsAggregateRepository = new();
             IEmailServiceProxyImposter emailServiceProxy = new();
             emailServiceProxy
@@ -162,7 +162,7 @@ namespace MessagingService.BusinessLogic.Tests.Services
         public async Task MessagingDomainService_ResendEmailMessage_MessageSent()
         {
             IAggregateRepositoryImposter<EmailAggregate, DomainEvent> emailAggregateRepository = new();
-            emailAggregateRepository.GetLatestVersion(Arg<Guid>.Any(), Arg<CancellationToken>.Any()).ReturnsAsync(Result.Success(TestData.GetSentEmailAggregate()));
+            emailAggregateRepository.GetLatestVersion(Arg<Guid>.Any(), Arg<CancellationToken>.Any()).ReturnsAsync(Results.Ok(TestData.GetSentEmailAggregate()));
             IAggregateRepositoryImposter<SMSAggregate, DomainEvent> smsAggregateRepository = new();
             IEmailServiceProxyImposter emailServiceProxy = new();
             emailServiceProxy
@@ -188,7 +188,7 @@ namespace MessagingService.BusinessLogic.Tests.Services
         public async Task MessagingDomainService_ResendEmailMessage_APICallFailed_MessageFailed()
         {
             IAggregateRepositoryImposter<EmailAggregate, DomainEvent> emailAggregateRepository = new();
-            emailAggregateRepository.GetLatestVersion(Arg<Guid>.Any(), Arg<CancellationToken>.Any()).ReturnsAsync(Result.Success(TestData.GetSentEmailAggregate()));
+            emailAggregateRepository.GetLatestVersion(Arg<Guid>.Any(), Arg<CancellationToken>.Any()).ReturnsAsync(Results.Ok(TestData.GetSentEmailAggregate()));
             IAggregateRepositoryImposter<SMSAggregate, DomainEvent> smsAggregateRepository = new();
             IEmailServiceProxyImposter emailServiceProxy = new();
             emailServiceProxy
@@ -214,7 +214,7 @@ namespace MessagingService.BusinessLogic.Tests.Services
         public async Task MessagingDomainService_ResendEmailMessage_APIResponseError_MessageFailed()
         {
             IAggregateRepositoryImposter<EmailAggregate, DomainEvent> emailAggregateRepository = new();
-            emailAggregateRepository.GetLatestVersion(Arg<Guid>.Any(), Arg<CancellationToken>.Any()).ReturnsAsync(Result.Success(TestData.GetSentEmailAggregate()));
+            emailAggregateRepository.GetLatestVersion(Arg<Guid>.Any(), Arg<CancellationToken>.Any()).ReturnsAsync(Results.Ok(TestData.GetSentEmailAggregate()));
             IAggregateRepositoryImposter<SMSAggregate, DomainEvent> smsAggregateRepository = new();
             IEmailServiceProxyImposter emailServiceProxy = new();
             emailServiceProxy
@@ -241,8 +241,8 @@ namespace MessagingService.BusinessLogic.Tests.Services
         {
             IAggregateRepositoryImposter<EmailAggregate, DomainEvent> emailAggregateRepository = new();
             IAggregateRepositoryImposter<SMSAggregate, DomainEvent> smsAggregateRepository = new();
-            smsAggregateRepository.GetLatestVersion(Arg<Guid>.Any(), Arg<CancellationToken>.Any()).ReturnsAsync(Result.Success(TestData.GetEmptySMSAggregate()));
-            smsAggregateRepository.SaveChanges(Arg<SMSAggregate>.Any(), Arg<CancellationToken>.Any()).ReturnsAsync(Result.Success());
+            smsAggregateRepository.GetLatestVersion(Arg<Guid>.Any(), Arg<CancellationToken>.Any()).ReturnsAsync(Results.Ok(TestData.GetEmptySMSAggregate()));
+            smsAggregateRepository.SaveChanges(Arg<SMSAggregate>.Any(), Arg<CancellationToken>.Any()).ReturnsAsync(Results.Ok());
             IEmailServiceProxyImposter emailServiceProxy = new();
             ISMSServiceProxyImposter smsServiceProxy = new();
             smsServiceProxy
@@ -260,8 +260,8 @@ namespace MessagingService.BusinessLogic.Tests.Services
                                                         TestData.Destination,
                                                         TestData.Message,
                                                         CancellationToken.None);
-            result.IsSuccess.ShouldBeTrue();
-            result.Data.ShouldBe(TestData.MessageId);
+            result.IsSuccess().ShouldBeTrue();
+            result.Value.ShouldBeOfType<Success<Guid>>().Value.ShouldBe(TestData.MessageId);
 
         }
 
@@ -270,8 +270,8 @@ namespace MessagingService.BusinessLogic.Tests.Services
         {
             IAggregateRepositoryImposter<EmailAggregate, DomainEvent> emailAggregateRepository = new();
             IAggregateRepositoryImposter<SMSAggregate, DomainEvent> smsAggregateRepository = new();
-            smsAggregateRepository.GetLatestVersion(Arg<Guid>.Any(), Arg<CancellationToken>.Any()).ReturnsAsync(Result.Success(TestData.GetSentSMSAggregate()));
-            smsAggregateRepository.SaveChanges(Arg<SMSAggregate>.Any(), Arg<CancellationToken>.Any()).ReturnsAsync(Result.Success());
+            smsAggregateRepository.GetLatestVersion(Arg<Guid>.Any(), Arg<CancellationToken>.Any()).ReturnsAsync(Results.Ok(TestData.GetSentSMSAggregate()));
+            smsAggregateRepository.SaveChanges(Arg<SMSAggregate>.Any(), Arg<CancellationToken>.Any()).ReturnsAsync(Results.Ok());
             IEmailServiceProxyImposter emailServiceProxy = new();
             ISMSServiceProxyImposter smsServiceProxy = new();
             smsServiceProxy
@@ -289,8 +289,8 @@ namespace MessagingService.BusinessLogic.Tests.Services
                 TestData.Destination,
                 TestData.Message,
                 CancellationToken.None);
-            result.IsSuccess.ShouldBeTrue(); 
-            result.Data.ShouldBe(TestData.MessageId);
+            result.IsSuccess().ShouldBeTrue();
+            result.Value.ShouldBeOfType<Success<Guid>>().Value.ShouldBe(TestData.MessageId);
 
         }
 
@@ -299,8 +299,8 @@ namespace MessagingService.BusinessLogic.Tests.Services
         {
             IAggregateRepositoryImposter<EmailAggregate, DomainEvent> emailAggregateRepository = new();
             IAggregateRepositoryImposter<SMSAggregate, DomainEvent> smsAggregateRepository = new();
-            smsAggregateRepository.GetLatestVersion(Arg<Guid>.Any(), Arg<CancellationToken>.Any()).ReturnsAsync(Result.Success(TestData.GetEmptySMSAggregate()));
-            smsAggregateRepository.SaveChanges(Arg<SMSAggregate>.Any(), Arg<CancellationToken>.Any()).ReturnsAsync(Result.Failure("Save failed"));
+            smsAggregateRepository.GetLatestVersion(Arg<Guid>.Any(), Arg<CancellationToken>.Any()).ReturnsAsync(Results.Ok(TestData.GetEmptySMSAggregate()));
+            smsAggregateRepository.SaveChanges(Arg<SMSAggregate>.Any(), Arg<CancellationToken>.Any()).ReturnsAsync(Results.Fail("Save failed"));
             IEmailServiceProxyImposter emailServiceProxy = new();
             ISMSServiceProxyImposter smsServiceProxy = new();
             smsServiceProxy
@@ -325,7 +325,7 @@ namespace MessagingService.BusinessLogic.Tests.Services
         {
             IAggregateRepositoryImposter<EmailAggregate, DomainEvent> emailAggregateRepository = new();
             IAggregateRepositoryImposter<SMSAggregate, DomainEvent> smsAggregateRepository = new();
-            smsAggregateRepository.GetLatestVersion(Arg<Guid>.Any(), Arg<CancellationToken>.Any()).ReturnsAsync(Result.Success(TestData.GetSentSMSAggregate()));
+            smsAggregateRepository.GetLatestVersion(Arg<Guid>.Any(), Arg<CancellationToken>.Any()).ReturnsAsync(Results.Ok(TestData.GetSentSMSAggregate()));
             IEmailServiceProxyImposter emailServiceProxy = new();
             ISMSServiceProxyImposter smsServiceProxy = new();
             smsServiceProxy
@@ -347,7 +347,7 @@ namespace MessagingService.BusinessLogic.Tests.Services
         {
             IAggregateRepositoryImposter<EmailAggregate, DomainEvent> emailAggregateRepository = new();
             IAggregateRepositoryImposter<SMSAggregate, DomainEvent> smsAggregateRepository = new();
-            smsAggregateRepository.GetLatestVersion(Arg<Guid>.Any(), Arg<CancellationToken>.Any()).ReturnsAsync(Result.Success(TestData.GetSentSMSAggregate()));
+            smsAggregateRepository.GetLatestVersion(Arg<Guid>.Any(), Arg<CancellationToken>.Any()).ReturnsAsync(Results.Ok(TestData.GetSentSMSAggregate()));
             IEmailServiceProxyImposter emailServiceProxy = new();
             ISMSServiceProxyImposter smsServiceProxy = new();
             smsServiceProxy
@@ -369,7 +369,7 @@ namespace MessagingService.BusinessLogic.Tests.Services
         {
             IAggregateRepositoryImposter<EmailAggregate, DomainEvent> emailAggregateRepository = new();
             IAggregateRepositoryImposter<SMSAggregate, DomainEvent> smsAggregateRepository = new();
-            smsAggregateRepository.GetLatestVersion(Arg<Guid>.Any(), Arg<CancellationToken>.Any()).ReturnsAsync(Result.Success(TestData.GetSentSMSAggregate()));
+            smsAggregateRepository.GetLatestVersion(Arg<Guid>.Any(), Arg<CancellationToken>.Any()).ReturnsAsync(Results.Ok(TestData.GetSentSMSAggregate()));
             IEmailServiceProxyImposter emailServiceProxy = new();
             ISMSServiceProxyImposter smsServiceProxy = new();
             smsServiceProxy
@@ -397,7 +397,7 @@ namespace MessagingService.BusinessLogic.Tests.Services
         {
             IAggregateRepositoryImposter<EmailAggregate, DomainEvent> emailAggregateRepository = new();
             IAggregateRepositoryImposter<SMSAggregate, DomainEvent> smsAggregateRepository = new();
-            smsAggregateRepository.GetLatestVersion(Arg<Guid>.Any(), Arg<CancellationToken>.Any()).ReturnsAsync(Result.Success(TestData.GetSentSMSAggregate()));
+            smsAggregateRepository.GetLatestVersion(Arg<Guid>.Any(), Arg<CancellationToken>.Any()).ReturnsAsync(Results.Ok(TestData.GetSentSMSAggregate()));
             IEmailServiceProxyImposter emailServiceProxy = new();
             ISMSServiceProxyImposter smsServiceProxy = new();
             MessagingDomainService messagingDomainService =
@@ -417,7 +417,7 @@ namespace MessagingService.BusinessLogic.Tests.Services
         public async Task MessagingDomainService_UpdateEmailMessageStatus_MessageUpdated(BusinessLogic.Services.EmailServices.MessageStatus status)
         {
             IAggregateRepositoryImposter<EmailAggregate, DomainEvent> emailAggregateRepository = new();
-            emailAggregateRepository.GetLatestVersion(Arg<Guid>.Any(), Arg<CancellationToken>.Any()).ReturnsAsync(Result.Success(TestData.GetSentEmailAggregate()));
+            emailAggregateRepository.GetLatestVersion(Arg<Guid>.Any(), Arg<CancellationToken>.Any()).ReturnsAsync(Results.Ok(TestData.GetSentEmailAggregate()));
             IAggregateRepositoryImposter<SMSAggregate, DomainEvent> smsAggregateRepository = new();
             IEmailServiceProxyImposter emailServiceProxy = new();
             ISMSServiceProxyImposter smsServiceProxy = new();
@@ -437,49 +437,47 @@ namespace MessagingService.BusinessLogic.Tests.Services
         public void DomainServiceHelper_HandleGetAggregateResult_SuccessfulGet_ResultHandled()
         {
             Guid aggregateId = Guid.Parse("0639682D-1D28-4AD8-B29D-4B76619083F1");
-            Result<TestAggregate> result = Result.Success(new TestAggregate
+            Result<TestAggregate> result = Results.Ok(new TestAggregate
             {
                 AggregateId = aggregateId
             });
 
             var handleResult = DomainServiceHelper.HandleGetAggregateResult(result, aggregateId, true);
-            handleResult.IsSuccess.ShouldBeTrue();
-            handleResult.Data.ShouldBeOfType(typeof(TestAggregate));
-            handleResult.Data.AggregateId.ShouldBe(aggregateId);
+            handleResult.IsSuccess().ShouldBeTrue();
+            handleResult.Value.ShouldBeOfType<Success<TestAggregate>>().Value.AggregateId.ShouldBe(aggregateId);
         }
 
         [Fact]
         public void DomainServiceHelper_HandleGetAggregateResult_FailedGet_ResultHandled()
         {
             Guid aggregateId = Guid.Parse("0639682D-1D28-4AD8-B29D-4B76619083F1");
-            Result<TestAggregate> result = Result.Failure("Failed Get");
+            Result<TestAggregate> result = new Error(ErrorType.Failure, "Failed Get");
 
             var handleResult = DomainServiceHelper.HandleGetAggregateResult(result, aggregateId, true);
-            handleResult.IsFailed.ShouldBeTrue();
-            handleResult.Message.ShouldBe("Failed Get");
+            handleResult.IsSuccess().ShouldBeFalse();
+            handleResult.GetErrorMessage().ShouldBe("Failed Get");
         }
 
         [Fact]
         public void DomainServiceHelper_HandleGetAggregateResult_FailedGet_NotFoundButIsError_ResultHandled()
         {
             Guid aggregateId = Guid.Parse("0639682D-1D28-4AD8-B29D-4B76619083F1");
-            Result<TestAggregate> result = Result.NotFound("Failed Get");
+            Result<TestAggregate> result = new Error(ErrorType.NotFound, "Failed Get");
 
             var handleResult = DomainServiceHelper.HandleGetAggregateResult(result, aggregateId, true);
-            handleResult.IsFailed.ShouldBeTrue();
-            handleResult.Message.ShouldBe("Failed Get");
+            handleResult.IsSuccess().ShouldBeFalse();
+            handleResult.GetErrorMessage().ShouldBe("Failed Get");
         }
 
         [Fact]
         public void DomainServiceHelper_HandleGetAggregateResult_FailedGet_NotFoundButIsNotError_ResultHandled()
         {
             Guid aggregateId = Guid.Parse("0639682D-1D28-4AD8-B29D-4B76619083F1");
-            Result<TestAggregate> result = Result.NotFound("Failed Get");
+            Result<TestAggregate> result = new Error(ErrorType.NotFound, "Failed Get");
 
             var handleResult = DomainServiceHelper.HandleGetAggregateResult(result, aggregateId, false);
-            handleResult.IsSuccess.ShouldBeTrue();
-            handleResult.Data.ShouldBeOfType(typeof(TestAggregate));
-            handleResult.Data.AggregateId.ShouldBe(aggregateId);
+            handleResult.IsSuccess().ShouldBeTrue();
+            handleResult.Value.ShouldBeOfType<Success<TestAggregate>>().Value.AggregateId.ShouldBe(aggregateId);
         }
     }
 

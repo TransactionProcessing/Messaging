@@ -97,8 +97,8 @@ namespace MessagingService.SMSAggregate.Tests
             }
 
             var result = smsAggregate.MarkMessageAsDelivered(TestData.ProviderStatusDescription, TestData.DeliveredDateTime);
-            result.IsFailed.ShouldBeTrue();
-            result.Errors[0].ErrorType.ShouldBe(ErrorType.Validation);
+            result.IsSuccess().ShouldBeFalse();
+            result.GetErrors()[0].ErrorType.ShouldBe(ErrorType.Validation);
         }
 
         [Fact]
@@ -151,8 +151,8 @@ namespace MessagingService.SMSAggregate.Tests
             }
 
             var result = smsAggregate.MarkMessageAsExpired(TestData.ProviderStatusDescription, TestData.DeliveredDateTime);
-            result.IsFailed.ShouldBeTrue();
-            result.Errors[0].ErrorType.ShouldBe(ErrorType.Validation);
+            result.IsSuccess().ShouldBeFalse();
+            result.GetErrors()[0].ErrorType.ShouldBe(ErrorType.Validation);
         }
 
         [Fact]
@@ -205,8 +205,8 @@ namespace MessagingService.SMSAggregate.Tests
             }
 
             var result = smsAggregate.MarkMessageAsUndeliverable(TestData.ProviderStatusDescription, TestData.DeliveredDateTime);
-            result.IsFailed.ShouldBeTrue();
-            result.Errors[0].ErrorType.ShouldBe(ErrorType.Validation);
+            result.IsSuccess().ShouldBeFalse();
+            result.GetErrors()[0].ErrorType.ShouldBe(ErrorType.Validation);
         }
 
         [Fact]
@@ -259,8 +259,8 @@ namespace MessagingService.SMSAggregate.Tests
             }
 
             var result = smsAggregate.MarkMessageAsRejected(TestData.ProviderStatusDescription, TestData.DeliveredDateTime);
-            result.IsFailed.ShouldBeTrue();
-            result.Errors[0].ErrorType.ShouldBe(ErrorType.Validation);
+            result.IsSuccess().ShouldBeFalse();
+            result.GetErrors()[0].ErrorType.ShouldBe(ErrorType.Validation);
         }
 
         [Fact]
@@ -298,8 +298,8 @@ namespace MessagingService.SMSAggregate.Tests
             SMSAggregate smsAggregate = SMSAggregate.Create(TestData.MessageId);
 
             var result = smsAggregate.ResendRequestToProvider();
-            result.IsFailed.ShouldBeTrue();
-            result.Errors[0].ErrorType.ShouldBe(ErrorType.Validation);
+            result.IsSuccess().ShouldBeFalse();
+            result.GetErrors()[0].ErrorType.ShouldBe(ErrorType.Validation);
         }
         
         [Fact]
@@ -309,8 +309,8 @@ namespace MessagingService.SMSAggregate.Tests
 
             smsAggregate.SendRequestToProvider(TestData.Sender, TestData.Destination, TestData.Message);
             var result = smsAggregate.ResendRequestToProvider();
-            result.IsFailed.ShouldBeTrue();
-            result.Errors[0].ErrorType.ShouldBe(ErrorType.Validation);
+            result.IsSuccess().ShouldBeFalse();
+            result.GetErrors()[0].ErrorType.ShouldBe(ErrorType.Validation);
         }
         
         [Fact]
@@ -322,8 +322,8 @@ namespace MessagingService.SMSAggregate.Tests
             smsAggregate.ReceiveResponseFromProvider(TestData.ProviderSMSReference);
             smsAggregate.MarkMessageAsRejected(TestData.ProviderStatusDescription, TestData.RejectedDateTime);
             var result = smsAggregate.ResendRequestToProvider();
-            result.IsFailed.ShouldBeTrue();
-            result.Errors[0].ErrorType.ShouldBe(ErrorType.Validation);
+            result.IsSuccess().ShouldBeFalse();
+            result.GetErrors()[0].ErrorType.ShouldBe(ErrorType.Validation);
         }
         
         [Fact]
@@ -335,8 +335,8 @@ namespace MessagingService.SMSAggregate.Tests
             smsAggregate.ReceiveResponseFromProvider(TestData.ProviderSMSReference);
             smsAggregate.MarkMessageAsExpired(TestData.ProviderStatusDescription, TestData.ExpiredDateTime);
             var result = smsAggregate.ResendRequestToProvider();
-            result.IsFailed.ShouldBeTrue();
-            result.Errors[0].ErrorType.ShouldBe(ErrorType.Validation);
+            result.IsSuccess().ShouldBeFalse();
+            result.GetErrors()[0].ErrorType.ShouldBe(ErrorType.Validation);
         }
 
         [Fact]
@@ -348,8 +348,8 @@ namespace MessagingService.SMSAggregate.Tests
             smsAggregate.ReceiveResponseFromProvider(TestData.ProviderSMSReference);
             smsAggregate.MarkMessageAsUndeliverable(TestData.ProviderStatusDescription, TestData.UndeliveredDateTime);
             var result = smsAggregate.ResendRequestToProvider();
-            result.IsFailed.ShouldBeTrue();
-            result.Errors[0].ErrorType.ShouldBe(ErrorType.Validation);
+            result.IsSuccess().ShouldBeFalse();
+            result.GetErrors()[0].ErrorType.ShouldBe(ErrorType.Validation);
         }
 
         [Fact]

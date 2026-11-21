@@ -12,6 +12,7 @@ using TransactionProcessing.Shared.General;
 using TransactionProcessing.Shared.Logger;
 using TransactionProcessing.Shared.Serialisation;
 using TransactionProcessing.UnionResults;
+using Results = TransactionProcessing.UnionResults.Results;
 
 namespace MessagingService.Handlers;
 
@@ -32,19 +33,19 @@ public static class DomainEventHandlers
 
             Result<List<IDomainEventHandler>> eventHandlersResult = resolver.GetDomainEventHandlers(domainEvent);
 
-            if (eventHandlersResult.IsFailed)
+            if (eventHandlersResult.Value is not Success<List<IDomainEventHandler>> success)
             {
                 Logger.LogWarning("No event handlers configured for Event Type [{eventType}]", domainEvent.GetType().Name);
-                return Result.Success();
+                return Results.Ok();
             }
 
-            var eventHandlers = eventHandlersResult.Data;
+            var eventHandlers = success.Value;
             var tasks = eventHandlers.Select(h => h.Handle(domainEvent, cancellationToken));
             await Task.WhenAll(tasks);
 
             Logger.LogInformation("Finished processing event - ID [{eventId}]", domainEvent.EventId);
 
-            return Result.Success();
+            return Results.Ok();
         }
         catch (Exception ex)
         {

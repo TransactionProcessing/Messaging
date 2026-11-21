@@ -16,24 +16,24 @@ namespace MessagingService.BusinessLogic.Tests.Mediator
     {
         public async Task<Result<Guid>> SendEmailMessage(EmailCommands.SendEmailCommand command,
                                                          List<EmailAttachment> attachments,
-                                                         CancellationToken cancellationToken) => Result.Success(Guid.NewGuid());
+                                                         CancellationToken cancellationToken) => Results.Ok(Guid.NewGuid());
         
         public async Task<Result<Guid>> SendSMSMessage(Guid connectionIdentifier,
                                                        Guid messageId,
                                                        String sender,
                                                        String destination,
                                                        String message,
-                                                       CancellationToken cancellationToken) => Result.Success(Guid.NewGuid());
+                                                       CancellationToken cancellationToken) => Results.Ok(Guid.NewGuid());
 
         public async Task<Result> ResendEmailMessage(Guid connectionIdentifier,
                                                      Guid messageId,
-                                                     CancellationToken cancellationToken) => Result.Success();
-        public async Task<Result> ResendSMSMessage(Guid connectionIdentifier, Guid messageId, CancellationToken cancellationToken) => Result.Success();
+                                                     CancellationToken cancellationToken) => Results.Ok();
+        public async Task<Result> ResendSMSMessage(Guid connectionIdentifier, Guid messageId, CancellationToken cancellationToken) => Results.Ok();
 
         public async Task<Result> UpdateMessageStatus(EmailCommands.UpdateMessageStatusCommand command,
-                                                      CancellationToken cancellationToken) => Result.Success();
+                                                      CancellationToken cancellationToken) => Results.Ok();
 
         public async Task<Result> UpdateMessageStatus(SMSCommands.UpdateMessageStatusCommand command,
-                                                      CancellationToken cancellationToken) => Result.Success();
+                                                      CancellationToken cancellationToken) => Results.Ok();
     }
 }

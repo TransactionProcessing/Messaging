@@ -21,15 +21,16 @@ public static class SMSEndpoints
             .WithName("Send SMS")
             .WithSummary("Sends an SMS message")
             .WithDescription("Submits an SMS message for delivery. If messageId is omitted or null, the service generates a message identifier.")
-            .ProducesUnionResult<SendSMSResponse>();
+            .Produces<SendSMSResponse>(StatusCodes.Status201Created)
+            .ProducesMessagingErrors();
 
         smsGroup.MapPost("/resend", SMSHandlers.ResendSMS)
             .RequireAuthorization(AuthorizationExtensions.PolicyNames.ClientCredentialsOnlyPolicy)
             .WithName("Resend SMS")
             .WithSummary("Resends an SMS message by id")
             .WithDescription("Requests delivery of an existing SMS message, identified by messageId and connectionIdentifier.")
-            .ProducesUnionResult()
-            .Produces(StatusCodes.Status202Accepted);
+            .Produces(StatusCodes.Status202Accepted)
+            .ProducesMessagingErrors();
             
         return endpoints;
     }

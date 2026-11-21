@@ -8,6 +8,7 @@
     using MessagingService.DataTransferObjects;
     using TransactionProcessing.Shared.IntegrationTesting;
     using Shouldly;
+    using TransactionProcessing.UnionResults;
 
     public class MessagingSteps{
         private readonly IMessagingServiceClient MessagingServiceClient;
@@ -21,7 +22,7 @@
             foreach (SendEmailRequest sendEmailRequest in requests){
                 var result = await this.MessagingServiceClient.SendEmail(accessToken, sendEmailRequest, CancellationToken.None).ConfigureAwait(false);
 
-                result.IsSuccess.ShouldBeTrue();
+                result.IsSuccess().ShouldBeTrue();
                 results.Add((String.Join(",", sendEmailRequest.ToAddresses),  null));
             }
             return results;
@@ -33,7 +34,7 @@
             {
                 var result = await this.MessagingServiceClient.SendSMS(accessToken, sendSmsRequest, CancellationToken.None).ConfigureAwait(false);
 
-                result.IsSuccess.ShouldBeTrue();
+                result.IsSuccess().ShouldBeTrue();
             }
         }
 
