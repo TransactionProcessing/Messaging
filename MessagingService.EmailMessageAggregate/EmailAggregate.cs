@@ -18,80 +18,80 @@ namespace MessagingService.EmailMessageAggregate
                                          DateTime bouncedDateTime)
         {
             if (aggregate.DeliveryStatusList[aggregate.ResendCount] == MessageStatus.Bounced)
-                return Result.Success();
+                return Results.Ok();
             
             Result result = aggregate.CheckMessageCanBeSetToBounced();
-            if (result.IsFailed)
+            if (!result.IsSuccess())
                 return result;
 
             EmailMessageBouncedEvent messageBouncedEvent = new(aggregate.AggregateId, providerStatus, bouncedDateTime);
 
             aggregate.ApplyAndAppend(messageBouncedEvent);
             
-            return Result.Success();
+            return Results.Ok();
         }
 
         public static Result MarkMessageAsDelivered(this EmailAggregate aggregate, String providerStatus,
                                                     DateTime deliveredDateTime)
         {
             if (aggregate.DeliveryStatusList[aggregate.ResendCount] == MessageStatus.Delivered)
-                return Result.Success();
+                return Results.Ok();
             Result result = aggregate.CheckMessageCanBeSetToDelivered();
-            if (result.IsFailed)
+            if (!result.IsSuccess())
                 return result;
 
             EmailMessageDeliveredEvent messageDeliveredEvent = new(aggregate.AggregateId, providerStatus, deliveredDateTime);
 
             aggregate.ApplyAndAppend(messageDeliveredEvent);
 
-            return Result.Success();
+            return Results.Ok();
         }
 
         public static Result MarkMessageAsFailed(this EmailAggregate aggregate, String providerStatus,
                                         DateTime failedDateTime)
         {
             if (aggregate.DeliveryStatusList[aggregate.ResendCount] == MessageStatus.Failed)
-                return Result.Success();
+                return Results.Ok();
             var result = aggregate.CheckMessageCanBeSetToFailed();
-            if (result.IsFailed)
+            if (!result.IsSuccess())
                 return result;
             EmailMessageFailedEvent messageFailedEvent = new(aggregate.AggregateId, providerStatus, failedDateTime);
 
             aggregate.ApplyAndAppend(messageFailedEvent);
 
-            return Result.Success();
+            return Results.Ok();
         }
 
         public static Result MarkMessageAsRejected(this EmailAggregate aggregate, String providerStatus,
                                           DateTime rejectedDateTime)
         {
             if (aggregate.DeliveryStatusList[aggregate.ResendCount] == MessageStatus.Rejected)
-                return Result.Success();
+                return Results.Ok();
             var result = aggregate.CheckMessageCanBeSetToRejected();
-            if (result.IsFailed)
+            if (!result.IsSuccess())
                 return result;
 
             EmailMessageRejectedEvent messageRejectedEvent = new(aggregate.AggregateId, providerStatus, rejectedDateTime);
 
             aggregate.ApplyAndAppend(messageRejectedEvent);
 
-            return Result.Success();
+            return Results.Ok();
         }
 
         public static Result MarkMessageAsSpam(this EmailAggregate aggregate, String providerStatus,
                                       DateTime spamDateTime)
         {
             if (aggregate.DeliveryStatusList[aggregate.ResendCount] == MessageStatus.Spam)
-                return Result.Success();
+                return Results.Ok();
             var result = aggregate.CheckMessageCanBeSetToSpam();
-            if (result.IsFailed)
+            if (!result.IsSuccess())
                 return result;
 
             EmailMessageMarkedAsSpamEvent messageMarkedAsSpamEvent = new(aggregate.AggregateId, providerStatus, spamDateTime);
 
             aggregate.ApplyAndAppend(messageMarkedAsSpamEvent);
 
-            return Result.Success();
+            return Results.Ok();
         }
 
         public static Result ReceiveResponseFromProvider(this EmailAggregate aggregate, String providerRequestReference,
@@ -102,7 +102,7 @@ namespace MessagingService.EmailMessageAggregate
 
             aggregate.ApplyAndAppend(responseReceivedFromProviderEvent);
 
-            return Result.Success();
+            return Results.Ok();
         }
 
         public static Result ReceiveBadResponseFromProvider(this EmailAggregate aggregate, String error, String errorCode)
@@ -112,7 +112,7 @@ namespace MessagingService.EmailMessageAggregate
 
             aggregate.ApplyAndAppend(badResponseReceivedFromProviderEvent);
 
-            return Result.Success();
+            return Results.Ok();
         }
 
         public static MessageStatus GetMessageStatus(this EmailAggregate aggregate)
@@ -141,7 +141,7 @@ namespace MessagingService.EmailMessageAggregate
                 aggregate.ApplyAndAppend(emailAttachmentRequestSentToProviderEvent);
             }
 
-            return Result.Success();
+            return Results.Ok();
         }
 
         public static Result ResendRequestToProvider(this EmailAggregate aggregate)
@@ -149,57 +149,57 @@ namespace MessagingService.EmailMessageAggregate
             if (aggregate.DeliveryStatusList[aggregate.ResendCount] != MessageStatus.Sent &&
                 aggregate.DeliveryStatusList[aggregate.ResendCount] != MessageStatus.Delivered)
             {
-                return Result.Invalid($"Cannot re-send a message to provider that has not already been sent. Current Status [{aggregate.DeliveryStatusList[aggregate.ResendCount]}]");
+                return Results.Validation($"Cannot re-send a message to provider that has not already been sent. Current Status [{aggregate.DeliveryStatusList[aggregate.ResendCount]}]");
             }
 
             RequestResentToEmailProviderEvent requestResentToEmailProviderEvent = new(aggregate.AggregateId);
 
             aggregate.ApplyAndAppend(requestResentToEmailProviderEvent);
-            return Result.Success();
+            return Results.Ok();
         }
 
         private static Result CheckMessageCanBeSetToBounced(this EmailAggregate aggregate)
         {
             if (aggregate.DeliveryStatusList[aggregate.ResendCount] != MessageStatus.Sent)
             {
-                return Result.Invalid($"Message at status {aggregate.DeliveryStatusList[aggregate.ResendCount]} cannot be set to bounced");
+                return Results.Validation($"Message at status {aggregate.DeliveryStatusList[aggregate.ResendCount]} cannot be set to bounced");
             }
-            return Result.Success();
+            return Results.Ok();
         }
 
         private static Result CheckMessageCanBeSetToDelivered(this EmailAggregate aggregate)
         {
             if (aggregate.DeliveryStatusList[aggregate.ResendCount] != MessageStatus.Sent)
             {
-                return Result.Invalid($"Message at status {aggregate.DeliveryStatusList[aggregate.ResendCount]} cannot be set to delivered");
+                return Results.Validation($"Message at status {aggregate.DeliveryStatusList[aggregate.ResendCount]} cannot be set to delivered");
             }
-            return Result.Success();
+            return Results.Ok();
         }
 
         private static Result CheckMessageCanBeSetToFailed(this EmailAggregate aggregate) {
             if (aggregate.DeliveryStatusList[aggregate.ResendCount] != MessageStatus.Sent) {
-                return Result.Invalid($"Message at status {aggregate.DeliveryStatusList[aggregate.ResendCount]} cannot be set to failed");
+                return Results.Validation($"Message at status {aggregate.DeliveryStatusList[aggregate.ResendCount]} cannot be set to failed");
             }
 
-            return Result.Success();
+            return Results.Ok();
         }
 
         private static Result CheckMessageCanBeSetToRejected(this EmailAggregate aggregate)
         {
             if (aggregate.DeliveryStatusList[aggregate.ResendCount] != MessageStatus.Sent)
             {
-                return Result.Invalid($"Message at status {aggregate.DeliveryStatusList[aggregate.ResendCount]} cannot be set to rejected");
+                return Results.Validation($"Message at status {aggregate.DeliveryStatusList[aggregate.ResendCount]} cannot be set to rejected");
             }
-            return Result.Success();
+            return Results.Ok();
         }
 
         private static Result CheckMessageCanBeSetToSpam(this EmailAggregate aggregate)
         {
             if (aggregate.DeliveryStatusList[aggregate.ResendCount] != MessageStatus.Sent)
             {
-                return Result.Invalid($"Message at status {aggregate.DeliveryStatusList[aggregate.ResendCount]} cannot be set to spam");
+                return Results.Validation($"Message at status {aggregate.DeliveryStatusList[aggregate.ResendCount]} cannot be set to spam");
             }
-            return Result.Success();
+            return Results.Ok();
         }
 
         public static void PlayEvent(this EmailAggregate aggregate, RequestSentToEmailProviderEvent domainEvent)

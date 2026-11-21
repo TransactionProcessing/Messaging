@@ -1,11 +1,11 @@
-<Project>
+﻿<Project>
   <PropertyGroup>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>
   <ItemGroup>
-    <PackageVersion Include="TransactionProcessing.ClientProxyBase" Version="2026.11.5" />
-    <PackageVersion Include="HealthMonitoring.Client" Version="2026.10.3.68" />
-    <PackageVersion Include="TransactionProcessing.UnionResults" Version="2026.11.5" />
+    <PackageVersion Include="TransactionProcessing.ClientProxyBase" Version="2026.11.7" />
+    <PackageVersion Include="HealthMonitoring.Client" Version="2026.10.3.76" />
+    <PackageVersion Include="TransactionProcessing.UnionResults" Version="2026.11.7" />
     <PackageVersion Include="NLog.Extensions.Logging" Version="6.3.0" />
     <PackageVersion Include="MediatR" Version="15.0.0" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Relational" Version="11.0.0" />
@@ -14,19 +14,19 @@
     <PackageVersion Include="SharpCompress" Version="0.50.9" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.12.0" />
     <PackageVersion Include="Microsoft.Testing.Extensions.TrxReport" Version="2.5.3" />
-    <PackageVersion Include="TransactionProcessing.Shared.EventStore" Version="2026.11.5" />
+    <PackageVersion Include="TransactionProcessing.Shared.EventStore" Version="2026.11.7" />
     <PackageVersion Include="Shouldly" Version="4.3.0" />
     <PackageVersion Include="SSH.NET" Version="2026.0.1" />
     <PackageVersion Include="System.Security.Cryptography.Pkcs" Version="11.0.0" />
-    <PackageVersion Include="TransactionProcessing.ApiDefaults" Version="2026.11.5" />
+    <PackageVersion Include="TransactionProcessing.ApiDefaults" Version="2026.11.7" />
     <PackageVersion Include="xunit.v3.mtp-v2" Version="4.0.3" />
     <PackageVersion Include="Microsoft.Testing.Extensions.CodeCoverage" Version="18.12.0" />
     <PackageVersion Include="Grpc.Net.Client" Version="2.85.0" />
-    <PackageVersion Include="TransactionProcessing.Shared" Version="2026.11.5" />
-    <PackageVersion Include="TransactionProcessing.Shared.DomainDrivenDesign" Version="2026.11.5" />
-    <PackageVersion Include="TransactionProcessing.Shared.IntegrationTesting" Version="2026.11.5" />
-    <PackageVersion Include="TransactionProcessing.Shared.Logger" Version="2026.11.5" />
-    <PackageVersion Include="TransactionProcessing.UnionResults.AspNetCore" Version="2026.11.5" />
+    <PackageVersion Include="TransactionProcessing.Shared" Version="2026.11.7" />
+    <PackageVersion Include="TransactionProcessing.Shared.DomainDrivenDesign" Version="2026.11.7" />
+    <PackageVersion Include="TransactionProcessing.Shared.IntegrationTesting" Version="2026.11.7" />
+    <PackageVersion Include="TransactionProcessing.Shared.Logger" Version="2026.11.7" />
+    <PackageVersion Include="TransactionProcessing.UnionResults.AspNetCore" Version="2026.11.7" />
     <PackageVersion Include="Ductus.FluentDocker" Version="2.85.0" />
     <PackageVersion Include="Reqnroll.Tools.MsBuild.Generation" Version="3.3.4" />
     <PackageVersion Include="NUnit" Version="5.0.0" />
@@ -53,8 +53,8 @@
     <PackageVersion Include="NUnit3TestAdapter" Version="6.3.1" />
     <PackageVersion Include="Reqnroll" Version="3.3.4" />
     <PackageVersion Include="Reqnroll.NUnit" Version="3.3.4" />
-    <PackageVersion Include="SecurityService.Client" Version="2026.10.3.212" />
-    <PackageVersion Include="SecurityService.IntegrationTesting.Helpers" Version="2026.10.3.212" />
+    <PackageVersion Include="SecurityService.Client" Version="2026.10.3.219" />
+    <PackageVersion Include="SecurityService.IntegrationTesting.Helpers" Version="2026.10.3.219" />
     <PackageVersion Include="coverlet.collector" Version="10.1.1" />
   </ItemGroup>
 </Project>

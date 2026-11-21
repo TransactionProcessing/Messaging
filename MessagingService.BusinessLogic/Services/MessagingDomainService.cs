@@ -1,4 +1,4 @@
-using MessagingService.BusinessLogic.Requests;
+﻿using MessagingService.BusinessLogic.Requests;
 using TransactionProcessing.UnionResults;
 
 namespace MessagingService.BusinessLogic.Services
@@ -63,19 +63,19 @@ namespace MessagingService.BusinessLogic.Services
                 Result<EmailAggregate> emailAggregateResult =
                     DomainServiceHelper.HandleGetAggregateResult(getEmailResult, messageId, isNotFoundError);
 
-                EmailAggregate emailAggregate = emailAggregateResult.Data;
-                Result result = await action(emailAggregate);
-                if (result.IsFailed)
-                    return Result.Fail(new ErrorList(result.Errors));
+                if (emailAggregateResult.Value is not Success<EmailAggregate> success)
+                    return emailAggregateResult.Bind(static _ => Results.Ok());
 
-                Result saveResult = await this.EmailAggregateRepository.SaveChanges(emailAggregate, cancellationToken);
-                if (saveResult.IsFailed)
-                    return Result.Fail(new ErrorList(saveResult.Errors));
-                return Result.Success();
+                EmailAggregate emailAggregate = success.Value;
+                Result result = await action(emailAggregate);
+                if (!result.IsSuccess())
+                    return result;
+
+                return await this.EmailAggregateRepository.SaveChanges(emailAggregate, cancellationToken);
             }
             catch (Exception ex)
             {
-                return Result.Failure(ex.GetExceptionMessages());
+                return new ErrorList(ex.GetExceptionMessages().Select(message => new Error(ErrorType.Failure, message)));
             }
         }
 
@@ -91,19 +91,19 @@ namespace MessagingService.BusinessLogic.Services
                 Result<SMSAggregate> smsAggregateResult =
                     DomainServiceHelper.HandleGetAggregateResult(getSMSResult, messageId, isNotFoundError);
 
-                SMSAggregate smsAggregate = smsAggregateResult.Data;
-                Result result = await action(smsAggregate);
-                if (result.IsFailed)
-                    return Result.Fail(new ErrorList(result.Errors));
+                if (smsAggregateResult.Value is not Success<SMSAggregate> success)
+                    return smsAggregateResult.Bind(static _ => Results.Ok());
 
-                Result saveResult = await this.SmsAggregateRepository.SaveChanges(smsAggregate, cancellationToken);
-                if (saveResult.IsFailed)
-                    return Result.Fail(new ErrorList(saveResult.Errors));
-                return Result.Success();
+                SMSAggregate smsAggregate = success.Value;
+                Result result = await action(smsAggregate);
+                if (!result.IsSuccess())
+                    return result;
+
+                return await this.SmsAggregateRepository.SaveChanges(smsAggregate, cancellationToken);
             }
             catch (Exception ex)
             {
-                return Result.Failure(ex.GetExceptionMessages());
+                return new ErrorList(ex.GetExceptionMessages().Select(message => new Error(ErrorType.Failure, message)));
             }
         }
 
@@ -114,12 +114,12 @@ namespace MessagingService.BusinessLogic.Services
             {
                 // Check if this message has been sent before
                 if (emailAggregate.GetMessageStatus() != EmailMessageAggregate.MessageStatus.NotSet) {
-                    return Result.Success();
+                    return Results.Ok();
                 }
 
                 // send message to provider (record event)
                 Result stateResult = emailAggregate.SendRequestToProvider(command.FromAddress, command.ToAddresses, command.Subject, command.Body, command.IsHtml, attachments);
-                if (stateResult.IsFailed)
+                if (!stateResult.IsSuccess())
                     return stateResult;
 
                 // Make call to Email provider here
@@ -134,15 +134,13 @@ namespace MessagingService.BusinessLogic.Services
                     stateResult = emailAggregate.ReceiveBadResponseFromProvider(emailResponse.Error, emailResponse.ErrorCode);
                 }
 
-                if (stateResult.IsFailed)
+                if (!stateResult.IsSuccess())
                     return stateResult;
 
-                return Result.Success();
+                return Results.Ok();
             }, command.MessageId, cancellationToken, false);
 
-            if (result.IsFailed)
-                return Result<Guid>.FromFailure(result);
-            return Result.Success(command.MessageId);
+            return result.Bind(() => Results.Ok(command.MessageId));
         }
 
         public async Task<Result<Guid>> SendSMSMessage(Guid connectionIdentifier,
@@ -155,12 +153,12 @@ namespace MessagingService.BusinessLogic.Services
             Result result = await ApplySMSUpdates(async (SMSAggregate smsAggregate) => {
                 // Check if this message has been sent before
                 if (smsAggregate.GetMessageStatus() != SMSMessageAggregate.MessageStatus.NotSet) {
-                    return Result.Success();
+                    return Results.Ok();
                 }
 
                 // send message to provider (record event)
                 Result stateResult = smsAggregate.SendRequestToProvider(sender, destination, message);
-                if (stateResult.IsFailed)
+                if (!stateResult.IsSuccess())
                     return stateResult;
 
                 // Make call to SMS provider here
@@ -169,15 +167,13 @@ namespace MessagingService.BusinessLogic.Services
 
                 // response message from provider (record event)
                 stateResult= smsAggregate.ReceiveResponseFromProvider(smsResponse.SMSIdentifier);
-                if (stateResult.IsFailed)
+                if (!stateResult.IsSuccess())
                     return stateResult;
 
-                return Result.Success();
+                return Results.Ok();
             }, messageId, cancellationToken, false);
 
-            if (result.IsFailed)
-                return Result<Guid>.FromFailure(result);
-            return Result.Success(messageId);
+            return result.Bind(() => Results.Ok(messageId));
 
         }
 
@@ -188,7 +184,7 @@ namespace MessagingService.BusinessLogic.Services
             Result result = await ApplyEmailUpdates(async (EmailAggregate emailAggregate) => {
                 // re-send message to provider (record event)
                 Result stateResult = emailAggregate.ResendRequestToProvider();
-                if (stateResult.IsFailed)
+                if (!stateResult.IsSuccess())
                     return stateResult;
 
                 // Make call to Email provider here
@@ -207,10 +203,10 @@ namespace MessagingService.BusinessLogic.Services
                 else {
                     stateResult = emailAggregate.ReceiveBadResponseFromProvider(emailResponse.Error, emailResponse.ErrorCode);
                 }
-                if (stateResult.IsFailed)
+                if (!stateResult.IsSuccess())
                     return stateResult;
 
-                return Result.Success();
+                return Results.Ok();
             }, messageId, cancellationToken);
             return result;
         }
@@ -219,7 +215,7 @@ namespace MessagingService.BusinessLogic.Services
             Result result = await ApplySMSUpdates(async (SMSAggregate smsAggregate) => {
                 // re-send message to provider (record event)
                 Result stateResult = smsAggregate.ResendRequestToProvider();
-                if (stateResult.IsFailed)
+                if (!stateResult.IsSuccess())
                     return stateResult;
 
                 // Make call to SMS provider here
@@ -228,10 +224,10 @@ namespace MessagingService.BusinessLogic.Services
 
                 // response message from provider (record event)
                 stateResult = smsAggregate.ReceiveResponseFromProvider(smsResponse.SMSIdentifier);
-                if (stateResult.IsFailed)
+                if (!stateResult.IsSuccess())
                     return stateResult;
 
-                return Result.Success();
+                return Results.Ok();
             }, messageId, cancellationToken);
             return result;
         }
@@ -265,10 +261,10 @@ namespace MessagingService.BusinessLogic.Services
                         break;
                 }
 
-                if (stateResult.IsFailed)
+                if (!stateResult.IsSuccess())
                     return stateResult;
 
-                return Result.Success();
+                return Results.Ok();
             }, command.MessageId, cancellationToken);
             return result;
         }
@@ -297,10 +293,10 @@ namespace MessagingService.BusinessLogic.Services
                         stateResult = smsAggregate.MarkMessageAsRejected(command.Description, command.Timestamp);
                         break;
                 }
-                if (stateResult.IsFailed)
+                if (!stateResult.IsSuccess())
                     return stateResult;
 
-                return Result.Success();
+                return Results.Ok();
             }, command.MessageId, cancellationToken);
             return result;
         }
@@ -311,15 +307,15 @@ namespace MessagingService.BusinessLogic.Services
         public static Result<T> HandleGetAggregateResult<T>(Result<T> result, Guid aggregateId, bool isNotFoundError = true)
             where T : Aggregate, new()  // Constraint: T is a subclass of Aggregate and has a parameterless constructor
         {
-            if (result.IsFailed)
+            if (!result.IsSuccess())
             {
-                bool isNotFound = result.Errors.All(error => error.ErrorType == ErrorType.NotFound);
+                bool isNotFound = result.GetErrors().All(error => error.ErrorType == ErrorType.NotFound);
                 if (!isNotFound || isNotFoundError)
                 {
-                    return Result<T>.FromFailure(result);
+                    return result;
                 }
 
-                return Result.Success(new T { AggregateId = aggregateId });
+                return Results.Ok(new T { AggregateId = aggregateId });
             }
 
             return result;
