@@ -222,4 +222,3 @@ public static class Program
 
     private sealed record EndpointDescriptionMetadata(string Description) : IEndpointDescriptionMetadata;
 }
-
