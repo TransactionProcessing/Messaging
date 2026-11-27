@@ -150,17 +150,15 @@ public static class Program
 
         if (string.IsNullOrWhiteSpace(certificatePath))
         {
-            return;
+            throw new InvalidOperationException(
+                "MessagingService:Https:CertificatePath must point to the mounted HTTPS certificate.");
         }
 
         string? certificatePassword = builder.Configuration["MessagingService:Https:CertificatePassword"];
 
         builder.WebHost.ConfigureKestrel(options =>
         {
-            // Kestrel's explicit Listen endpoints replace the configured `urls`,
-            // so keep the existing HTTP port when adding the HTTPS listener.
-            options.ListenAnyIP(5006);
-            options.ListenAnyIP(5007, listenOptions =>
+            options.ListenAnyIP(5006, listenOptions =>
                 listenOptions.UseHttps(certificatePath, certificatePassword));
         });
     }
