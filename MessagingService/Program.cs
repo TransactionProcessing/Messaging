@@ -6,6 +6,7 @@ using MessagingService.Endpoints;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http.Metadata;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Configuration.Json;
 using Microsoft.Extensions.DependencyInjection;
@@ -48,6 +49,7 @@ public static class Program
         builder.Logging.AddNLog();
 
         ConfigureConfiguration(builder.Configuration, builder.Environment, assemblyDirectory);
+        ConfigureHttpsListener(builder);
         ConfigurationReader.Initialise(builder.Configuration);
         ConfigureSentry(builder);
 
@@ -142,6 +144,27 @@ public static class Program
         }
     }
 
+    private static void ConfigureHttpsListener(WebApplicationBuilder builder)
+    {
+        string? certificatePath = builder.Configuration["MessagingService:Https:CertificatePath"];
+
+        if (string.IsNullOrWhiteSpace(certificatePath))
+        {
+            return;
+        }
+
+        string? certificatePassword = builder.Configuration["MessagingService:Https:CertificatePassword"];
+
+        builder.WebHost.ConfigureKestrel(options =>
+        {
+            // Kestrel's explicit Listen endpoints replace the configured `urls`,
+            // so keep the existing HTTP port when adding the HTTPS listener.
+            options.ListenAnyIP(5006);
+            options.ListenAnyIP(5007, listenOptions =>
+                listenOptions.UseHttps(certificatePath, certificatePassword));
+        });
+    }
+
     private static void ConfigureApplication(WebApplication app)
     {
         if (app.Environment.IsDevelopment())
@@ -199,3 +222,4 @@ public static class Program
 
     private sealed record EndpointDescriptionMetadata(string Description) : IEndpointDescriptionMetadata;
 }
+
