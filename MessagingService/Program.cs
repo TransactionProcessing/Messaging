@@ -105,8 +105,25 @@ public static class Program
             .AddEnvironmentVariables()
             .AddInMemoryCollection(new Dictionary<string, string>
             {
-                ["HealthMonitoring:Service:Version"] = Assembly.GetEntryAssembly()?.GetName().Version?.ToString() ?? "0.0.0.0"
+                ["HealthMonitoring:Service:Version"] = Assembly.GetEntryAssembly()?.GetName().Version?.ToString() ?? "0.0.0.0",
+                ["HealthMonitoring:Service:HealthUrl"] = GetHttpsHealthUrl(configuration["HealthMonitoring:Service:HealthUrl"])
             });
+    }
+
+    private static string GetHttpsHealthUrl(string? healthUrl)
+    {
+        if (!Uri.TryCreate(healthUrl, UriKind.Absolute, out Uri? uri))
+        {
+            return "https://localhost:5006/healthui";
+        }
+
+        UriBuilder uriBuilder = new(uri)
+        {
+            Scheme = Uri.UriSchemeHttps,
+            Port = 5006
+        };
+
+        return uriBuilder.Uri.ToString();
     }
 
     private static void RemoveDefaultAppSettingsSources(IConfigurationManager configuration,
