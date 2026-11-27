@@ -1,4 +1,4 @@
-﻿using TransactionProcessing.ClientProxyBase;
+using TransactionProcessing.ClientProxyBase;
 using TransactionProcessing.UnionResults;
 
 namespace MessagingService.IntegrationTests.Common
@@ -9,6 +9,7 @@ namespace MessagingService.IntegrationTests.Common
     using Ductus.FluentDocker.Model.Builders;
     using Ductus.FluentDocker.Services;
     using Ductus.FluentDocker.Services.Extensions;
+    using DotNet.Testcontainers.Configurations;
     using global::TransactionProcessing.Shared.IntegrationTesting;
     using global::TransactionProcessing.Shared.Logger;
     using global::TransactionProcessing.Shared.Serialisation;
@@ -80,9 +81,14 @@ namespace MessagingService.IntegrationTests.Common
 
             // Setup the base address resolvers
             String SecurityServiceBaseAddressResolver(String api) => $"https://127.0.0.1:{this.SecurityServicePort}";
-            String MessagingServiceBaseAddressResolver(String api) => $"http://127.0.0.1:{this.MessagingServicePort}";
+            String MessagingServiceBaseAddressResolver(String api) => $"https://localhost:{this.MessagingServicePort}";
             
             HttpClient httpClient = CreateHttpClient();
+
+            using HttpResponseMessage messagingHealthResponse = await httpClient.GetAsync(
+                $"https://localhost:{this.MessagingServicePort}/health",
+                cancellationToken).ConfigureAwait(false);
+            messagingHealthResponse.EnsureSuccessStatusCode();
             
             this.SecurityServiceClient = new SecurityServiceClient(SecurityServiceBaseAddressResolver, httpClient, Serialise, Deserialise);
             this.MessagingServiceClient = new MessagingServiceClient(MessagingServiceBaseAddressResolver, httpClient, Serialise, Deserialise);
@@ -94,6 +100,60 @@ namespace MessagingService.IntegrationTests.Common
                 throw new InvalidOperationException("Unable to obtain the integration-test management bootstrap token.");
             }
             this.AccessToken = success.Value.AccessToken;
+        }
+
+        protected override IReadOnlyList<IReadOnlyList<DockerServices>> GetStartupGroups()
+        {
+            List<IReadOnlyList<DockerServices>> startupGroups = new();
+
+            foreach (IReadOnlyList<DockerServices> group in base.GetStartupGroups())
+            {
+                if (group.Contains(DockerServices.MessagingService))
+                {
+                    startupGroups.Add(new[] { DockerServices.MessagingService });
+
+                    DockerServices[] remainingServices = group
+                        .Where(service => service != DockerServices.MessagingService)
+                        .ToArray();
+
+                    if (remainingServices.Length > 0)
+                    {
+                        startupGroups.Add(remainingServices);
+                    }
+                }
+                else
+                {
+                    startupGroups.Add(group);
+                }
+            }
+
+            return startupGroups;
+        }
+
+        public override DotNet.Testcontainers.Builders.ContainerBuilder SetupMessagingServiceContainer()
+        {
+            if (this.IntegrationTestCertificate is null)
+            {
+                throw new InvalidOperationException("Integration test certificate was not initialised before MessagingService container setup.");
+            }
+
+            this.SkipHealthChecks = true;
+            this.AdditionalVariables[ContainerType.MessagingService] = new Dictionary<String, String>
+            {
+                ["MessagingService:Https:CertificatePath"] = this.IntegrationTestCertificate.GetContainerCertificatePath(),
+                ["MessagingService:Https:CertificatePassword"] = this.IntegrationTestCertificate.Password
+            };
+
+            return base.SetupMessagingServiceContainer()
+                .WithResourceMapping(
+                    this.IntegrationTestCertificate.CertificateDirectory,
+                    this.IntegrationTestCertificate.ContainerCertificateDirectory);
+        }
+
+        public override DotNet.Testcontainers.Builders.ContainerBuilder SetupSecurityServiceContainer()
+        {
+            this.SkipHealthChecks = false;
+            return base.SetupSecurityServiceContainer();
         }
         #endregion
 
