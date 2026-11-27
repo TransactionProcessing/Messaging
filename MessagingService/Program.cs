@@ -6,6 +6,7 @@ using MessagingService.Endpoints;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http.Metadata;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Configuration.Json;
 using Microsoft.Extensions.DependencyInjection;
@@ -48,6 +49,7 @@ public static class Program
         builder.Logging.AddNLog();
 
         ConfigureConfiguration(builder.Configuration, builder.Environment, assemblyDirectory);
+        ConfigureHttpsListener(builder);
         ConfigurationReader.Initialise(builder.Configuration);
         ConfigureSentry(builder);
 
@@ -103,8 +105,25 @@ public static class Program
             .AddEnvironmentVariables()
             .AddInMemoryCollection(new Dictionary<string, string>
             {
-                ["HealthMonitoring:Service:Version"] = Assembly.GetEntryAssembly()?.GetName().Version?.ToString() ?? "0.0.0.0"
+                ["HealthMonitoring:Service:Version"] = Assembly.GetEntryAssembly()?.GetName().Version?.ToString() ?? "0.0.0.0",
+                ["HealthMonitoring:Service:HealthUrl"] = GetHttpsHealthUrl(configuration["HealthMonitoring:Service:HealthUrl"])
             });
+    }
+
+    private static string GetHttpsHealthUrl(string? healthUrl)
+    {
+        if (!Uri.TryCreate(healthUrl, UriKind.Absolute, out Uri? uri))
+        {
+            return "https://localhost:5006/healthui";
+        }
+
+        UriBuilder uriBuilder = new(uri)
+        {
+            Scheme = Uri.UriSchemeHttps,
+            Port = 5006
+        };
+
+        return uriBuilder.Uri.ToString();
     }
 
     private static void RemoveDefaultAppSettingsSources(IConfigurationManager configuration,
@@ -140,6 +159,25 @@ public static class Program
                 options.Release = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "unknown";
             });
         }
+    }
+
+    private static void ConfigureHttpsListener(WebApplicationBuilder builder)
+    {
+        string? certificatePath = builder.Configuration["MessagingService:Https:CertificatePath"];
+
+        if (string.IsNullOrWhiteSpace(certificatePath))
+        {
+            throw new InvalidOperationException(
+                "MessagingService:Https:CertificatePath must point to the mounted HTTPS certificate.");
+        }
+
+        string? certificatePassword = builder.Configuration["MessagingService:Https:CertificatePassword"];
+
+        builder.WebHost.ConfigureKestrel(options =>
+        {
+            options.ListenAnyIP(5006, listenOptions =>
+                listenOptions.UseHttps(certificatePath, certificatePassword));
+        });
     }
 
     private static void ConfigureApplication(WebApplication app)
