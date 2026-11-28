@@ -163,15 +163,15 @@ public static class Program
 
     private static void ConfigureHttpsListener(WebApplicationBuilder builder)
     {
-        string? certificatePath = builder.Configuration["MessagingService:Https:CertificatePath"];
+        string? certificatePath = builder.Configuration["ServiceOptions:KestrelOptions:Path"];
 
         if (string.IsNullOrWhiteSpace(certificatePath))
         {
             throw new InvalidOperationException(
-                "MessagingService:Https:CertificatePath must point to the mounted HTTPS certificate.");
+                "ServiceOptions:KestrelOptions:Path must point to the mounted HTTPS certificate.");
         }
 
-        string? certificatePassword = builder.Configuration["MessagingService:Https:CertificatePassword"];
+        string? certificatePassword = builder.Configuration["ServiceOptions:KestrelOptions:Password"];
 
         builder.WebHost.ConfigureKestrel(options =>
         {
