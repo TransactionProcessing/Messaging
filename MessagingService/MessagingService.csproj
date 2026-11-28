@@ -31,6 +31,7 @@
     <PackageReference Include="Sentry.AspNetCore" />
     <PackageReference Include="System.Security.Cryptography.Pkcs" />
     <PackageReference Include="TransactionProcessing.ApiDefaults" />
+      <PackageReference Include="TransactionProcessing.CertificateDefaults" />
     <PackageReference Include="Microsoft.OpenApi" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
   </ItemGroup>
