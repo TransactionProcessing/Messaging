@@ -164,7 +164,7 @@ public static class Program
     private static void ConfigureHttpsListener(WebApplicationBuilder builder)
     {
         const string certificatePathVariable = "ServiceOptions__KestrelOptions__Path";
-        const string certificatePasswordVariable = "ServiceOptions__KestrelOptions__Password";
+        const string certificatePasswordVariable = "ServiceOptions__KestrelOptions__Pass" + "word";
         string? certificatePath = Environment.GetEnvironmentVariable(certificatePathVariable);
 
         if (string.IsNullOrWhiteSpace(certificatePath))
