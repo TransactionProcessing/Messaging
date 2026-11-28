@@ -140,8 +140,8 @@ namespace MessagingService.IntegrationTests.Common
             this.SkipHealthChecks = true;
             this.AdditionalVariables[ContainerType.MessagingService] = new Dictionary<String, String>
             {
-                ["MessagingService:Https:CertificatePath"] = this.IntegrationTestCertificate.GetContainerCertificatePath(),
-                ["MessagingService:Https:CertificatePassword"] = this.IntegrationTestCertificate.Password
+                ["ServiceOptions:KestrelOptions:Path"] = this.IntegrationTestCertificate.GetContainerCertificatePath(),
+                ["ServiceOptions:KestrelOptions:Password"] = this.IntegrationTestCertificate.Password
             };
 
             return base.SetupMessagingServiceContainer()
