@@ -57,7 +57,10 @@ namespace MessagingService.Bootstrapper
 
             this.ConfigureHttpJsonOptions(jsonOptions => JsonSerializerConfiguration.ConfigureMinimalApi(jsonOptions.SerializerOptions));
 
-            this.AddHealthMonitoringRegistration(configuration);
+            if (configuration.GetValue("HealthMonitoring:RegistrationEnabled", true))
+            {
+                this.AddHealthMonitoringRegistration(configuration);
+            }
 
             this.AddApiDefaults(options =>
             {

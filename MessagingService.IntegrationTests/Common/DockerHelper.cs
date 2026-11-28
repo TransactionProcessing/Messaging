@@ -141,7 +141,8 @@ namespace MessagingService.IntegrationTests.Common
             this.AdditionalVariables[ContainerType.MessagingService] = new Dictionary<String, String>
             {
                 ["ServiceOptions__KestrelOptions__Path"] = this.IntegrationTestCertificate.GetContainerCertificatePath(),
-                ["ServiceOptions__KestrelOptions__Password"] = this.IntegrationTestCertificate.Password
+                ["ServiceOptions__KestrelOptions__Password"] = this.IntegrationTestCertificate.Password,
+                ["HealthMonitoring__RegistrationEnabled"] = "false"
             };
 
             return base.SetupMessagingServiceContainer()
