@@ -163,15 +163,17 @@ public static class Program
 
     private static void ConfigureHttpsListener(WebApplicationBuilder builder)
     {
-        string? certificatePath = builder.Configuration["ServiceOptions:KestrelOptions:Path"];
+        const string certificatePathVariable = "ServiceOptions__KestrelOptions__Path";
+        const string certificatePasswordVariable = "ServiceOptions__KestrelOptions__Password";
+        string? certificatePath = Environment.GetEnvironmentVariable(certificatePathVariable);
 
         if (string.IsNullOrWhiteSpace(certificatePath))
         {
             throw new InvalidOperationException(
-                "ServiceOptions:KestrelOptions:Path must point to the mounted HTTPS certificate.");
+                $"Environment variable {certificatePathVariable} must point to the mounted HTTPS certificate.");
         }
 
-        string? certificatePassword = builder.Configuration["ServiceOptions:KestrelOptions:Password"];
+        string? certificatePassword = Environment.GetEnvironmentVariable(certificatePasswordVariable);
 
         builder.WebHost.ConfigureKestrel(options =>
         {
