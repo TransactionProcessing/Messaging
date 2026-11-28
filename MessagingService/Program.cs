@@ -26,6 +26,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Reflection;
 using TransactionProcessing.ApiDefaults;
+using TransactionProcessing.CertificateDefaults;
 
 namespace MessagingService;
 
@@ -49,7 +50,8 @@ public static class Program
         builder.Logging.AddNLog();
 
         ConfigureConfiguration(builder.Configuration, builder.Environment, assemblyDirectory);
-        ConfigureHttpsListener(builder);
+        builder.WebHost.ConfigureTransactionProcessingHttps();
+        
         ConfigurationReader.Initialise(builder.Configuration);
         ConfigureSentry(builder);
 
@@ -71,7 +73,7 @@ public static class Program
         ConfigureApplication(app);
         app.Run();
     }
-
+    
     private static void ConfigureLogging()
     {
         string nlogConfigPath = Path.Combine(Directory.GetCurrentDirectory(), "nlog.config");
@@ -159,25 +161,6 @@ public static class Program
                 options.Release = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "unknown";
             });
         }
-    }
-
-    private static void ConfigureHttpsListener(WebApplicationBuilder builder)
-    {
-        string? certificatePath = builder.Configuration["ServiceOptions:KestrelOptions:Path"];
-
-        if (string.IsNullOrWhiteSpace(certificatePath))
-        {
-            throw new InvalidOperationException(
-                "ServiceOptions:KestrelOptions:Path must point to the mounted HTTPS certificate.");
-        }
-
-        string? certificatePassword = builder.Configuration["ServiceOptions:KestrelOptions:Password"];
-
-        builder.WebHost.ConfigureKestrel(options =>
-        {
-            options.ListenAnyIP(5006, listenOptions =>
-                listenOptions.UseHttps(certificatePath, certificatePassword));
-        });
     }
 
     private static void ConfigureApplication(WebApplication app)
