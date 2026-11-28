@@ -6,12 +6,11 @@ unrelated and remain unchanged.
 
 ## Configure the HTTPS listener
 
-Set these environment variables in the development or staging service
-environment before starting the service:
+Set the shared service options environment variables:
 
 ```text
-MessagingService__Https__CertificatePath=<path to mounted CA-issued PFX>
-MessagingService__Https__CertificatePassword=<secret-store value>
+ServiceOptions__KestrelOptions__Path=<path to mounted CA-issued PFX>
+ServiceOptions__KestrelOptions__Password=<secret-store value>
 ```
 
 Mount the CA-issued server certificate into the service environment and provide
